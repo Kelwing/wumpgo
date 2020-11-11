@@ -10,7 +10,7 @@ const (
 	DiscordEpoch = 1420070400000
 )
 
-type Snowflake int64
+type Snowflake uint64
 
 func (s *Snowflake) UnmarshalJSON(bytes []byte) error {
 	var snowflake string
