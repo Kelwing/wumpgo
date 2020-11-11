@@ -39,3 +39,9 @@ type Channel struct {
 	ParentID             Snowflake             `json:"parent_id,omitempty"`
 	LastPinTimestamp     Time                  `json:"last_pin_timestamp,omitempty"`
 }
+
+type AllowedMentions struct {
+	Parse []string    `json:"parse"`
+	Roles []Snowflake `json:"roles,omitempty"`
+	Users []Snowflake `json:"users,omitempty"`
+}
