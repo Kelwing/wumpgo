@@ -1,3 +1,3 @@
-module github.com/postcord/objects
+module github.com/Postcord/objects
 
 go 1.14
