@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Postcord/objects"
 	"github.com/valyala/fasthttp"
 )
-import "github.com/postcord/objects"
 
 type App struct {
 	server   *fasthttp.Server
