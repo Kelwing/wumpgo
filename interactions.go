@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/Postcord/objects"
 	"github.com/valyala/fasthttp"
+	"log"
 )
 
 type App struct {
@@ -43,35 +44,29 @@ func (a *App) RemoveCommand(commandName string) {
 
 func (a *App) requestHandler(ctx *fasthttp.RequestCtx) {
 	if string(ctx.Request.URI().Path()) != "/" || !ctx.Request.Header.IsPost() {
-		ctx.Response.SetStatusCode(fasthttp.StatusNotFound)
-		data, _ := json.Marshal(map[string]string{"error": "Not found"})
-		_, _ = ctx.Write(data)
-		ctx.Response.Header.SetContentType("application/json")
+		_ = writeJSON(ctx, fasthttp.StatusNotFound, map[string]string{"error": "Not found"})
 		return
 	}
 
 	resp, err := a.ProcessRequest(ctx.Request.Body(), string(ctx.Request.Header.Peek("x-signature-ed25519")))
 	if err != nil {
-		ctx.Response.SetStatusCode(fasthttp.StatusOK)
-		data, _ := json.Marshal(objects.InteractionResponse{
+		_ = writeJSON(ctx, fasthttp.StatusOK, objects.InteractionResponse{
 			Type: objects.ResponseChannelMessage,
 			Data: &objects.InteractionApplicationCommandCallbackData{
 				Content: "An unknown error occurred",
 				Flags:   objects.ResponseFlagEphemeral,
 			},
 		})
-		_, _ = ctx.Write(data)
-		ctx.Response.Header.SetContentType("application/json")
 		return
 	}
 
-	ctx.Response.SetStatusCode(fasthttp.StatusOK)
-	data, _ := json.Marshal(resp)
-	_, _ = ctx.Write(data)
-	ctx.Response.Header.SetContentType("application/json")
+	err = writeJSON(ctx, fasthttp.StatusOK, resp)
+	if err != nil {
+		log.Println("failed to write response: ", err)
+	}
 }
 
-func (a *App) ProcessRequest(data []byte, signature string) ([]byte, error) {
+func (a *App) ProcessRequest(data []byte, signature string) (*objects.InteractionResponse, error) {
 	if !a.verifyMessage(data, signature) {
 		return nil, errors.New("message does not match signature")
 	}
@@ -89,18 +84,18 @@ func (a *App) ProcessRequest(data []byte, signature string) ([]byte, error) {
 	case objects.InteractionApplicationCommand:
 		command, ok := a.commands[payload.Data.Name]
 		if !ok {
-			return json.Marshal(objects.InteractionResponse{
+			return &objects.InteractionResponse{
 				Type: objects.ResponseChannelMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					Content: "Command doesn't have a handler.",
 					Flags:   objects.ResponseFlagEphemeral,
 				},
-			})
+			}, nil
 		}
 		resp = command.Handler(payload)
 	}
 
-	return json.Marshal(resp)
+	return resp, nil
 }
 
 func (a *App) Run(port int) error {
