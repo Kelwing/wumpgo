@@ -11,7 +11,7 @@ import (
 
 type App struct {
 	server   *fasthttp.Server
-	commands map[string]*objects.ApplicationCommand
+	commands map[string]HandlerFunc
 }
 
 func New(publicKey string) (*App, error) {
@@ -21,7 +21,7 @@ func New(publicKey string) (*App, error) {
 	}
 	router := fasthttprouter.New()
 	a := &App{
-		commands: make(map[string]*objects.ApplicationCommand),
+		commands: make(map[string]HandlerFunc),
 		server: &fasthttp.Server{
 			Handler: router.Handler,
 			Name:    "Postcord",
@@ -33,9 +33,9 @@ func New(publicKey string) (*App, error) {
 	return a, nil
 }
 
-func (a *App) AddCommand(command *objects.ApplicationCommand) {
+func (a *App) AddCommand(command *objects.ApplicationCommand, h HandlerFunc) {
 	// TODO check if it exists with Discord, add if it doesn't
-	a.commands[command.Name] = command
+	a.commands[command.Name] = h
 }
 
 func (a *App) RemoveCommand(commandName string) {
@@ -44,7 +44,7 @@ func (a *App) RemoveCommand(commandName string) {
 }
 
 func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-	resp, err := a.ProcessRequest(ctx.Request.Body(), string(ctx.Request.Header.Peek("x-signature-ed25519")))
+	resp, err := a.ProcessRequest(ctx.Request.Body())
 	if err != nil {
 		_ = writeJSON(ctx, fasthttp.StatusOK, objects.InteractionResponse{
 			Type: objects.ResponseChannelMessage,
@@ -62,7 +62,7 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 	}
 }
 
-func (a *App) ProcessRequest(data []byte, signature string) (*objects.InteractionResponse, error) {
+func (a *App) ProcessRequest(data []byte) (*objects.InteractionResponse, error) {
 	payload := &objects.Interaction{}
 	err := json.Unmarshal(data, &payload)
 	if err != nil {
@@ -85,7 +85,24 @@ func (a *App) ProcessRequest(data []byte, signature string) (*objects.Interactio
 				},
 			}, nil
 		}
-		resp = command.Handler(payload)
+
+		ctx := &CommandCtx{
+			Request: payload,
+			Response: &objects.InteractionResponse{
+				Type: objects.ResponseChannelMessage,
+				Data: &objects.InteractionApplicationCommandCallbackData{
+					TTS:             false,
+					Content:         "",
+					Embeds:          nil,
+					AllowedMentions: nil,
+					Flags:           0,
+				},
+			},
+		}
+
+		command(ctx)
+
+		resp = ctx.Response
 	}
 
 	return resp, nil
