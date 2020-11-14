@@ -1,19 +1,17 @@
 package interactions
 
 import (
-	"crypto/ed25519"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/Postcord/objects"
 	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttprouter"
 	"log"
 )
 
 type App struct {
 	server   *fasthttp.Server
 	commands map[string]*objects.ApplicationCommand
-	pubKey   ed25519.PublicKey
 }
 
 func New(publicKey string) (*App, error) {
@@ -21,14 +19,17 @@ func New(publicKey string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	router := fasthttprouter.New()
 	a := &App{
 		commands: make(map[string]*objects.ApplicationCommand),
-		pubKey:   pubKey,
+		server: &fasthttp.Server{
+			Handler: router.Handler,
+			Name:    "Postcord",
+		},
 	}
-	a.server = &fasthttp.Server{
-		Handler: a.requestHandler,
-		Name:    "Postcord",
-	}
+
+	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
+
 	return a, nil
 }
 
@@ -42,12 +43,7 @@ func (a *App) RemoveCommand(commandName string) {
 	delete(a.commands, commandName)
 }
 
-func (a *App) requestHandler(ctx *fasthttp.RequestCtx) {
-	if string(ctx.Request.URI().Path()) != "/" || !ctx.Request.Header.IsPost() {
-		_ = writeJSON(ctx, fasthttp.StatusNotFound, map[string]string{"error": "Not found"})
-		return
-	}
-
+func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
 	resp, err := a.ProcessRequest(ctx.Request.Body(), string(ctx.Request.Header.Peek("x-signature-ed25519")))
 	if err != nil {
 		_ = writeJSON(ctx, fasthttp.StatusOK, objects.InteractionResponse{
@@ -67,9 +63,6 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx) {
 }
 
 func (a *App) ProcessRequest(data []byte, signature string) (*objects.InteractionResponse, error) {
-	if !a.verifyMessage(data, signature) {
-		return nil, errors.New("message does not match signature")
-	}
 	payload := &objects.Interaction{}
 	err := json.Unmarshal(data, &payload)
 	if err != nil {
