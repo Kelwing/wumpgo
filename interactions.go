@@ -62,50 +62,26 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 	}
 }
 
-func (a *App) ProcessRequest(data []byte) (*objects.InteractionResponse, error) {
-	payload := &objects.Interaction{}
-	err := json.Unmarshal(data, &payload)
+func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
+	ctx = &CommandCtx{}
+	err = json.Unmarshal(data, ctx)
 	if err != nil {
-		return nil, err
+		return
 	}
-	var resp *objects.InteractionResponse
-	switch payload.Type {
+	switch ctx.Request.Type {
 	case objects.InteractionRequestPing:
-		resp = &objects.InteractionResponse{
-			Type: objects.ResponsePong,
-		}
+		ctx = &CommandCtx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
+		return
 	case objects.InteractionApplicationCommand:
-		command, ok := a.commands[payload.Data.Name]
+		command, ok := a.commands[ctx.Request.Data.Name]
 		if !ok {
-			return &objects.InteractionResponse{
-				Type: objects.ResponseChannelMessage,
-				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content: "Command doesn't have a handler.",
-					Flags:   objects.ResponseFlagEphemeral,
-				},
-			}, nil
+			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
+			return
 		}
-
-		ctx := &CommandCtx{
-			Request: payload,
-			Response: &objects.InteractionResponse{
-				Type: objects.ResponseChannelMessage,
-				Data: &objects.InteractionApplicationCommandCallbackData{
-					TTS:             false,
-					Content:         "",
-					Embeds:          nil,
-					AllowedMentions: nil,
-					Flags:           0,
-				},
-			},
-		}
-
 		command(ctx)
-
-		resp = ctx.Response
 	}
 
-	return resp, nil
+	return
 }
 
 func (a *App) Run(port int) error {

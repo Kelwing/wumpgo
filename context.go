@@ -18,6 +18,16 @@ func (c *CommandCtx) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, c.Request); err != nil {
 		return err
 	}
+	c.Response = &objects.InteractionResponse{
+		Type: objects.ResponseChannelMessage,
+		Data: &objects.InteractionApplicationCommandCallbackData{
+			TTS:             false,
+			Content:         "",
+			Embeds:          nil,
+			AllowedMentions: nil,
+			Flags:           0,
+		},
+	}
 	return nil
 }
 
