@@ -93,3 +93,20 @@ func (c *CommandCtx) Write(data []byte) (n int, err error) {
 	c.Response.Data.Content = fmt.Sprintf("%s%s", c.Response.Data.Content, string(data))
 	return len(data), nil
 }
+
+// Request helper functions
+func (c *CommandCtx) Member() *objects.GuildMember {
+	return &c.Request.Member
+}
+
+func (c *CommandCtx) CommandName() string {
+	return c.Request.Data.Name
+}
+
+func (c *CommandCtx) Options() *[]objects.ApplicationCommandInteractionDataOption {
+	return &c.Request.Data.Options
+}
+
+func (c *CommandCtx) Token() string {
+	return c.Request.Token
+}
