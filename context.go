@@ -103,8 +103,8 @@ func (c *CommandCtx) CommandName() string {
 	return c.Request.Data.Name
 }
 
-func (c *CommandCtx) Options() *[]objects.ApplicationCommandInteractionDataOption {
-	return &c.Request.Data.Options
+func (c *CommandCtx) Options() []objects.ApplicationCommandInteractionDataOption {
+	return c.Request.Data.Options
 }
 
 func (c *CommandCtx) Token() string {
