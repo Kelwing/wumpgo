@@ -63,7 +63,9 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 }
 
 func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
-	ctx = &CommandCtx{}
+	ctx = &CommandCtx{
+		options: make(map[string]*CommandOption),
+	}
 	err = json.Unmarshal(data, ctx)
 	if err != nil {
 		return
