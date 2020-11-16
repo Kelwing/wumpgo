@@ -11,6 +11,7 @@ type HandlerFunc func(ctx *CommandCtx)
 type CommandCtx struct {
 	Request  *objects.Interaction
 	Response *objects.InteractionResponse
+	options  map[string]*CommandOption
 }
 
 func (c *CommandCtx) UnmarshalJSON(data []byte) error {
@@ -109,4 +110,13 @@ func (c *CommandCtx) Options() []objects.ApplicationCommandInteractionDataOption
 
 func (c *CommandCtx) Token() string {
 	return c.Request.Token
+}
+
+func (c *CommandCtx) Get(name string) *CommandOption {
+	option, ok := c.options[name]
+	if !ok {
+		return &CommandOption{Value: nil}
+	}
+
+	return option
 }

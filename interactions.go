@@ -68,6 +68,11 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 	if err != nil {
 		return
 	}
+
+	for _, option := range ctx.Request.Data.Options {
+		ctx.options[option.Name] = &CommandOption{Value: option.Value}
+	}
+
 	switch ctx.Request.Type {
 	case objects.InteractionRequestPing:
 		ctx = &CommandCtx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
