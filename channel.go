@@ -41,7 +41,8 @@ type Channel struct {
 }
 
 type AllowedMentions struct {
-	Parse []string    `json:"parse"`
-	Roles []Snowflake `json:"roles,omitempty"`
-	Users []Snowflake `json:"users,omitempty"`
+	Parse       []string    `json:"parse"`
+	Roles       []Snowflake `json:"roles,omitempty"`
+	Users       []Snowflake `json:"users,omitempty"`
+	RepliedUser bool        `json:"replied_user,omitempty"`
 }
