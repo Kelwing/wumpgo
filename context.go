@@ -12,6 +12,7 @@ type CommandCtx struct {
 	Request  *objects.Interaction
 	Response *objects.InteractionResponse
 	options  map[string]*CommandOption
+	app      *App
 }
 
 func (c *CommandCtx) UnmarshalJSON(data []byte) error {
@@ -119,4 +120,8 @@ func (c *CommandCtx) Get(name string) *CommandOption {
 	}
 
 	return option
+}
+
+func (c *CommandCtx) App() *App {
+	return c.app
 }

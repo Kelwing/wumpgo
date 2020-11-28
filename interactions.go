@@ -7,11 +7,14 @@ import (
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
 	"log"
+	"sync"
 )
 
 type App struct {
-	server   *fasthttp.Server
-	commands map[string]HandlerFunc
+	server     *fasthttp.Server
+	commands   map[string]HandlerFunc
+	extraProps map[string]interface{}
+	propsLock  sync.RWMutex
 }
 
 func New(publicKey string) (*App, error) {
@@ -26,6 +29,7 @@ func New(publicKey string) (*App, error) {
 			Handler: router.Handler,
 			Name:    "Postcord",
 		},
+		extraProps: make(map[string]interface{}),
 	}
 
 	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
@@ -89,6 +93,21 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 	}
 
 	return
+}
+
+// Get retrieves a value from the global context
+func (a *App) Get(key string) (interface{}, bool) {
+	a.propsLock.RLock()
+	defer a.propsLock.RUnlock()
+	obj, ok := a.extraProps[key]
+	return obj, ok
+}
+
+// Set stores a value in the global context.  This is suitable for things like database connections.
+func (a *App) Set(key string, obj interface{}) {
+	a.propsLock.Lock()
+	defer a.propsLock.Unlock()
+	a.extraProps[key] = obj
 }
 
 func (a *App) Run(port int) error {
