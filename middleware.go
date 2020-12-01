@@ -14,6 +14,7 @@ func verifyMiddleware(h fasthttprouter.Handle, key ed25519.PublicKey) fasthttpro
 			return
 		}
 
+		// Need to return an error code here since Discord sends random security checks
 		ctx.Response.SetStatusCode(fasthttp.StatusBadRequest)
 	}
 }
