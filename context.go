@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Postcord/objects"
+	"github.com/jinzhu/copier"
 )
 
 type HandlerFunc func(ctx *CommandCtx)
@@ -13,6 +14,12 @@ type CommandCtx struct {
 	Response *objects.InteractionResponse
 	options  map[string]*CommandOption
 	app      *App
+}
+
+func (c *CommandCtx) Clone() (*CommandCtx, error) {
+	newCtx := &CommandCtx{}
+	err := copier.Copy(newCtx, c)
+	return newCtx, err
 }
 
 func (c *CommandCtx) UnmarshalJSON(data []byte) error {
