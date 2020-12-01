@@ -2,10 +2,8 @@ package interactions
 
 import (
 	"crypto/ed25519"
-	"github.com/Postcord/objects"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
-	"net/http"
 )
 
 func verifyMiddleware(h fasthttprouter.Handle, key ed25519.PublicKey) fasthttprouter.Handle {
@@ -16,12 +14,6 @@ func verifyMiddleware(h fasthttprouter.Handle, key ed25519.PublicKey) fasthttpro
 			return
 		}
 
-		_ = writeJSON(ctx, http.StatusOK, objects.InteractionResponse{
-			Type: objects.ResponseChannelMessage,
-			Data: &objects.InteractionApplicationCommandCallbackData{
-				Content: "An unknown error occurred",
-				Flags:   objects.ResponseFlagEphemeral,
-			},
-		})
+		ctx.Response.SetStatusCode(fasthttp.StatusBadRequest)
 	}
 }
