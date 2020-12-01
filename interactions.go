@@ -75,15 +75,14 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		return
 	}
 
-	for _, option := range ctx.Request.Data.Options {
-		ctx.options[option.Name] = &CommandOption{Value: option.Value}
-	}
-
 	switch ctx.Request.Type {
 	case objects.InteractionRequestPing:
 		ctx = &CommandCtx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
 		return
 	case objects.InteractionApplicationCommand:
+		for _, option := range ctx.Request.Data.Options {
+			ctx.options[option.Name] = &CommandOption{Value: option.Value}
+		}
 		command, ok := a.commands[ctx.Request.Data.Name]
 		if !ok {
 			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
