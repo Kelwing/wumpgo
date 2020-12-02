@@ -3,7 +3,6 @@ package rest
 import (
 	"bytes"
 	"context"
-	"errors"
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
@@ -142,7 +141,7 @@ func (r *RedisRatelimiter) updateBucket(key string, resp *http.Response) error {
 
 func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body []byte, bucketID string, retries int) ([]byte, error) {
 	if r.MaxRetries > 0 && r.MaxRetries < retries {
-		return nil, errors.New("max retries exceeded")
+		return nil, MaxRetriesExceeded
 	}
 	var reader io.Reader = nil
 	if body != nil {
