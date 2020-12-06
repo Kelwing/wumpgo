@@ -18,11 +18,14 @@ type MemoryConf struct {
 }
 
 func NewMemoryRatelimiter(conf *MemoryConf) *MemoryRatelimiter {
+	global := int64(0)
 	return &MemoryRatelimiter{
 		http:          &http.Client{Timeout: time.Second * 5},
 		authorization: conf.Authorization,
 		MaxRetries:    conf.MaxRetries,
 		UserAgent:     conf.UserAgent,
+		buckets:       make(map[string]*memoryBucket),
+		global:        &global,
 	}
 }
 
@@ -58,7 +61,7 @@ func (m *MemoryRatelimiter) getSleepTime(bucket *memoryBucket) time.Duration {
 	return time.Duration(0)
 }
 
-func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body []byte, bucket *memoryBucket, retries int) ([]byte, error) {
+func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body []byte, bucket *memoryBucket, retries int) (*DiscordResponse, error) {
 	if m.MaxRetries > 0 && m.MaxRetries < retries {
 		return nil, MaxRetriesExceeded
 	}
@@ -109,10 +112,18 @@ func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body 
 		return m.requestLocked(method, url, contentType, body, bucket, retries+1)
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DiscordResponse{
+		Body:   respBody,
+		Status: resp.StatusCode,
+	}, nil
 }
 
-func (m *MemoryRatelimiter) Request(method, url, contentType string, body []byte) ([]byte, error) {
+func (m *MemoryRatelimiter) Request(method, url, contentType string, body []byte) (*DiscordResponse, error) {
 	m.Lock()
 	bucketID := getBucketID(url)
 	bucket, ok := m.buckets[bucketID]

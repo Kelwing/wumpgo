@@ -7,7 +7,7 @@ import (
 )
 
 type Ratelimiter interface {
-	Request(method, url, contentType string, body []byte) ([]byte, error)
+	Request(method, url, contentType string, body []byte) (*DiscordResponse, error)
 }
 
 var userIdRe = regexp.MustCompile(`\d{16,19}`)
@@ -34,7 +34,7 @@ func getBucketID(urlStr string) string {
 			break
 		}
 
-		if userIdRe.MatchString(comp) && !isBucketedParam(comps[5:][i-1]) {
+		if userIdRe.MatchString(comp) && !isBucketedParam(comps[5:][i]) {
 			bucketComps = append(bucketComps, "id")
 		} else {
 			bucketComps = append(bucketComps, comp)

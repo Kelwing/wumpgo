@@ -139,7 +139,7 @@ func (r *RedisRatelimiter) updateBucket(key string, resp *http.Response) error {
 	return nil
 }
 
-func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body []byte, bucketID string, retries int) ([]byte, error) {
+func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body []byte, bucketID string, retries int) (*DiscordResponse, error) {
 	if r.MaxRetries > 0 && r.MaxRetries < retries {
 		return nil, MaxRetriesExceeded
 	}
@@ -188,10 +188,18 @@ func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body [
 		return r.requestLocked(method, url, contentType, body, bucketID, retries+1)
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DiscordResponse{
+		Body:   respBody,
+		Status: resp.StatusCode,
+	}, nil
 }
 
-func (r *RedisRatelimiter) Request(method, url, contentType string, body []byte) ([]byte, error) {
+func (r *RedisRatelimiter) Request(method, url, contentType string, body []byte) (*DiscordResponse, error) {
 	bucketID := getBucketID(url)
 	mutex, err := r.acquireLock(bucketID)
 	if err != nil {
