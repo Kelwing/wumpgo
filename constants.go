@@ -15,4 +15,6 @@ const (
 	ReactionFmt           = ReactionsBaseFmt + "/%s/%s"
 	ReactionsFmt          = ReactionsBaseFmt + "/%s"
 	BulkDeleteMessagesFmt = ChannelMessagesFmt + "/bulk-delete"
+
+	// Commands
 )

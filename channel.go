@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Postcord/objects"
+	"github.com/google/go-querystring/query"
 	"net/http"
+	"net/url"
 )
 
 func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
@@ -70,4 +72,37 @@ func (c *Client) DeleteChannel(id objects.Snowflake) (*objects.Channel, error) {
 	}
 
 	return channel, nil
+}
+
+type GetChannelMessagesParams struct {
+	Around objects.Snowflake `url:"around,omitempty"`
+	Before objects.Snowflake `url:"before,omitempty"`
+	After  objects.Snowflake `url:"after,omitempty"`
+	Limit  int               `url:"limit,omitempty"`
+}
+
+func (c *Client) GetChannelMessages(id objects.Snowflake, params *GetChannelMessagesParams) ([]*objects.Message, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelMessagesFmt, id))
+	if err != nil {
+		return nil, err
+	}
+	q, err := query.Values(params)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = q.Encode()
+
+	res, err := c.request(http.MethodGet, u.String(), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var messages []*objects.Message
+
+	err = res.JSON(&messages)
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, nil
 }
