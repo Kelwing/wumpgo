@@ -11,6 +11,7 @@ import (
 )
 
 type App struct {
+	Router     *fasthttprouter.Router
 	server     *fasthttp.Server
 	commands   map[string]HandlerFunc
 	extraProps map[string]interface{}
@@ -30,6 +31,7 @@ func New(publicKey string) (*App, error) {
 			Name:    "Postcord",
 		},
 		extraProps: make(map[string]interface{}),
+		Router:     router,
 	}
 
 	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
