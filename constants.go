@@ -17,4 +17,9 @@ const (
 	BulkDeleteMessagesFmt = ChannelMessagesFmt + "/bulk-delete"
 
 	// Commands
+	ApplicationFmt              = BaseURL + "/applications"
+	GlobalApplicationsFmt       = ApplicationFmt + "/%d/commands"
+	GlobalApplicationsUpdateFmt = GlobalApplicationsFmt + "/%d"
+	GuildApplicationsFmt        = ApplicationFmt + "/%d/guilds/%d/commands"
+	GuildApplicationsUpdateFmt  = GuildApplicationsFmt + "/%d"
 )
