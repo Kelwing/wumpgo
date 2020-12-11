@@ -2,7 +2,7 @@ package rest
 
 const (
 	// Discord API Base URL
-	BaseURL = "https://discord.com/api"
+	BaseURL = "https://discord.com/api/v8"
 
 	JsonContentType = "application/json"
 
