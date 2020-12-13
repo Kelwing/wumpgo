@@ -57,5 +57,5 @@ type EmbedAuthor struct {
 type EmbedField struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
-	Inline string `json:"inline,omitempty"`
+	Inline bool   `json:"inline,omitempty"`
 }
