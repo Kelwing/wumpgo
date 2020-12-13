@@ -2,9 +2,9 @@ package interactions
 
 import (
 	"crypto/ed25519"
+
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
-	"log"
 )
 
 func verifyMiddleware(h fasthttprouter.Handle, key ed25519.PublicKey) fasthttprouter.Handle {
@@ -13,14 +13,11 @@ func verifyMiddleware(h fasthttprouter.Handle, key ed25519.PublicKey) fasthttpro
 		body := ctx.PostBody()
 		body = append(ctx.Request.Header.Peek("X-Signature-Timestamp"), body...)
 		if verifyMessage(body, string(signature), key) {
-			log.Println("signature verification succeeded")
 			h(ctx, ps)
 			return
 		}
 
-		log.Println("signature verification failed")
-
-		// Need to return an error code here since Discord sends random security checks
+		// Discord requires a 4xx response code to security checks
 		ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
 	}
 }

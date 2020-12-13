@@ -3,7 +3,7 @@ module github.com/Postcord/interactions
 go 1.14
 
 require (
-	github.com/Postcord/objects v0.0.0-20201113193436-ce7455b39a4c
+	github.com/Postcord/objects v0.0.0-20201120125630-3791b11b4436
 	github.com/andybalholm/brotli v1.0.1 // indirect
 	github.com/jinzhu/copier v0.1.0
 	github.com/klauspost/compress v1.11.2 // indirect
