@@ -170,3 +170,10 @@ type AuditLogOption struct {
 	// triggered on CHANNEL_OVERWRITE_CREATE & CHANNEL_OVERWRITE_UPDATE & CHANNEL_OVERWRITE_DELETE actions
 	RoleName string `json:"role_name"`
 }
+
+type AuditLog struct {
+	Webhooks      []*Webhook       `json:"webhooks"`
+	Users         []*User          `json:"users"`
+	AuditLogEntry []*AuditLogEntry `json:"audit_log_entry"`
+	Integrations  []*Integration
+}
