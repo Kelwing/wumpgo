@@ -46,3 +46,8 @@ type AllowedMentions struct {
 	Users       []Snowflake `json:"users,omitempty"`
 	RepliedUser bool        `json:"replied_user,omitempty"`
 }
+
+type FollowedChannel struct {
+	ChannelID Snowflake `json:"channel_id"`
+	WebhookID Snowflake `json:"webhook_id"`
+}
