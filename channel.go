@@ -1,10 +1,14 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Postcord/objects"
 	"github.com/google/go-querystring/query"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 )
@@ -14,11 +18,13 @@ func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err = resp.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
 
 	channel := &objects.Channel{}
 
-	err = resp.JSON(channel)
-	if err != nil {
+	if err = resp.JSON(channel); err != nil {
 		return nil, err
 	}
 
@@ -47,11 +53,13 @@ func (c *Client) ModifyChannel(id objects.Snowflake, params *ModifyChannelParams
 	if err != nil {
 		return nil, err
 	}
+	if err = resp.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
 
 	channel := &objects.Channel{}
 
-	err = resp.JSON(channel)
-	if err != nil {
+	if err = resp.JSON(channel); err != nil {
 		return nil, err
 	}
 
@@ -64,10 +72,13 @@ func (c *Client) DeleteChannel(id objects.Snowflake) (*objects.Channel, error) {
 		return nil, err
 	}
 
+	if err = resp.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
 	channel := &objects.Channel{}
 
-	err = resp.JSON(channel)
-	if err != nil {
+	if err = resp.JSON(channel); err != nil {
 		return nil, err
 	}
 
@@ -97,12 +108,482 @@ func (c *Client) GetChannelMessages(id objects.Snowflake, params *GetChannelMess
 		return nil, err
 	}
 
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
 	var messages []*objects.Message
 
-	err = res.JSON(&messages)
-	if err != nil {
+	if err = res.JSON(&messages); err != nil {
 		return nil, err
 	}
 
 	return messages, nil
+}
+
+func (c *Client) GetChannelMessage(channel, message objects.Snowflake) (*objects.Message, error) {
+	res, err := c.request(http.MethodGet, fmt.Sprintf(ChannelMessageFmt, channel, message), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	msg := &objects.Message{}
+
+	if err = res.JSON(msg); err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+
+func (c *Client) CrossPostMessage(channel, message objects.Snowflake) (*objects.Message, error) {
+	res, err := c.request(http.MethodPost, fmt.Sprintf(CrosspostMessageFmt, channel, message), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	msg := &objects.Message{}
+
+	if err = res.JSON(msg); err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+
+func (c *Client) DeleteMessage(channel, message objects.Snowflake) error {
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelMessageFmt, channel, message), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type DeleteMessagesParams struct {
+	Messages []objects.Snowflake `json:"messages"`
+}
+
+func (c *Client) BulkDeleteMessages(channel objects.Snowflake, params *DeleteMessagesParams) error {
+	data, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(http.MethodPost, fmt.Sprintf(BulkDeleteMessagesFmt, channel), JsonContentType, data)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type EditChannelParams struct {
+	Allow objects.PermissionBit `json:"allow"`
+	Deny  objects.PermissionBit `json:"deny"`
+	Type  int                   `json:"type"`
+}
+
+func (c *Client) EditChannelPermissions(channel, overwrite objects.Snowflake, params *EditChannelParams) error {
+	data, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(http.MethodPut, fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite), JsonContentType, data)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) DeleteChannelPermission(channel, overwrite objects.Snowflake) error {
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetChannelInvites(channel objects.Snowflake) ([]*objects.Invite, error) {
+	res, err := c.request(http.MethodGet, fmt.Sprintf(ChannelInvitesFmt, channel), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var invites []*objects.Invite
+	if err = res.JSON(&invites); err != nil {
+		return nil, err
+	}
+
+	return invites, nil
+}
+
+type CreateInviteParams struct {
+	MaxAge         int64             `json:"max_age,omitempty"`
+	MaxUses        int64             `json:"max_uses,omitempty"`
+	Temporary      bool              `json:"temporary,,omitempty"`
+	Unique         bool              `json:"unique,omitempty"`
+	TargetUser     objects.Snowflake `json:"target_user,omitempty"`
+	TargetUserType objects.Snowflake `json:"target_user_type,omitempty"`
+}
+
+func (c *Client) CreateChannelInvite(channel objects.Snowflake, params *CreateInviteParams) (*objects.Invite, error) {
+	data, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.request(http.MethodPost, fmt.Sprintf(ChannelInvitesFmt, channel), JsonContentType, data)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	invite := &objects.Invite{}
+
+	if err = res.JSON(invite); err != nil {
+		return nil, err
+	}
+	return invite, nil
+}
+
+func (c *Client) getEmoji(emoji interface{}) (string, error) {
+	var react string
+
+	switch t := emoji.(type) {
+	case objects.Emoji:
+		react = fmt.Sprintf("%s:%d", t.Name, t.ID)
+	case *objects.Emoji:
+		react = fmt.Sprintf("%s:%d", t.Name, t.ID)
+	case string:
+		react = t
+	default:
+		return "", errors.New(fmt.Sprintf("invalid emoji type, %T", t))
+	}
+
+	return react, nil
+}
+
+func (c *Client) CreateReaction(channel, message objects.Snowflake, emoji interface{}) error {
+	react, err := c.getEmoji(emoji)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(http.MethodPut, fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) DeleteOwnReaction(channel, message objects.Snowflake, emoji interface{}) error {
+	react, err := c.getEmoji(emoji)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteUserReaction(channel, message, user objects.Snowflake, emoji interface{}) error {
+	react, err := c.getEmoji(emoji)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionUserFmt, channel, message, url.QueryEscape(react), user), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type GetReactionsParams struct {
+	Before objects.Snowflake `json:"before,omitempty"`
+	After  objects.Snowflake `json:"after,omitempty"`
+	Limit  int               `json:"limit"`
+}
+
+func (c *Client) GetReactions(channel, message objects.Snowflake, emoji interface{}, params *GetReactionsParams) ([]*objects.User, error) {
+	react, err := c.getEmoji(emoji)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := url.Parse(fmt.Sprintf(ReactionsFmt, channel, message, url.QueryEscape(react)))
+	if err != nil {
+		return nil, err
+	}
+
+	q, err := query.Values(params)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = q.Encode()
+
+	res, err := c.request(http.MethodGet, u.String(), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var users []*objects.User
+	if err = res.JSON(&users); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (c *Client) DeleteAllReactions(channel, message objects.Snowflake) error {
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionsBaseFmt, channel, message), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) DeleteEmojiReactions(channel, message objects.Snowflake, emoji interface{}) error {
+	reaction, err := c.getEmoji(emoji)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionsFmt, channel, message, reaction), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetPinnedMessages(channel objects.Snowflake) ([]*objects.Message, error) {
+	res, err := c.request(http.MethodGet, fmt.Sprintf(ChannelPinsFmt, channel), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var messages []*objects.Message
+	if err = res.JSON(&messages); err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+func (c *Client) AddPinnedMessage(channel, message objects.Snowflake) error {
+	res, err := c.request(http.MethodPut, fmt.Sprintf(ChannelPinnedFmt, channel, message), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) DeletePinnedMessage(channel, message objects.Snowflake) error {
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelPinnedFmt, channel, message), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+	return nil
+}
+
+type CreateMessageFileParams struct {
+	Reader   io.Reader
+	Filename string
+	Spoiler  bool
+}
+
+type CreateMessageParams struct {
+	Content          string                     `json:"content,omitempty"`
+	Nonce            string                     `json:"nonce,omitempty"`
+	TTS              bool                       `json:"tts,omitempty"`
+	Files            []*CreateMessageFileParams `json:"-"`
+	Embed            *objects.Embed             `json:"embed,omitempty"`
+	AllowedMentions  *objects.AllowedMentions   `json:"allowed_mentions,omitempty"`
+	MessageReference *objects.MessageReference  `json:"message_reference,omitempty"`
+}
+
+func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageParams) (*objects.Message, error) {
+	var contentType string
+	var body []byte
+
+	if len(params.Files) > 0 {
+		buffer := new(bytes.Buffer)
+		m := multipart.NewWriter(buffer)
+
+		b, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+
+		if err = m.WriteField("payload_json", string(b)); err != nil {
+			return nil, err
+		}
+
+		for n, file := range params.Files {
+			w, err := m.CreateFormFile(fmt.Sprintf("file%d", n), file.Filename)
+			if err != nil {
+				return nil, err
+			}
+			if _, err = io.Copy(w, file.Reader); err != nil {
+				return nil, err
+			}
+		}
+
+		contentType = m.FormDataContentType()
+		if err = m.Close(); err != nil {
+			return nil, err
+		}
+		body = buffer.Bytes()
+	} else {
+		contentType = JsonContentType
+		var err error
+		body, err = json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	res, err := c.request(http.MethodPost, fmt.Sprintf(ChannelMessagesFmt, channel), contentType, body)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	msg := &objects.Message{}
+	if err = res.JSON(msg); err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+
+type EditMessageParams struct {
+	Content string              `json:"content,omitempty"`
+	Embed   *objects.Embed      `json:"embed,omitempty"`
+	Flags   objects.MessageFlag `json:"flags,omitempty"`
+}
+
+func (c *Client) EditMessage(channel, message objects.Snowflake, params *EditMessageParams) (*objects.Message, error) {
+	body, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.request(http.MethodPatch, fmt.Sprintf(ChannelMessageFmt, channel, message), JsonContentType, body)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := &objects.Message{}
+	if err = res.JSON(msg); err != nil {
+		return nil, err
+	}
+	return msg, nil
+}
+
+func (c *Client) FollowNewsChannel(channel objects.Snowflake) (*objects.FollowedChannel, error) {
+	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelFollowersFmt, channel), JsonContentType, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	followedChannel := &objects.FollowedChannel{}
+	if err = res.JSON(followedChannel); err != nil {
+		return nil, err
+	}
+
+	return followedChannel, nil
+}
+
+func (c *Client) StartTyping(channel objects.Snowflake) error {
+	res, err := c.request(http.MethodPost, fmt.Sprintf(ChannelTypingFmt, channel), JsonContentType, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+	return nil
 }

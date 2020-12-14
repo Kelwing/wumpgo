@@ -12,9 +12,16 @@ const (
 	ChannelMessageFmt     = ChannelMessagesFmt + "/%d"
 	CrosspostMessageFmt   = ChannelMessageFmt + "/crosspost"
 	ReactionsBaseFmt      = ChannelMessageFmt + "/reactions"
-	ReactionFmt           = ReactionsBaseFmt + "/%s/%s"
 	ReactionsFmt          = ReactionsBaseFmt + "/%s"
+	ReactionFmt           = ReactionsFmt + "/%s"
+	ReactionUserFmt       = ReactionsFmt + "/%d"
 	BulkDeleteMessagesFmt = ChannelMessagesFmt + "/bulk-delete"
+	ChannelPermissionsFmt = ChannelBaseFmt + "/permissions/%d"
+	ChannelInvitesFmt     = ChannelBaseFmt + "/invites"
+	ChannelPinsFmt        = ChannelBaseFmt + "/pins"
+	ChannelPinnedFmt      = ChannelPinsFmt + "/%d"
+	ChannelFollowersFmt   = ChannelBaseFmt + "/followers"
+	ChannelTypingFmt      = ChannelBaseFmt + "/typing"
 
 	// Commands
 	ApplicationFmt              = BaseURL + "/applications"
@@ -22,4 +29,8 @@ const (
 	GlobalApplicationsUpdateFmt = GlobalApplicationsFmt + "/%d"
 	GuildApplicationsFmt        = ApplicationFmt + "/%d/guilds/%d/commands"
 	GuildApplicationsUpdateFmt  = GuildApplicationsFmt + "/%d"
+
+	// Guilds
+	GuildBaseFmt      = BaseURL + "/guilds/%d"
+	GuildAuditLogsFmt = GuildBaseFmt + "/audit-logs"
 )
