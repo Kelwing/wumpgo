@@ -114,3 +114,26 @@ type Guild struct {
 	ApproximateMemberCount      int                        `json:"approximate_member_count,omitempty"`
 	ApproximatePresenceCount    int                        `json:"approximate_presence_count,omitempty"`
 }
+
+type GuildPreview struct {
+	ID                       Snowflake      `json:"id"`
+	Name                     string         `json:"name"`
+	Icon                     string         `json:"icon,omitempty"`
+	Splash                   string         `json:"splash,omitempty"`
+	DiscoverySplash          string         `json:"discovery_splash,omitempty"`
+	Emojis                   []*Emoji       `json:"emojis"`
+	Features                 []GuildFeature `json:"features"`
+	ApproximateMemberCount   int            `json:"approximate_member_count"`
+	ApproximatePresenceCount int            `json:"approximate_presence_count"`
+	Description              string         `json:"description,omitempty"`
+}
+
+type GuildWidget struct {
+	Enabled   bool      `json:"enabled"`
+	ChannelID Snowflake `json:"channel_id,omitempty"`
+}
+
+type Ban struct {
+	Reason string `json:"reason,omitempty"`
+	User   *User  `json:"user"`
+}
