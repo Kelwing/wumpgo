@@ -128,12 +128,20 @@ type GuildPreview struct {
 	Description              string         `json:"description,omitempty"`
 }
 
+type WidgetUser struct {
+	ID            Snowflake `json:"id"`
+	Username      string    `json:"username"`
+	Discriminator string    `json:"discriminator"`
+	Status        string    `json:"status"`
+	AvatarURL     string    `json:"avatar_url"`
+}
+
 type GuildWidget struct {
-	ID            Snowflake      `json:"id"`
-	Name          string         `json:"name"`
-	Channels      []*Channel     `json:"channels"`
-	Members       []*GuildMember `json:"members"`
-	PresenceCount int            `json:"presence_count"`
+	ID            Snowflake     `json:"id"`
+	Name          string        `json:"name"`
+	Channels      []*Channel    `json:"channels"`
+	Members       []*WidgetUser `json:"members"`
+	PresenceCount int           `json:"presence_count"`
 }
 
 type Ban struct {
