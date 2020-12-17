@@ -129,8 +129,11 @@ type GuildPreview struct {
 }
 
 type GuildWidget struct {
-	Enabled   bool      `json:"enabled"`
-	ChannelID Snowflake `json:"channel_id,omitempty"`
+	ID            Snowflake      `json:"id"`
+	Name          string         `json:"name"`
+	Channels      []*Channel     `json:"channels"`
+	Members       []*GuildMember `json:"members"`
+	PresenceCount int            `json:"presence_count"`
 }
 
 type Ban struct {
