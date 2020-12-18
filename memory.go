@@ -61,7 +61,7 @@ func (m *MemoryRatelimiter) getSleepTime(bucket *memoryBucket) time.Duration {
 	return time.Duration(0)
 }
 
-func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body []byte, bucket *memoryBucket, retries int) (*DiscordResponse, error) {
+func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body []byte, bucket *memoryBucket, retries int, headers http.Header) (*DiscordResponse, error) {
 	if m.MaxRetries > 0 && m.MaxRetries < retries {
 		return nil, MaxRetriesExceeded
 	}
@@ -88,6 +88,15 @@ func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body 
 		req.Header.Set("authorization", m.authorization)
 	}
 
+	for k := range headers {
+		v := headers.Get(k)
+		if v == "" {
+			req.Header.Del(k)
+		} else {
+			req.Header.Set(k, v)
+		}
+	}
+
 	if delay := m.getSleepTime(bucket); delay > time.Duration(0) {
 		time.Sleep(delay)
 	}
@@ -107,9 +116,9 @@ func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body 
 		if delay := m.getSleepTime(bucket); delay > time.Duration(0) {
 			time.Sleep(delay)
 		}
-		return m.requestLocked(method, url, contentType, body, bucket, retries+1)
+		return m.requestLocked(method, url, contentType, body, bucket, retries+1, headers)
 	case http.StatusBadGateway:
-		return m.requestLocked(method, url, contentType, body, bucket, retries+1)
+		return m.requestLocked(method, url, contentType, body, bucket, retries+1, headers)
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -134,7 +143,21 @@ func (m *MemoryRatelimiter) Request(method, url, contentType string, body []byte
 	bucket.Lock()
 	m.Unlock()
 	defer bucket.Unlock()
-	return m.requestLocked(method, url, contentType, body, bucket, 0)
+	return m.requestLocked(method, url, contentType, body, bucket, 0, nil)
+}
+
+func (m *MemoryRatelimiter) RequestWithHeaders(method, url, contentType string, body []byte, headers http.Header) (*DiscordResponse, error) {
+	m.Lock()
+	bucketID := getBucketID(url)
+	bucket, ok := m.buckets[bucketID]
+	if !ok {
+		bucket = &memoryBucket{id: bucketID}
+		m.buckets[bucketID] = bucket
+	}
+	bucket.Lock()
+	m.Unlock()
+	defer bucket.Unlock()
+	return m.requestLocked(method, url, contentType, body, bucket, 0, headers)
 }
 
 func (m *MemoryRatelimiter) updateBucket(bucket *memoryBucket, resp *http.Response) error {

@@ -9,10 +9,10 @@ import (
 )
 
 type GetAuditLogParams struct {
-	UserID     objects.Snowflake     `json:"user_id,omitempty"`
-	ActionType objects.AuditLogEvent `json:"action_type,omitempty"`
-	Before     objects.Snowflake     `json:"before,omitempty"`
-	Limit      int                   `json:"limit,omitempty"`
+	UserID     objects.Snowflake     `url:"user_id,omitempty"`
+	ActionType objects.AuditLogEvent `url:"action_type,omitempty"`
+	Before     objects.Snowflake     `url:"before,omitempty"`
+	Limit      int                   `url:"limit,omitempty"`
 }
 
 func (c *Client) GetAuditLogs(guild objects.Snowflake, params *GetAuditLogParams) (*objects.AuditLog, error) {
@@ -28,7 +28,11 @@ func (c *Client) GetAuditLogs(guild objects.Snowflake, params *GetAuditLogParams
 
 	u.RawQuery = q.Encode()
 
-	res, err := c.request(http.MethodGet, u.String(), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        u.String(),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -11,10 +11,15 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
-	resp, err := c.request(http.MethodGet, fmt.Sprintf(ChannelBaseFmt, id), JsonContentType, nil)
+	resp, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(ChannelBaseFmt, id),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +47,7 @@ type ModifyChannelParams struct {
 	UserLimit            int64                         `json:"user_limit,omitempty"`
 	PermissionOverwrites []objects.PermissionOverwrite `json:"permission_overwrites,omitempty"`
 	Parent               objects.Snowflake             `json:"parent_id,omitempty"`
+	Reason               string                        `json:"-"`
 }
 
 func (c *Client) ModifyChannel(id objects.Snowflake, params *ModifyChannelParams) (*objects.Channel, error) {
@@ -49,7 +55,19 @@ func (c *Client) ModifyChannel(id objects.Snowflake, params *ModifyChannelParams
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.request(http.MethodPatch, fmt.Sprintf(ChannelBaseFmt, id), JsonContentType, data)
+
+	reason := ""
+	if params != nil {
+		reason = params.Reason
+	}
+
+	resp, err := c.request(&request{
+		method:      http.MethodPatch,
+		path:        fmt.Sprintf(ChannelBaseFmt, id),
+		contentType: JsonContentType,
+		body:        data,
+		reason:      reason,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +84,13 @@ func (c *Client) ModifyChannel(id objects.Snowflake, params *ModifyChannelParams
 	return channel, nil
 }
 
-func (c *Client) DeleteChannel(id objects.Snowflake) (*objects.Channel, error) {
-	resp, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelBaseFmt, id), JsonContentType, nil)
+func (c *Client) DeleteChannel(id objects.Snowflake, reason string) (*objects.Channel, error) {
+	resp, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ChannelBaseFmt, id),
+		contentType: JsonContentType,
+		reason:      reason,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +126,11 @@ func (c *Client) GetChannelMessages(id objects.Snowflake, params *GetChannelMess
 	}
 	u.RawQuery = q.Encode()
 
-	res, err := c.request(http.MethodGet, u.String(), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        u.String(),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +149,11 @@ func (c *Client) GetChannelMessages(id objects.Snowflake, params *GetChannelMess
 }
 
 func (c *Client) GetChannelMessage(channel, message objects.Snowflake) (*objects.Message, error) {
-	res, err := c.request(http.MethodGet, fmt.Sprintf(ChannelMessageFmt, channel, message), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(ChannelMessageFmt, channel, message),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +172,11 @@ func (c *Client) GetChannelMessage(channel, message objects.Snowflake) (*objects
 }
 
 func (c *Client) CrossPostMessage(channel, message objects.Snowflake) (*objects.Message, error) {
-	res, err := c.request(http.MethodPost, fmt.Sprintf(CrosspostMessageFmt, channel, message), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf(CrosspostMessageFmt, channel, message),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +195,11 @@ func (c *Client) CrossPostMessage(channel, message objects.Snowflake) (*objects.
 }
 
 func (c *Client) DeleteMessage(channel, message objects.Snowflake) error {
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelMessageFmt, channel, message), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ChannelMessageFmt, channel, message),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -182,7 +221,12 @@ func (c *Client) BulkDeleteMessages(channel objects.Snowflake, params *DeleteMes
 		return err
 	}
 
-	res, err := c.request(http.MethodPost, fmt.Sprintf(BulkDeleteMessagesFmt, channel), JsonContentType, data)
+	res, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf(BulkDeleteMessagesFmt, channel),
+		contentType: JsonContentType,
+		body:        data,
+	})
 	if err != nil {
 		return err
 	}
@@ -195,9 +239,10 @@ func (c *Client) BulkDeleteMessages(channel objects.Snowflake, params *DeleteMes
 }
 
 type EditChannelParams struct {
-	Allow objects.PermissionBit `json:"allow"`
-	Deny  objects.PermissionBit `json:"deny"`
-	Type  int                   `json:"type"`
+	Allow  objects.PermissionBit `json:"allow"`
+	Deny   objects.PermissionBit `json:"deny"`
+	Type   int                   `json:"type"`
+	Reason string                `json:"-"`
 }
 
 func (c *Client) EditChannelPermissions(channel, overwrite objects.Snowflake, params *EditChannelParams) error {
@@ -206,7 +251,18 @@ func (c *Client) EditChannelPermissions(channel, overwrite objects.Snowflake, pa
 		return err
 	}
 
-	res, err := c.request(http.MethodPut, fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite), JsonContentType, data)
+	reason := ""
+	if params != nil {
+		reason = params.Reason
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite),
+		contentType: JsonContentType,
+		body:        data,
+		reason:      reason,
+	})
 	if err != nil {
 		return err
 	}
@@ -217,8 +273,13 @@ func (c *Client) EditChannelPermissions(channel, overwrite objects.Snowflake, pa
 	return nil
 }
 
-func (c *Client) DeleteChannelPermission(channel, overwrite objects.Snowflake) error {
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite), JsonContentType, nil)
+func (c *Client) DeleteChannelPermission(channel, overwrite objects.Snowflake, reason string) error {
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite),
+		contentType: JsonContentType,
+		reason:      reason,
+	})
 	if err != nil {
 		return err
 	}
@@ -231,7 +292,11 @@ func (c *Client) DeleteChannelPermission(channel, overwrite objects.Snowflake) e
 }
 
 func (c *Client) GetChannelInvites(channel objects.Snowflake) ([]*objects.Invite, error) {
-	res, err := c.request(http.MethodGet, fmt.Sprintf(ChannelInvitesFmt, channel), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(ChannelInvitesFmt, channel),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -255,6 +320,7 @@ type CreateInviteParams struct {
 	Unique         bool              `json:"unique,omitempty"`
 	TargetUser     objects.Snowflake `json:"target_user,omitempty"`
 	TargetUserType objects.Snowflake `json:"target_user_type,omitempty"`
+	Reason         string            `json:"-"`
 }
 
 func (c *Client) CreateChannelInvite(channel objects.Snowflake, params *CreateInviteParams) (*objects.Invite, error) {
@@ -263,7 +329,18 @@ func (c *Client) CreateChannelInvite(channel objects.Snowflake, params *CreateIn
 		return nil, err
 	}
 
-	res, err := c.request(http.MethodPost, fmt.Sprintf(ChannelInvitesFmt, channel), JsonContentType, data)
+	reason := ""
+	if params != nil {
+		reason = params.Reason
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf(ChannelInvitesFmt, channel),
+		contentType: JsonContentType,
+		body:        data,
+		reason:      reason,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +380,11 @@ func (c *Client) CreateReaction(channel, message objects.Snowflake, emoji interf
 		return err
 	}
 
-	res, err := c.request(http.MethodPut, fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -320,7 +401,11 @@ func (c *Client) DeleteOwnReaction(channel, message objects.Snowflake, emoji int
 		return err
 	}
 
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -338,7 +423,11 @@ func (c *Client) DeleteUserReaction(channel, message, user objects.Snowflake, em
 		return err
 	}
 
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionUserFmt, channel, message, url.QueryEscape(react), user), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ReactionUserFmt, channel, message, url.QueryEscape(react), user),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -351,9 +440,9 @@ func (c *Client) DeleteUserReaction(channel, message, user objects.Snowflake, em
 }
 
 type GetReactionsParams struct {
-	Before objects.Snowflake `json:"before,omitempty"`
-	After  objects.Snowflake `json:"after,omitempty"`
-	Limit  int               `json:"limit"`
+	Before objects.Snowflake `url:"before,omitempty"`
+	After  objects.Snowflake `url:"after,omitempty"`
+	Limit  int               `url:"limit"`
 }
 
 func (c *Client) GetReactions(channel, message objects.Snowflake, emoji interface{}, params *GetReactionsParams) ([]*objects.User, error) {
@@ -373,7 +462,11 @@ func (c *Client) GetReactions(channel, message objects.Snowflake, emoji interfac
 	}
 	u.RawQuery = q.Encode()
 
-	res, err := c.request(http.MethodGet, u.String(), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        u.String(),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +483,11 @@ func (c *Client) GetReactions(channel, message objects.Snowflake, emoji interfac
 }
 
 func (c *Client) DeleteAllReactions(channel, message objects.Snowflake) error {
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionsBaseFmt, channel, message), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ReactionsBaseFmt, channel, message),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -407,7 +504,11 @@ func (c *Client) DeleteEmojiReactions(channel, message objects.Snowflake, emoji 
 		return err
 	}
 
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ReactionsFmt, channel, message, reaction), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ReactionsFmt, channel, message, reaction),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -420,7 +521,11 @@ func (c *Client) DeleteEmojiReactions(channel, message objects.Snowflake, emoji 
 }
 
 func (c *Client) GetPinnedMessages(channel objects.Snowflake) ([]*objects.Message, error) {
-	res, err := c.request(http.MethodGet, fmt.Sprintf(ChannelPinsFmt, channel), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(ChannelPinsFmt, channel),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -437,7 +542,11 @@ func (c *Client) GetPinnedMessages(channel objects.Snowflake) ([]*objects.Messag
 }
 
 func (c *Client) AddPinnedMessage(channel, message objects.Snowflake) error {
-	res, err := c.request(http.MethodPut, fmt.Sprintf(ChannelPinnedFmt, channel, message), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(ChannelPinnedFmt, channel, message),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -449,7 +558,11 @@ func (c *Client) AddPinnedMessage(channel, message objects.Snowflake) error {
 }
 
 func (c *Client) DeletePinnedMessage(channel, message objects.Snowflake) error {
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelPinnedFmt, channel, message), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ChannelPinnedFmt, channel, message),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}
@@ -494,6 +607,9 @@ func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageP
 		}
 
 		for n, file := range params.Files {
+			if file.Spoiler && !strings.HasPrefix(file.Filename, "SPOILER_") {
+				file.Filename = "SPOILER_" + file.Filename
+			}
 			w, err := m.CreateFormFile(fmt.Sprintf("file%d", n), file.Filename)
 			if err != nil {
 				return nil, err
@@ -517,7 +633,12 @@ func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageP
 		}
 	}
 
-	res, err := c.request(http.MethodPost, fmt.Sprintf(ChannelMessagesFmt, channel), contentType, body)
+	res, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf(ChannelMessagesFmt, channel),
+		contentType: contentType,
+		body:        body,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -546,7 +667,12 @@ func (c *Client) EditMessage(channel, message objects.Snowflake, params *EditMes
 		return nil, err
 	}
 
-	res, err := c.request(http.MethodPatch, fmt.Sprintf(ChannelMessageFmt, channel, message), JsonContentType, body)
+	res, err := c.request(&request{
+		method:      http.MethodPatch,
+		path:        fmt.Sprintf(ChannelMessageFmt, channel, message),
+		contentType: JsonContentType,
+		body:        body,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -559,7 +685,11 @@ func (c *Client) EditMessage(channel, message objects.Snowflake, params *EditMes
 }
 
 func (c *Client) FollowNewsChannel(channel objects.Snowflake) (*objects.FollowedChannel, error) {
-	res, err := c.request(http.MethodDelete, fmt.Sprintf(ChannelFollowersFmt, channel), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodDelete,
+		path:        fmt.Sprintf(ChannelFollowersFmt, channel),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -577,7 +707,11 @@ func (c *Client) FollowNewsChannel(channel objects.Snowflake) (*objects.Followed
 }
 
 func (c *Client) StartTyping(channel objects.Snowflake) error {
-	res, err := c.request(http.MethodPost, fmt.Sprintf(ChannelTypingFmt, channel), JsonContentType, nil)
+	res, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf(ChannelTypingFmt, channel),
+		contentType: JsonContentType,
+	})
 	if err != nil {
 		return err
 	}

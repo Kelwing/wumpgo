@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 type ErrorREST struct {
@@ -44,4 +45,14 @@ func (r *DiscordResponse) ExpectAnyStatus(statusCodes ...int) error {
 		Message: fmt.Sprintf("expected one of %d, got %d: %s", statusCodes, r.Status, r.Body),
 		Status:  r.Status,
 	}
+}
+
+type request struct {
+	method      string
+	path        string
+	contentType string
+	body        []byte
+	reason      string
+
+	headers http.Header
 }

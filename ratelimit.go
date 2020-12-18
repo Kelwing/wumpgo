@@ -2,12 +2,14 @@ package rest
 
 import (
 	"errors"
+	"net/http"
 	"regexp"
 	"strings"
 )
 
 type Ratelimiter interface {
 	Request(method, url, contentType string, body []byte) (*DiscordResponse, error)
+	RequestWithHeaders(method, url, contentType string, body []byte, headers http.Header) (*DiscordResponse, error)
 }
 
 var userIdRe = regexp.MustCompile(`\d{16,19}`)

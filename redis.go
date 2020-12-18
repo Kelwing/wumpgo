@@ -139,7 +139,7 @@ func (r *RedisRatelimiter) updateBucket(key string, resp *http.Response) error {
 	return nil
 }
 
-func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body []byte, bucketID string, retries int) (*DiscordResponse, error) {
+func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body []byte, bucketID string, retries int, headers http.Header) (*DiscordResponse, error) {
 	if r.MaxRetries > 0 && r.MaxRetries < retries {
 		return nil, MaxRetriesExceeded
 	}
@@ -164,6 +164,16 @@ func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body [
 		req.Header.Set("authorization", r.authorization)
 	}
 
+	for k := range headers {
+		// Overwrite previous headers
+		v := headers.Get(k)
+		if v == "" {
+			req.Header.Del(k)
+		} else {
+			req.Header.Set(k, v)
+		}
+	}
+
 	resp, err := r.http.Do(req)
 	if err != nil {
 		_ = r.updateBucket(bucketID, resp)
@@ -183,9 +193,9 @@ func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body [
 		if delay > time.Duration(0) {
 			time.Sleep(delay)
 		}
-		return r.requestLocked(method, url, contentType, body, bucketID, retries+1)
+		return r.requestLocked(method, url, contentType, body, bucketID, retries+1, headers)
 	case http.StatusBadGateway:
-		return r.requestLocked(method, url, contentType, body, bucketID, retries+1)
+		return r.requestLocked(method, url, contentType, body, bucketID, retries+1, headers)
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -206,5 +216,15 @@ func (r *RedisRatelimiter) Request(method, url, contentType string, body []byte)
 		return nil, err
 	}
 	defer mutex.Unlock()
-	return r.requestLocked(method, url, contentType, body, bucketID, 0)
+	return r.requestLocked(method, url, contentType, body, bucketID, 0, nil)
+}
+
+func (r *RedisRatelimiter) RequestWithHeaders(method, url, contentType string, body []byte, headers http.Header) (*DiscordResponse, error) {
+	bucketID := getBucketID(url)
+	mutex, err := r.acquireLock(bucketID)
+	if err != nil {
+		return nil, err
+	}
+	defer mutex.Unlock()
+	return r.requestLocked(method, url, contentType, body, bucketID, 0, headers)
 }

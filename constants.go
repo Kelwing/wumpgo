@@ -4,6 +4,8 @@ const (
 	// Discord API Base URL
 	BaseURL = "https://discord.com/api/v8"
 
+	XAuditLogReasonHeader = "X-Audit-Log-Reason"
+
 	JsonContentType = "application/json"
 
 	// Channels
@@ -31,6 +33,31 @@ const (
 	GuildApplicationsUpdateFmt  = GuildApplicationsFmt + "/%d"
 
 	// Guilds
-	GuildBaseFmt      = BaseURL + "/guilds/%d"
-	GuildAuditLogsFmt = GuildBaseFmt + "/audit-logs"
+	GuildBaseFmt                      = BaseURL + "/guilds/%d"
+	GuildCreateFmt                    = BaseURL + "/guilds"
+	GuildChannelsFmt                  = GuildBaseFmt + "/channels"
+	GuildPreviewFmt                   = GuildBaseFmt + "/preview"
+	GuildAuditLogsFmt                 = GuildBaseFmt + "/audit-logs"
+	GuildMembersFmt                   = GuildBaseFmt + "/members"
+	GuildMemberFmt                    = GuildMembersFmt + "/%d"
+	GuildMemberEditCurrentUserNickFmt = GuildMembersFmt + "/@me/nick"
+	GuildBansFmt                      = GuildBaseFmt + "/bans"
+	GuildBanUserFmt                   = GuildBansFmt + "/%d"
+	GuildPruneFmt                     = GuildBaseFmt + "/prune"
+	GuildVoiceRegionsFmt              = GuildBaseFmt + "/regions"
+	GuildInvitesFmt                   = GuildBaseFmt + "/invites"
+	GuildWidgetFmt                    = GuildBaseFmt + "/widget"
+	GuildWidgetJSONFmt                = GuildWidgetFmt + ".json"
+	GuildVanityURLFmt                 = GuildBaseFmt + "/vanity-url"
+	GuildWidgetImageFmt               = GuildWidgetFmt + ".png"
+
+	// Roles
+	GuildMemberRoleFmt = GuildBaseFmt + "/members/%d/roles/%d"
+	GuildRolesFmt      = GuildBaseFmt + "/roles"
+	GuildRoleFmt       = GuildRolesFmt + "/%d"
+
+	// Integrations
+	IntegrationsBaseFmt = GuildBaseFmt + "/integrations"
+	IntegrationBaseFmt  = IntegrationsBaseFmt + "/%d"
+	IntegrationSync     = IntegrationBaseFmt + "/sync"
 )

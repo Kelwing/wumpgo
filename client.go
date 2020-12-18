@@ -14,6 +14,9 @@ func New(config *Config) *Client {
 	}
 }
 
-func (c *Client) request(method, path, contentType string, body []byte) (*DiscordResponse, error) {
-	return c.rateLimiter.Request(method, path, contentType, body)
+func (c *Client) request(req *request) (*DiscordResponse, error) {
+	if req.reason != "" && req.headers.Get(XAuditLogReasonHeader) == "" {
+		req.headers.Set(XAuditLogReasonHeader, req.reason)
+	}
+	return c.rateLimiter.RequestWithHeaders(req.method, req.path, req.contentType, req.body, req.headers)
 }
