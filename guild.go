@@ -136,7 +136,7 @@ type WidgetUser struct {
 	AvatarURL     string    `json:"avatar_url"`
 }
 
-type GuildWidget struct {
+type GuildWidgetJSON struct {
 	ID            Snowflake     `json:"id"`
 	Name          string        `json:"name"`
 	Channels      []*Channel    `json:"channels"`
@@ -147,4 +147,9 @@ type GuildWidget struct {
 type Ban struct {
 	Reason string `json:"reason,omitempty"`
 	User   *User  `json:"user"`
+}
+
+type GuildWidget struct {
+	Enabled   bool      `json:"enabled"`
+	ChannelID Snowflake `json:"channel_id,omitempty"`
 }
