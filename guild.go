@@ -153,3 +153,17 @@ type GuildWidget struct {
 	Enabled   bool      `json:"enabled"`
 	ChannelID Snowflake `json:"channel_id,omitempty"`
 }
+
+type Template struct {
+	Code                  string    `json:"code"`
+	Name                  string    `json:"name"`
+	Description           string    `json:"description"`
+	UsageCount            int       `json:"usage_count"`
+	CreatorID             Snowflake `json:"creator_id"`
+	Creator               *User     `json:"creator"`
+	CreatedAt             Time      `json:"created_at"`
+	UpdatedAt             Time      `json:"updated_at"`
+	SourceGuildID         Snowflake `json:"source_guild_id"`
+	SerializedSourceGuild Snowflake `json:"serialized_source_guild"`
+	IsDirty               bool      `json:"is_dirty"`
+}
