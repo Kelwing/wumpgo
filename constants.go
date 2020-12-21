@@ -63,4 +63,9 @@ const (
 
 	// Invites
 	InviteFmt = BaseURL + "/invites/%s"
+
+	// Templates
+	TemplateFmt       = BaseURL + "/guilds/templates/%s"
+	GuildTemplateFmt  = BaseURL + "/guilds/%d/templates"
+	GuildTemplatesFmt = GuildTemplateFmt + "/%s"
 )

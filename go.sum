@@ -10,6 +10,8 @@ github.com/Postcord/objects v0.0.2-0.20201217211026-9e5ddda90495 h1:06E1rRNKP+Al
 github.com/Postcord/objects v0.0.2-0.20201217211026-9e5ddda90495/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/objects v0.0.2-0.20201218082815-302a8eb72807 h1:GiCCMhzwGqM1khuVtv3sBUXhc9NT7J8Ar5fg4rUgomQ=
 github.com/Postcord/objects v0.0.2-0.20201218082815-302a8eb72807/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
+github.com/Postcord/objects v0.0.2-0.20201221153833-7b5bf10158d9 h1:mUnyh6jjyv48/45gISiJqT+7wNpteB4CK8YVDkRcJ+4=
+github.com/Postcord/objects v0.0.2-0.20201221153833-7b5bf10158d9/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+qY=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
