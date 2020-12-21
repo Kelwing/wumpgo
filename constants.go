@@ -60,4 +60,7 @@ const (
 	IntegrationsBaseFmt = GuildBaseFmt + "/integrations"
 	IntegrationBaseFmt  = IntegrationsBaseFmt + "/%d"
 	IntegrationSync     = IntegrationBaseFmt + "/sync"
+
+	// Invites
+	InviteFmt = BaseURL + "/invites/%s"
 )
