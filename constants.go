@@ -68,4 +68,13 @@ const (
 	TemplateFmt       = BaseURL + "/guilds/templates/%s"
 	GuildTemplateFmt  = BaseURL + "/guilds/%d/templates"
 	GuildTemplatesFmt = GuildTemplateFmt + "/%s"
+
+	// Users
+	UsersFmt        = BaseURL + "/users"
+	UsersMeFmt      = UsersFmt + "/@me"
+	UsersMeGuilds   = UsersMeFmt + "/guilds"
+	UsersMeGuild    = UsersMeGuilds + "/%d"
+	UsersMeChannels = UsersMeFmt + "/guilds"
+	UserFmt         = BaseURL + "/%d"
+	UserConnections = UsersMeFmt + "/connections"
 )
