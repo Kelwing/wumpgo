@@ -77,4 +77,7 @@ const (
 	UsersMeChannels = UsersMeFmt + "/guilds"
 	UserFmt         = BaseURL + "/%d"
 	UserConnections = UsersMeFmt + "/connections"
+
+	// Voice
+	VoiceRegions = BaseURL + "/voice/regions"
 )
