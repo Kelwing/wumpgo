@@ -119,3 +119,22 @@ type ActivitySecrets struct {
 	Spectate string `json:"spectate,omitempty"`
 	Match    string `json:"match,omitempty"`
 }
+
+type Visibility uint
+
+const (
+	VisibilityNone Visibility = iota
+	VisibilityEveryone
+)
+
+type Connection struct {
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	Type         string         `json:"type"`
+	Revoked      bool           `json:"revoked,omitempty"`
+	Integrations []*Integration `json:"integrations,omitempty"`
+	Verified     bool           `json:"verified"`
+	FriendSync   bool           `json:"friend_sync"`
+	ShowActivity bool           `json:"show_activity"`
+	Visibility   Visibility     `json:"visibility"`
+}
