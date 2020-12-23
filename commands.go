@@ -19,6 +19,10 @@ func (c *Client) GetCommands(app objects.Snowflake) ([]*objects.ApplicationComma
 		return nil, err
 	}
 
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
 	var commands []*objects.ApplicationCommand
 	err = res.JSON(&commands)
 	if err != nil {
@@ -41,6 +45,10 @@ func (c *Client) AddCommand(app objects.Snowflake, command *objects.ApplicationC
 		body:        data,
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
 		return nil, err
 	}
 
@@ -69,6 +77,10 @@ func (c *Client) UpdateCommand(app, commandID objects.Snowflake, command *object
 		return nil, err
 	}
 
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
 	cmd := &objects.ApplicationCommand{}
 	err = res.JSON(cmd)
 	if err != nil {
@@ -79,7 +91,7 @@ func (c *Client) UpdateCommand(app, commandID objects.Snowflake, command *object
 }
 
 func (c *Client) DeleteCommand(app, commandID objects.Snowflake) error {
-	_, err := c.request(&request{
+	res, err := c.request(&request{
 		method:      http.MethodDelete,
 		path:        fmt.Sprintf(GlobalApplicationsUpdateFmt, app, commandID),
 		contentType: JsonContentType,
@@ -88,6 +100,11 @@ func (c *Client) DeleteCommand(app, commandID objects.Snowflake) error {
 	if err != nil {
 		return err
 	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -100,6 +117,10 @@ func (c *Client) GetGuildCommand(app, guild objects.Snowflake) ([]*objects.Appli
 		contentType: JsonContentType,
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
 		return nil, err
 	}
 
@@ -128,6 +149,10 @@ func (c *Client) AddGuildCommand(app, guild objects.Snowflake, command *objects.
 		return nil, err
 	}
 
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
 	cmd := &objects.ApplicationCommand{}
 	err = res.JSON(cmd)
 	if err != nil {
@@ -153,6 +178,10 @@ func (c *Client) UpdateGuildCommand(app, guild, commandID objects.Snowflake, com
 		return nil, err
 	}
 
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
 	cmd := &objects.ApplicationCommand{}
 	err = res.JSON(cmd)
 	if err != nil {
@@ -163,13 +192,17 @@ func (c *Client) UpdateGuildCommand(app, guild, commandID objects.Snowflake, com
 }
 
 func (c *Client) DeleteGuildCommand(app, guild, commandID objects.Snowflake) error {
-	_, err := c.request(&request{
+	res, err := c.request(&request{
 		method:      http.MethodDelete,
 		path:        fmt.Sprintf(GuildApplicationsUpdateFmt, app, guild, commandID),
 		contentType: JsonContentType,
 		body:        nil,
 	})
 	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
 		return err
 	}
 	return nil
