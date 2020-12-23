@@ -602,8 +602,12 @@ func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageP
 			return nil, err
 		}
 
-		if err = m.WriteField("payload_json", string(b)); err != nil {
+		if w, err := m.CreateFormField("payload_json"); err != nil {
 			return nil, err
+		} else {
+			if _, err = w.Write(b); err != nil {
+				return nil, err
+			}
 		}
 
 		for n, file := range params.Files {
