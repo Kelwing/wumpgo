@@ -80,4 +80,11 @@ const (
 
 	// Voice
 	VoiceRegions = BaseURL + "/voice/regions"
+
+	// Webhooks
+	ChannelWebhookFmt   = BaseURL + "/channels/%d/webhooks"
+	GuildWebhookFmt     = BaseURL + "/guilds/%d/webhooks"
+	WebhookFmt          = BaseURL + "/webhooks/%d"
+	WebhookWithTokenFmt = WebhookFmt + "/%s"
+	WebhookMessageFmt   = WebhookWithTokenFmt + "/messages/%d"
 )
