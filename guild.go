@@ -167,3 +167,34 @@ type Template struct {
 	SerializedSourceGuild Snowflake `json:"serialized_source_guild"`
 	IsDirty               bool      `json:"is_dirty"`
 }
+
+type WelcomeScreen struct {
+	Description     string            `json:"description,omitempty"`
+	WelcomeChannels []*WelcomeChannel `json:"welcome_channels"`
+}
+
+type WelcomeChannel struct {
+	ChannelID   Snowflake `json:"channel_id"`
+	Description string    `json:"description"`
+	EmojiID     Snowflake `json:"emoji_id,omitempty"`
+	EmojiName   string    `json:"emoji_name,omitempty"`
+}
+
+type MembershipScreening struct {
+	Version     Time                        `json:"version"`
+	FormFields  []*MembershipScreeningField `json:"form_fields"`
+	Description string                      `json:"description,omitempty"`
+}
+
+type MembershipFieldType string
+
+const (
+	MembershipFieldTypeTerms MembershipFieldType = "TERMS"
+)
+
+type MembershipScreeningField struct {
+	FieldType MembershipFieldType `json:"field_type"`
+	Label     string              `json:"label"`
+	Values    []string            `json:"values,omitempty"`
+	Required  bool                `json:"required"`
+}
