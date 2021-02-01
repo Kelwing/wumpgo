@@ -50,6 +50,7 @@ const (
 	GuildWidgetJSONFmt                = GuildWidgetFmt + ".json"
 	GuildVanityURLFmt                 = GuildBaseFmt + "/vanity-url"
 	GuildWidgetImageFmt               = GuildWidgetFmt + ".png"
+	GuildMembershipScreeningFmt       = GuildBaseFmt + "/member-verification"
 
 	// Roles
 	GuildMemberRoleFmt = GuildBaseFmt + "/members/%d/roles/%d"

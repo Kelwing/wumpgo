@@ -1152,3 +1152,66 @@ func (c *Client) GetGuildWidgetImage(guild objects.Snowflake, params *GuildWidge
 
 	return img, nil
 }
+
+func (c *Client) GetGuildMembershipScreeningForm(guild objects.Snowflake) (*objects.MembershipScreening, error) {
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(GuildMembershipScreeningFmt, guild),
+		contentType: JsonContentType,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	form := &objects.MembershipScreening{}
+	if err = res.JSON(form); err != nil {
+		return nil, err
+	}
+
+	return form, err
+}
+
+type ModifyGuildMembershipScreeningParams struct {
+	Enabled     *bool  `json:"enabled,omitempty"`
+	FormFields  string `json:"form_fields,omitempty"`
+	Description string `json:"description,omitempty"`
+	Reason      string `json:"-"`
+}
+
+func (c *Client) ModifyGuildMembershipScreeningForm(guild objects.Snowflake, params *ModifyGuildMembershipScreeningParams) (*objects.MembershipScreening, error) {
+	data, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+
+	reason := ""
+	if params != nil {
+		reason = params.Reason
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPatch,
+		path:        fmt.Sprintf(GuildMembershipScreeningFmt, guild),
+		contentType: JsonContentType,
+		reason:      reason,
+		body:        data,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	form := &objects.MembershipScreening{}
+	if err = res.JSON(form); err != nil {
+		return nil, err
+	}
+
+	return form, nil
+}
