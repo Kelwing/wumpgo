@@ -16,10 +16,14 @@ const (
 	MessageTypeUserPremiumGuildSubscriptionTier2
 	MessageTypeUserPremiumGuildSubscriptionTier3
 	MessageTypeChannelFollowAdd
+	_
 	MessageTypeGuildDiscoveryDisqualified
 	MessageTypeGuildDiscoveryRequalified
-
-	MessageTypeReply MessageType = 19
+	MessageTypeGuildDiscoveryGracePeriodInitialWarning
+	MessageTypeGuildDiscoveryGracePeriodFinalWarning
+	_
+	MessageTypeReply
+	MessageTypeApplicationCommand
 )
 
 type MessageActivityType uint
@@ -39,6 +43,9 @@ const (
 	MsgFlagSupressEmbeds
 	MsgFlagSourceMessageDeleted
 	MsgFlagUrgent
+	_
+	MsgFlagEphemeral
+	MsgFlagLoading
 )
 
 type MessageStickerFormat uint

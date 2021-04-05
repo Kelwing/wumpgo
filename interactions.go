@@ -70,9 +70,17 @@ type ApplicationCommandInteractionDataOption struct {
 }
 
 type ApplicationCommandInteractionData struct {
-	ID      Snowflake                                 `json:"id"`
-	Name    string                                    `json:"name"`
-	Options []ApplicationCommandInteractionDataOption `json:"options"`
+	ID       Snowflake                                 `json:"id"`
+	Name     string                                    `json:"name"`
+	Options  []ApplicationCommandInteractionDataOption `json:"options"`
+	Resolved ApplicationCommandInteractionDataResolved `json:"resolved"`
+}
+
+type ApplicationCommandInteractionDataResolved struct {
+	Users    map[Snowflake]User        `json:"users"`
+	Members  map[Snowflake]GuildMember `json:"members"`
+	Roles    map[Snowflake]Role        `json:"roles"`
+	Channels map[Snowflake]Channel     `json:"channels"`
 }
 
 type Interaction struct {
