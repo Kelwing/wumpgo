@@ -108,6 +108,35 @@ func (c *Client) DeleteCommand(app, commandID objects.Snowflake) error {
 	return nil
 }
 
+func (c *Client) BulkOverwriteGlobalCommands(app objects.Snowflake, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
+	data, err := json.Marshal(commands)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(GlobalApplicationsFmt, app),
+		contentType: JsonContentType,
+		body:        data,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var cmds []*objects.ApplicationCommand
+	if err = res.JSON(&cmds); err != nil {
+		return nil, err
+	}
+
+	return cmds, nil
+}
+
 // Guild Commands
 
 func (c *Client) GetGuildCommand(app, guild objects.Snowflake) ([]*objects.ApplicationCommand, error) {
@@ -206,4 +235,32 @@ func (c *Client) DeleteGuildCommand(app, guild, commandID objects.Snowflake) err
 		return err
 	}
 	return nil
+}
+
+func (c *Client) BulkOverwriteGuildCommands(application, guild objects.Snowflake, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
+	data, err := json.Marshal(commands)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(GuildApplicationsFmt, application, guild),
+		contentType: JsonContentType,
+		body:        data,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var cmds []*objects.ApplicationCommand
+	if err = res.JSON(&cmds); err != nil {
+		return nil, err
+	}
+
+	return cmds, nil
 }
