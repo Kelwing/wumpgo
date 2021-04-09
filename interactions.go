@@ -40,12 +40,13 @@ const (
 )
 
 type ApplicationCommand struct {
-	ID            Snowflake                  `json:"id,omitempty"`
-	ApplicationID Snowflake                  `json:"application_id,omitempty"`
-	Name          string                     `json:"name"`
-	Description   string                     `json:"description"`
-	Options       []ApplicationCommandOption `json:"options"`
-	Handler       HandlerFunc                `json:"-"`
+	ID                Snowflake                  `json:"id,omitempty"`
+	ApplicationID     Snowflake                  `json:"application_id,omitempty"`
+	Name              string                     `json:"name"`
+	Description       string                     `json:"description"`
+	Options           []ApplicationCommandOption `json:"options"`
+	Handler           HandlerFunc                `json:"-"`
+	DefaultPermission bool                       `json:"default_permission"`
 }
 
 type ApplicationCommandOption struct {
@@ -81,6 +82,19 @@ type ApplicationCommandInteractionDataResolved struct {
 	Members  map[Snowflake]GuildMember `json:"members"`
 	Roles    map[Snowflake]Role        `json:"roles"`
 	Channels map[Snowflake]Channel     `json:"channels"`
+}
+
+type ApplicationCommandPermissionType int
+
+const (
+	PermissionTypeRole ApplicationCommandPermissionType = iota + 1
+	PermissionTypeUser
+)
+
+type ApplicationCommandPermissions struct {
+	ID         Snowflake                        `json:"id"`
+	Type       ApplicationCommandPermissionType `json:"type"`
+	Permission bool                             `json:"permission"`
 }
 
 type Interaction struct {
