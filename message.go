@@ -131,3 +131,18 @@ type MessageSticker struct {
 	PreviewAsset string               `json:"preview_asset"`
 	FormatType   MessageStickerFormat `json:"format_type"`
 }
+
+type Component struct {
+	Type       int          `json:"type"`
+	Components []*Component `json:"components,omitempty"`
+	Label      string       `json:"label,omitempty"`
+	Style      int          `json:"style,omitempty"`
+	CustomID   string       `json:"custom_id,omitempty"`
+	URL        string       `json:"url,omitempty"`
+}
+
+type ComponentEmoji struct {
+	Name     string `json:"name"`
+	ID       string `json:"id"`
+	Animated bool   `json:"animated"`
+}

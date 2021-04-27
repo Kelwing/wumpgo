@@ -105,13 +105,15 @@ type GuildApplicationCommandPermissions struct {
 }
 
 type Interaction struct {
-	ID        Snowflake                          `json:"id"`
-	Type      InteractionType                    `json:"type"`
-	Data      *ApplicationCommandInteractionData `json:"data,omitempty"`
-	GuildID   Snowflake                          `json:"guild_id"`
-	ChannelID Snowflake                          `json:"channel_id"`
-	Member    GuildMember                        `json:"member"`
-	Token     string                             `json:"token"`
+	ID            Snowflake       `json:"id"`
+	Type          InteractionType `json:"type"`
+	Data          interface{}     `json:"data,omitempty"`
+	GuildID       Snowflake       `json:"guild_id"`
+	ChannelID     Snowflake       `json:"channel_id"`
+	Member        *GuildMember    `json:"member"`
+	User          *User           `json:"user"`
+	ApplicationID Snowflake       `json:"application_id"`
+	Token         string          `json:"token"`
 }
 
 type InteractionApplicationCommandCallbackData struct {
@@ -126,3 +128,25 @@ type InteractionResponse struct {
 	Type ResponseType                               `json:"type"`
 	Data *InteractionApplicationCommandCallbackData `json:"data,omitempty"`
 }
+
+type ComponentType int
+
+const (
+	ComponentTypeActionRow = iota + 1
+	ComponentTypeButton
+)
+
+type ApplicationComponentInteractionData struct {
+	CustomID      string        `json:"custom_id"`
+	ComponentType ComponentType `json:"component_type"`
+}
+
+type ButtonStyle int
+
+const (
+	ButtonStylePrimary = iota + 1
+	ButtonStyleSecondary
+	ButtonStyleSuccess
+	ButtonStyleDanger
+	ButtonStyleLink
+)
