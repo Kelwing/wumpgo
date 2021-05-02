@@ -23,6 +23,7 @@ const (
 const (
 	InteractionRequestPing InteractionType = iota + 1
 	InteractionApplicationCommand
+	InteractionButton
 )
 
 // Response types
