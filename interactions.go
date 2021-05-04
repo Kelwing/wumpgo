@@ -8,6 +8,7 @@ import (
 
 	"github.com/Postcord/objects"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
 )
@@ -19,13 +20,15 @@ type App struct {
 	buttonHandler ButtonHandlerFunc
 	extraProps    map[string]interface{}
 	propsLock     sync.RWMutex
+	logger        *logrus.Logger
 }
 
-func New(publicKey string) (*App, error) {
-	pubKey, err := parsePublicKey(publicKey)
+func New(config *Config) (*App, error) {
+	pubKey, err := parsePublicKey(config.PublicKey)
 	if err != nil {
 		return nil, err
 	}
+
 	router := fasthttprouter.New()
 	a := &App{
 		commands: make(map[string]HandlerFunc),
@@ -35,6 +38,12 @@ func New(publicKey string) (*App, error) {
 		},
 		extraProps: make(map[string]interface{}),
 		Router:     router,
+	}
+
+	if config.Logger == nil {
+		a.logger = logrus.StandardLogger()
+	} else {
+		a.logger = config.Logger
 	}
 
 	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
@@ -57,8 +66,10 @@ func (a *App) ButtonHandler(handler ButtonHandlerFunc) {
 }
 
 func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
+	a.logger.WithField("addr", ctx.RemoteIP()).Debug("new request")
 	resp, err := a.ProcessRequest(ctx.Request.Body())
 	if err != nil {
+		a.logger.WithError(err).Error("failed to process request")
 		_ = writeJSON(ctx, fasthttp.StatusOK, objects.InteractionResponse{
 			Type: objects.ResponseChannelMessage,
 			Data: &objects.InteractionApplicationCommandCallbackData{
@@ -81,8 +92,11 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 	}
 	err = json.Unmarshal(data, ctx)
 	if err != nil {
+		a.logger.WithError(err).Error("failed to decode request body")
 		return
 	}
+
+	a.logger.Info("received event of type ", ctx.Request.Type)
 
 	switch ctx.Request.Type {
 	case objects.InteractionRequestPing:
@@ -92,6 +106,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		var data objects.ApplicationCommandInteractionData
 		err = mapstructure.Decode(ctx.Request.Data, data)
 		if err != nil {
+			a.logger.WithError(err).Error("failed to decode command data")
 			ctx.SetContent("Data structure invalid.").Ephemeral()
 			return
 		}
@@ -100,12 +115,14 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		}
 		command, ok := a.commands[data.Name]
 		if !ok {
+			a.logger.Error(data.Name, " command doesn't have a handler")
 			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
 			return
 		}
 		command(ctx, &data)
 	case objects.InteractionButton:
 		if a.buttonHandler == nil {
+			a.logger.Error("got button event, but button handler not set")
 			ctx.Acknowledge()
 			return
 		}
@@ -114,6 +131,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 
 		err = mapstructure.Decode(ctx.Request.Data, &buttonData)
 		if err != nil {
+			a.logger.WithError(err).Error("failed to decode button data")
 			ctx.Acknowledge()
 			return
 		}
@@ -140,5 +158,6 @@ func (a *App) Set(key string, obj interface{}) {
 }
 
 func (a *App) Run(port int) error {
+	a.logger.Info("listening on port ", port)
 	return a.server.ListenAndServe(fmt.Sprintf(":%d", port))
 }
