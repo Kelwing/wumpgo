@@ -3,11 +3,14 @@ package interactions
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/Postcord/objects"
 	"github.com/jinzhu/copier"
 )
 
 type HandlerFunc func(ctx *CommandCtx)
+
+type ButtonHandlerFunc func(ctx *CommandCtx, data *objects.ApplicationComponentInteractionData)
 
 type CommandCtx struct {
 	Request  *objects.Interaction
@@ -48,6 +51,14 @@ func (c *CommandCtx) Acknowledge() *CommandCtx {
 	c.Response.Type = objects.ResponseAcknowledge
 	c.Response.Data = nil
 	return c
+}
+
+func (c *CommandCtx) DeferredMessageUpdate() {
+	c.Response.Type = objects.ResponseDeferredMessageUpdate
+}
+
+func (c *CommandCtx) UpdateMessage() {
+	c.Response.Type = objects.ResponseUpdateMessage
 }
 
 func (c *CommandCtx) AllowedMentions(mentions *objects.AllowedMentions) *CommandCtx {
@@ -105,15 +116,15 @@ func (c *CommandCtx) Write(data []byte) (n int, err error) {
 
 // Request helper functions
 func (c *CommandCtx) Member() *objects.GuildMember {
-	return &c.Request.Member
+	return c.Request.Member
 }
 
 func (c *CommandCtx) CommandName() string {
-	return c.Request.Data.Name
+	return c.Request.Data.(objects.ApplicationCommandInteractionData).Name
 }
 
 func (c *CommandCtx) Options() []objects.ApplicationCommandInteractionDataOption {
-	return c.Request.Data.Options
+	return c.Request.Data.(objects.ApplicationCommandInteractionData).Options
 }
 
 func (c *CommandCtx) Token() string {

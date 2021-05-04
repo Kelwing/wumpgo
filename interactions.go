@@ -3,19 +3,22 @@ package interactions
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Postcord/objects"
-	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttprouter"
 	"log"
 	"sync"
+
+	"github.com/Postcord/objects"
+	"github.com/mitchellh/mapstructure"
+	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttprouter"
 )
 
 type App struct {
-	Router     *fasthttprouter.Router
-	server     *fasthttp.Server
-	commands   map[string]HandlerFunc
-	extraProps map[string]interface{}
-	propsLock  sync.RWMutex
+	Router        *fasthttprouter.Router
+	server        *fasthttp.Server
+	commands      map[string]HandlerFunc
+	buttonHandler ButtonHandlerFunc
+	extraProps    map[string]interface{}
+	propsLock     sync.RWMutex
 }
 
 func New(publicKey string) (*App, error) {
@@ -47,6 +50,10 @@ func (a *App) AddCommand(command *objects.ApplicationCommand, h HandlerFunc) {
 func (a *App) RemoveCommand(commandName string) {
 	// TODO check if it exists with discord, remove if it does
 	delete(a.commands, commandName)
+}
+
+func (a *App) ButtonHandler(handler ButtonHandlerFunc) {
+	a.buttonHandler = handler
 }
 
 func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
@@ -82,15 +89,36 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		ctx = &CommandCtx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
 		return
 	case objects.InteractionApplicationCommand:
-		for _, option := range ctx.Request.Data.Options {
+		var data objects.ApplicationCommandInteractionData
+		err = mapstructure.Decode(ctx.Request.Data, data)
+		if err != nil {
+			ctx.SetContent("Data structure invalid.").Ephemeral()
+			return
+		}
+		for _, option := range data.Options {
 			ctx.options[option.Name] = &CommandOption{Value: option.Value}
 		}
-		command, ok := a.commands[ctx.Request.Data.Name]
+		command, ok := a.commands[data.Name]
 		if !ok {
 			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
 			return
 		}
 		command(ctx)
+	case objects.InteractionButton:
+		if a.buttonHandler == nil {
+			ctx.Acknowledge()
+			return
+		}
+
+		var buttonData objects.ApplicationComponentInteractionData
+
+		err = mapstructure.Decode(ctx.Request.Data, &buttonData)
+		if err != nil {
+			ctx.Acknowledge()
+			return
+		}
+
+		a.buttonHandler(ctx, &buttonData)
 	}
 
 	return
