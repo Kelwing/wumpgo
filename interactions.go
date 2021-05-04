@@ -104,7 +104,17 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		return
 	case objects.InteractionApplicationCommand:
 		var data objects.ApplicationCommandInteractionData
-		err = mapstructure.Decode(ctx.Request.Data, &data)
+		config := &mapstructure.DecoderConfig{
+			WeaklyTypedInput: true,
+			Result:           &data,
+		}
+		var decoder *mapstructure.Decoder
+		decoder, err = mapstructure.NewDecoder(config)
+		if err != nil {
+			a.logger.WithError(err).Error("failed to create decoder")
+			return
+		}
+		err = decoder.Decode(ctx.Request.Data)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode command data")
 			ctx.SetContent("Data structure invalid.").Ephemeral()
@@ -129,7 +139,17 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 
 		var buttonData objects.ApplicationComponentInteractionData
 
-		err = mapstructure.Decode(ctx.Request.Data, &buttonData)
+		config := &mapstructure.DecoderConfig{
+			WeaklyTypedInput: true,
+			Result:           &buttonData,
+		}
+		var decoder *mapstructure.Decoder
+		decoder, err = mapstructure.NewDecoder(config)
+		if err != nil {
+			a.logger.WithError(err).Error("failed to create decoder")
+			return
+		}
+		err = decoder.Decode(ctx.Request.Data)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode button data")
 			ctx.Acknowledge()
