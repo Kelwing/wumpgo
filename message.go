@@ -83,6 +83,7 @@ type Message struct {
 	Flags             MessageFlag         `json:"flags,omitempty"`
 	Stickers          []*MessageSticker   `json:"stickers,omitempty"`
 	ReferencedMessage *Message            `json:"referenced_message,omitempty"`
+	Components        []*Component        `json:"components,omitempty"`
 }
 
 type MessageActivity struct {
