@@ -104,7 +104,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		return
 	case objects.InteractionApplicationCommand:
 		var data objects.ApplicationCommandInteractionData
-		err = mapstructure.Decode(ctx.Request.Data, data)
+		err = mapstructure.Decode(ctx.Request.Data, &data)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode command data")
 			ctx.SetContent("Data structure invalid.").Ephemeral()
