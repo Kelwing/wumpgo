@@ -142,3 +142,8 @@ func (c *CommandCtx) Get(name string) *CommandOption {
 func (c *CommandCtx) App() *App {
 	return c.app
 }
+
+func (c *CommandCtx) AddComponent(component *objects.Component) *CommandCtx {
+	c.Response.Data.Components = append(c.Response.Data.Components, component)
+	return c
+}
