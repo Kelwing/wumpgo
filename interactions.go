@@ -71,7 +71,7 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 	if err != nil {
 		a.logger.WithError(err).Error("failed to process request")
 		_ = writeJSON(ctx, fasthttp.StatusOK, objects.InteractionResponse{
-			Type: objects.ResponseChannelMessage,
+			Type: objects.ResponseChannelMessageWithSource,
 			Data: &objects.InteractionApplicationCommandCallbackData{
 				Content: "An unknown error occurred",
 				Flags:   objects.ResponseFlagEphemeral,
@@ -133,7 +133,6 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 	case objects.InteractionButton:
 		if a.buttonHandler == nil {
 			a.logger.Error("got button event, but button handler not set")
-			ctx.Acknowledge()
 			return
 		}
 
@@ -152,7 +151,6 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		err = decoder.Decode(ctx.Request.Data)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode button data")
-			ctx.Acknowledge()
 			return
 		}
 

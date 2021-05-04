@@ -30,7 +30,7 @@ func (c *CommandCtx) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	c.Response = &objects.InteractionResponse{
-		Type: objects.ResponseChannelMessage,
+		Type: objects.ResponseChannelMessageWithSource,
 		Data: &objects.InteractionApplicationCommandCallbackData{
 			TTS:             false,
 			Content:         "",
@@ -46,12 +46,6 @@ func (c *CommandCtx) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.Response)
 }
 
-func (c *CommandCtx) Acknowledge() *CommandCtx {
-	c.Response.Type = objects.ResponseAcknowledge
-	c.Response.Data = nil
-	return c
-}
-
 func (c *CommandCtx) DeferredMessageUpdate() {
 	c.Response.Type = objects.ResponseDeferredMessageUpdate
 }
@@ -62,11 +56,6 @@ func (c *CommandCtx) UpdateMessage() {
 
 func (c *CommandCtx) AllowedMentions(mentions *objects.AllowedMentions) *CommandCtx {
 	c.Response.Data.AllowedMentions = mentions
-	return c
-}
-
-func (c *CommandCtx) WithSource() *CommandCtx {
-	c.Response.Type = objects.ResponseChannelMessageWithSource
 	return c
 }
 
