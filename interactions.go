@@ -32,6 +32,9 @@ const (
 	ResponseAcknowledge
 	ResponseChannelMessage
 	ResponseChannelMessageWithSource
+	ResponseDeferredChannelMessageWithSource
+	ResponseDeferredMessageUpdate // buttons only
+	ResponseUpdateMessage
 )
 
 // Response flags
@@ -107,14 +110,16 @@ type GuildApplicationCommandPermissions struct {
 
 type Interaction struct {
 	ID            Snowflake       `json:"id"`
+	ApplicationID Snowflake       `json:"application_id"`
 	Type          InteractionType `json:"type"`
 	Data          interface{}     `json:"data,omitempty"`
 	GuildID       Snowflake       `json:"guild_id"`
 	ChannelID     Snowflake       `json:"channel_id"`
 	Member        *GuildMember    `json:"member"`
 	User          *User           `json:"user"`
-	ApplicationID Snowflake       `json:"application_id"`
 	Token         string          `json:"token"`
+	Message       *Message        `json:"message,omitempty"`
+	Version       int             `json:"version,omitempty"`
 }
 
 type InteractionApplicationCommandCallbackData struct {
