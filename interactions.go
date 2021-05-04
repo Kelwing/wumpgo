@@ -103,7 +103,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		return
 	case objects.InteractionApplicationCommand:
 		var cmdData objects.ApplicationCommandInteractionData
-		err = json.Unmarshal(ctx.Request.Data, &data)
+		err = json.Unmarshal(ctx.Request.Data, &cmdData)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode command data")
 			ctx.SetContent("Data structure invalid.").Ephemeral()
