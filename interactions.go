@@ -29,8 +29,8 @@ const (
 // Response types
 const (
 	ResponsePong ResponseType = iota + 1
-	ResponseAcknowledge
-	ResponseChannelMessage
+	_
+	_
 	ResponseChannelMessageWithSource
 	ResponseDeferredChannelMessageWithSource
 	ResponseDeferredMessageUpdate // buttons only
