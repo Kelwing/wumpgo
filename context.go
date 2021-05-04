@@ -108,11 +108,21 @@ func (c *CommandCtx) Member() *objects.GuildMember {
 }
 
 func (c *CommandCtx) CommandName() string {
-	return c.Request.Data.(objects.ApplicationCommandInteractionData).Name
+	var data objects.ApplicationCommandInteractionData
+	err := json.Unmarshal(c.Request.Data, &data)
+	if err != nil {
+		return ""
+	}
+	return data.Name
 }
 
 func (c *CommandCtx) Options() []objects.ApplicationCommandInteractionDataOption {
-	return c.Request.Data.(objects.ApplicationCommandInteractionData).Options
+	var data objects.ApplicationCommandInteractionData
+	err := json.Unmarshal(c.Request.Data, &data)
+	if err != nil {
+		return nil
+	}
+	return data.Options
 }
 
 func (c *CommandCtx) Token() string {

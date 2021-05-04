@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/Postcord/objects"
-	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
@@ -103,33 +102,23 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 		ctx = &CommandCtx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
 		return
 	case objects.InteractionApplicationCommand:
-		var data objects.ApplicationCommandInteractionData
-		config := &mapstructure.DecoderConfig{
-			WeaklyTypedInput: true,
-			Result:           &data,
-		}
-		var decoder *mapstructure.Decoder
-		decoder, err = mapstructure.NewDecoder(config)
-		if err != nil {
-			a.logger.WithError(err).Error("failed to create decoder")
-			return
-		}
-		err = decoder.Decode(ctx.Request.Data)
+		var cmdData objects.ApplicationCommandInteractionData
+		err = json.Unmarshal(ctx.Request.Data, &data)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode command data")
 			ctx.SetContent("Data structure invalid.").Ephemeral()
 			return
 		}
-		for _, option := range data.Options {
+		for _, option := range cmdData.Options {
 			ctx.options[option.Name] = &CommandOption{Value: option.Value}
 		}
-		command, ok := a.commands[data.Name]
+		command, ok := a.commands[cmdData.Name]
 		if !ok {
-			a.logger.Error(data.Name, " command doesn't have a handler")
+			a.logger.Error(cmdData.Name, " command doesn't have a handler")
 			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
 			return
 		}
-		command(ctx, &data)
+		command(ctx, &cmdData)
 	case objects.InteractionButton:
 		if a.buttonHandler == nil {
 			a.logger.Error("got button event, but button handler not set")
@@ -138,17 +127,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 
 		var buttonData objects.ApplicationComponentInteractionData
 
-		config := &mapstructure.DecoderConfig{
-			WeaklyTypedInput: true,
-			Result:           &buttonData,
-		}
-		var decoder *mapstructure.Decoder
-		decoder, err = mapstructure.NewDecoder(config)
-		if err != nil {
-			a.logger.WithError(err).Error("failed to create decoder")
-			return
-		}
-		err = decoder.Decode(ctx.Request.Data)
+		err = json.Unmarshal(ctx.Request.Data, &buttonData)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode button data")
 			return
