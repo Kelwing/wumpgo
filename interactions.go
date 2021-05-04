@@ -103,7 +103,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
 			return
 		}
-		command(ctx)
+		command(ctx, &data)
 	case objects.InteractionButton:
 		if a.buttonHandler == nil {
 			ctx.Acknowledge()

@@ -8,8 +8,7 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-type HandlerFunc func(ctx *CommandCtx)
-
+type HandlerFunc func(ctx *CommandCtx, data *objects.ApplicationCommandInteractionData)
 type ButtonHandlerFunc func(ctx *CommandCtx, data *objects.ApplicationComponentInteractionData)
 
 type CommandCtx struct {
