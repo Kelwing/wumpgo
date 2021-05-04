@@ -1,5 +1,7 @@
 package objects
 
+import "encoding/json"
+
 type (
 	ApplicationCommandOptionType int
 	InteractionType              int
@@ -112,7 +114,7 @@ type Interaction struct {
 	ID            Snowflake       `json:"id"`
 	ApplicationID Snowflake       `json:"application_id"`
 	Type          InteractionType `json:"type"`
-	Data          interface{}     `json:"data,omitempty"`
+	Data          json.RawMessage `json:"data,omitempty"`
 	GuildID       Snowflake       `json:"guild_id"`
 	ChannelID     Snowflake       `json:"channel_id"`
 	Member        *GuildMember    `json:"member"`
