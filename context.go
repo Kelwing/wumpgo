@@ -132,7 +132,7 @@ func (c *CommandCtx) Token() string {
 func (c *CommandCtx) Get(name string) *CommandOption {
 	option, ok := c.options[name]
 	if !ok {
-		return &CommandOption{Value: nil}
+		return &CommandOption{value: nil}
 	}
 
 	return option

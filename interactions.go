@@ -110,7 +110,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 			return
 		}
 		for _, option := range cmdData.Options {
-			ctx.options[option.Name] = &CommandOption{Value: option.Value}
+			ctx.options[option.Name] = &CommandOption{value: option.Value, data: &cmdData, options: option.Options, optionType: objects.ApplicationCommandOptionType(option.Type)}
 		}
 		command, ok := a.commands[cmdData.Name]
 		if !ok {
