@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Postcord/objects"
-	"github.com/google/go-querystring/query"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/Postcord/objects"
+	"github.com/google/go-querystring/query"
 )
 
 type CreateWebhookParams struct {
@@ -393,4 +394,27 @@ func (c *Client) DeleteWebhookMessage(messageID, webhookID objects.Snowflake, to
 	}
 
 	return nil
+}
+
+func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
+	data, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPatch,
+		path:        fmt.Sprintf(EditOriginalInteractionResponseFmt, applicationID, token),
+		contentType: JsonContentType,
+		body:        data,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	msg := &objects.Message{}
+	if err = res.JSON(msg); err != nil {
+		return nil, err
+	}
+	return msg, nil
 }

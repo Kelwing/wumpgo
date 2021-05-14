@@ -88,4 +88,7 @@ const (
 	WebhookFmt          = BaseURL + "/webhooks/%d"
 	WebhookWithTokenFmt = WebhookFmt + "/%s"
 	WebhookMessageFmt   = WebhookWithTokenFmt + "/messages/%d"
+
+	// Interactions
+	EditOriginalInteractionResponseFmt = WebhookWithTokenFmt + "/messages/@original"
 )
