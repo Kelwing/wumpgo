@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 	"github.com/jinzhu/copier"
 )
 
@@ -145,4 +146,14 @@ func (c *CommandCtx) App() *App {
 func (c *CommandCtx) AddComponent(component *objects.Component) *CommandCtx {
 	c.Response.Data.Components = append(c.Response.Data.Components, component)
 	return c
+}
+
+func (c *CommandCtx) Edit() error {
+	_, err := c.app.restClient.EditOriginalInteractionResponse(c.Request.ApplicationID, c.Request.Token, &rest.EditWebhookMessageParams{
+		Content:         c.Response.Data.Content,
+		Embeds:          c.Response.Data.Embeds,
+		AllowedMentions: c.Response.Data.AllowedMentions,
+	})
+
+	return err
 }

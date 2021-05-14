@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
@@ -20,6 +21,7 @@ type App struct {
 	extraProps    map[string]interface{}
 	propsLock     sync.RWMutex
 	logger        *logrus.Logger
+	restClient    *rest.Client
 }
 
 func New(config *Config) (*App, error) {
@@ -46,6 +48,14 @@ func New(config *Config) (*App, error) {
 	}
 
 	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
+
+	restClient := rest.New(&rest.Config{
+		Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
+			UserAgent: "BlurpleBot/1.0 (Linux) Postcord (https://github.com/Postcord)",
+		}),
+	})
+
+	a.restClient = restClient
 
 	return a, nil
 }
