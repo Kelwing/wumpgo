@@ -402,7 +402,7 @@ func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake
 		return nil, err
 	}
 
-	res, err := c.request(&request{
+	res, err := c.requestNoAuth(&request{
 		method:      http.MethodPatch,
 		path:        fmt.Sprintf(EditOriginalInteractionResponseFmt, applicationID, token),
 		contentType: JsonContentType,
