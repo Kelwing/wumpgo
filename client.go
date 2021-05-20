@@ -4,10 +4,12 @@ import "net/http"
 
 type Config struct {
 	Ratelimiter Ratelimiter
+	Cache       Cache
 }
 
 type Client struct {
 	rateLimiter Ratelimiter
+	cache       Cache
 }
 
 func New(config *Config) *Client {
@@ -20,7 +22,24 @@ func (c *Client) request(req *request) (*DiscordResponse, error) {
 	if req.reason != "" && req.headers.Get(XAuditLogReasonHeader) == "" {
 		req.headers.Set(XAuditLogReasonHeader, req.reason)
 	}
-	return c.rateLimiter.RequestWithHeaders(req.method, req.path, req.contentType, req.body, req.headers)
+
+	if req.method == "GET" && c.cache != nil {
+		data, err := c.cache.Get(req.path)
+		if err == nil {
+			return data, nil
+		}
+	}
+
+	resp, err := c.rateLimiter.RequestWithHeaders(req.method, req.path, req.contentType, req.body, req.headers)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.cache != nil {
+		c.cache.Put(req.path, resp)
+	}
+
+	return resp, err
 }
 
 func (c *Client) requestNoAuth(req *request) (*DiscordResponse, error) {
@@ -31,5 +50,20 @@ func (c *Client) requestNoAuth(req *request) (*DiscordResponse, error) {
 		req.headers.Set(XAuditLogReasonHeader, req.reason)
 	}
 	req.headers.Set("authorization", "")
-	return c.rateLimiter.RequestWithHeaders(req.method, req.path, req.contentType, req.body, req.headers)
+	if req.method == "GET" && c.cache != nil {
+		data, err := c.cache.Get(req.path)
+		if err == nil {
+			return data, nil
+		}
+	}
+	resp, err := c.rateLimiter.RequestWithHeaders(req.method, req.path, req.contentType, req.body, req.headers)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.cache != nil {
+		c.cache.Put(req.path, resp)
+	}
+
+	return resp, err
 }
