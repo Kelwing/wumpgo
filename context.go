@@ -1,7 +1,6 @@
 package interactions
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/Postcord/objects"
@@ -9,63 +8,29 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-type HandlerFunc func(ctx *CommandCtx, data *objects.ApplicationCommandInteractionData)
-type ButtonHandlerFunc func(ctx *CommandCtx, data *objects.ApplicationComponentInteractionData)
-
-type CommandCtx struct {
+type Ctx struct {
 	Request  *objects.Interaction
 	Response *objects.InteractionResponse
-	options  map[string]*CommandOption
 	app      *App
 }
 
-func (c *CommandCtx) Clone() (*CommandCtx, error) {
-	newCtx := &CommandCtx{}
+func (c *Ctx) Clone() (*Ctx, error) {
+	newCtx := &Ctx{}
 	err := copier.Copy(newCtx, c)
 	return newCtx, err
 }
 
-func (c *CommandCtx) UnmarshalJSON(data []byte) error {
-	c.Request = new(objects.Interaction)
-	if err := json.Unmarshal(data, c.Request); err != nil {
-		return err
-	}
-	c.Response = &objects.InteractionResponse{
-		Type: objects.ResponseChannelMessageWithSource,
-		Data: &objects.InteractionApplicationCommandCallbackData{
-			TTS:             false,
-			Content:         "",
-			Embeds:          nil,
-			AllowedMentions: nil,
-			Flags:           0,
-		},
-	}
-	return nil
-}
-
-func (c *CommandCtx) MarshalJSON() ([]byte, error) {
-	return json.Marshal(c.Response)
-}
-
-func (c *CommandCtx) DeferredMessageUpdate() {
-	c.Response.Type = objects.ResponseDeferredMessageUpdate
-}
-
-func (c *CommandCtx) UpdateMessage() {
-	c.Response.Type = objects.ResponseUpdateMessage
-}
-
-func (c *CommandCtx) AllowedMentions(mentions *objects.AllowedMentions) *CommandCtx {
+func (c *Ctx) AllowedMentions(mentions *objects.AllowedMentions) *Ctx {
 	c.Response.Data.AllowedMentions = mentions
 	return c
 }
 
-func (c *CommandCtx) Ephemeral() *CommandCtx {
+func (c *Ctx) Ephemeral() *Ctx {
 	c.Response.Data.Flags = objects.ResponseFlagEphemeral
 	return c
 }
 
-func (c *CommandCtx) AddEmbed(em *objects.Embed) *CommandCtx {
+func (c *Ctx) AddEmbed(em *objects.Embed) *Ctx {
 	if c.Response.Data.Embeds == nil {
 		c.Response.Data.Embeds = []*objects.Embed{em}
 	} else {
@@ -74,12 +39,12 @@ func (c *CommandCtx) AddEmbed(em *objects.Embed) *CommandCtx {
 	return c
 }
 
-func (c *CommandCtx) SetEmbed(em *objects.Embed) *CommandCtx {
+func (c *Ctx) SetEmbed(em *objects.Embed) *Ctx {
 	c.Response.Data.Embeds = []*objects.Embed{em}
 	return c
 }
 
-func (c *CommandCtx) EmbedContent(content string) *CommandCtx {
+func (c *Ctx) EmbedContent(content string) *Ctx {
 	c.Response.Data.Embeds = []*objects.Embed{
 		{
 			Description: content,
@@ -88,67 +53,40 @@ func (c *CommandCtx) EmbedContent(content string) *CommandCtx {
 	return c
 }
 
-func (c *CommandCtx) SetContent(content string) *CommandCtx {
+func (c *Ctx) SetContent(content string) *Ctx {
 	c.Response.Data.Content = content
 	return c
 }
 
-func (c *CommandCtx) TTS() *CommandCtx {
+func (c *Ctx) TTS() *Ctx {
 	c.Response.Data.TTS = true
 	return c
 }
 
-func (c *CommandCtx) Write(data []byte) (n int, err error) {
+func (c *Ctx) Write(data []byte) (n int, err error) {
 	c.Response.Data.Content = fmt.Sprintf("%s%s", c.Response.Data.Content, string(data))
 	return len(data), nil
 }
 
 // Request helper functions
-func (c *CommandCtx) Member() *objects.GuildMember {
+func (c *Ctx) Member() *objects.GuildMember {
 	return c.Request.Member
 }
 
-func (c *CommandCtx) CommandName() string {
-	var data objects.ApplicationCommandInteractionData
-	err := json.Unmarshal(c.Request.Data, &data)
-	if err != nil {
-		return ""
-	}
-	return data.Name
-}
-
-func (c *CommandCtx) Options() []objects.ApplicationCommandInteractionDataOption {
-	var data objects.ApplicationCommandInteractionData
-	err := json.Unmarshal(c.Request.Data, &data)
-	if err != nil {
-		return nil
-	}
-	return data.Options
-}
-
-func (c *CommandCtx) Token() string {
+func (c *Ctx) Token() string {
 	return c.Request.Token
 }
 
-func (c *CommandCtx) Get(name string) *CommandOption {
-	option, ok := c.options[name]
-	if !ok {
-		return &CommandOption{value: nil}
-	}
-
-	return option
-}
-
-func (c *CommandCtx) App() *App {
+func (c *Ctx) App() *App {
 	return c.app
 }
 
-func (c *CommandCtx) AddComponent(component *objects.Component) *CommandCtx {
+func (c *Ctx) AddComponent(component *objects.Component) *Ctx {
 	c.Response.Data.Components = append(c.Response.Data.Components, component)
 	return c
 }
 
-func (c *CommandCtx) Edit() error {
+func (c *Ctx) Edit() error {
 	_, err := c.app.restClient.EditOriginalInteractionResponse(c.Request.ApplicationID, c.Request.Token, &rest.EditWebhookMessageParams{
 		Content:         c.Response.Data.Content,
 		Embeds:          c.Response.Data.Embeds,

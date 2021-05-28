@@ -51,7 +51,7 @@ func New(config *Config) (*App, error) {
 
 	restClient := rest.New(&rest.Config{
 		Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
-			UserAgent: "BlurpleBot/1.0 (Linux) Postcord (https://github.com/Postcord)",
+			UserAgent: "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
 		}),
 	})
 
@@ -95,10 +95,9 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 	}
 }
 
-func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
-	ctx = &CommandCtx{
-		options: make(map[string]*CommandOption),
-		app:     a,
+func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
+	ctx = &Ctx{
+		app: a,
 	}
 	err = json.Unmarshal(data, ctx)
 	if err != nil {
@@ -110,10 +109,13 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 
 	switch ctx.Request.Type {
 	case objects.InteractionRequestPing:
-		ctx = &CommandCtx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
+		ctx = &Ctx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
 		return
 	case objects.InteractionApplicationCommand:
 		var cmdData objects.ApplicationCommandInteractionData
+		cmdCtx := &CommandCtx{
+			Ctx: ctx,
+		}
 		err = json.Unmarshal(ctx.Request.Data, &cmdData)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode command data")
@@ -121,7 +123,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 			return
 		}
 		for _, option := range cmdData.Options {
-			ctx.options[option.Name] = &CommandOption{value: option.Value, data: &cmdData, options: option.Options, optionType: objects.ApplicationCommandOptionType(option.Type)}
+			cmdCtx.options[option.Name] = &CommandOption{value: option.Value, data: &cmdData, options: option.Options, optionType: objects.ApplicationCommandOptionType(option.Type)}
 		}
 		command, ok := a.commands[cmdData.Name]
 		if !ok {
@@ -129,22 +131,25 @@ func (a *App) ProcessRequest(data []byte) (ctx *CommandCtx, err error) {
 			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
 			return
 		}
-		command(ctx, &cmdData)
+		cmdCtx.Data = &cmdData
+		command(cmdCtx)
 	case objects.InteractionButton:
 		if a.buttonHandler == nil {
 			a.logger.Error("got button event, but button handler not set")
 			return
 		}
 
-		var buttonData objects.ApplicationComponentInteractionData
+		btnCtx := &ButtonCtx{
+			Ctx: ctx,
+		}
 
-		err = json.Unmarshal(ctx.Request.Data, &buttonData)
+		err = json.Unmarshal(ctx.Request.Data, &btnCtx.Data)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to decode button data")
 			return
 		}
 
-		a.buttonHandler(ctx, &buttonData)
+		a.buttonHandler(btnCtx)
 	}
 
 	return
