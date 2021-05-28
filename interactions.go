@@ -144,6 +144,7 @@ type ComponentType int
 const (
 	ComponentTypeActionRow = iota + 1
 	ComponentTypeButton
+	ComponentTypeSelectMenu
 )
 
 type ApplicationComponentInteractionData struct {

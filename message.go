@@ -134,12 +134,26 @@ type MessageSticker struct {
 }
 
 type Component struct {
-	Type       int          `json:"type"`
-	Components []*Component `json:"components,omitempty"`
-	Label      string       `json:"label,omitempty"`
-	Style      int          `json:"style,omitempty"`
-	CustomID   string       `json:"custom_id,omitempty"`
-	URL        string       `json:"url,omitempty"`
+	Type        ComponentType    `json:"type"`
+	Components  []*Component     `json:"components,omitempty"`
+	Label       string           `json:"label,omitempty"`
+	Style       ButtonStyle      `json:"style,omitempty"`
+	Emoji       *Emoji           `json:"emoji,omitempty"`
+	CustomID    string           `json:"custom_id,omitempty"`
+	URL         string           `json:"url,omitempty"`
+	Disabled    bool             `json:"disabled,omitempty"`
+	Placeholder string           `json:"placeholder,omitempty"`
+	MinValues   int              `json:"min_values,omitempty"`
+	MaxValues   int              `json:"max_values,omitempty"`
+	Options     []*SelectOptions `json:"options,omitempty"`
+}
+
+type SelectOptions struct {
+	Label       string `json:"label"`
+	Value       string `json:"value"`
+	Description string `json:"description,omitempty"`
+	Emoji       *Emoji `json:"emoji,omitempty"`
+	Default     bool   `json:"default"`
 }
 
 type ComponentEmoji struct {
