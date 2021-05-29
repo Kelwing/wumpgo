@@ -24,19 +24,19 @@ import (
 
 func main() {
     app, err := interactions.New(&interactions.Config{
-		PublicKey: os.Getenv("DISCORD_PUBLIC_KEY"),
-	})
+        PublicKey: os.Getenv("DISCORD_PUBLIC_KEY"),
+    })
     if err != nil {
-		panic("failed to create interactions client")
-	}
+        panic("failed to create interactions client")
+    }
 
     app.AddCommand(&objects.ApplicationCommand{
-		Name:        "test",
-		Description: "Test things",
-	}, testHandler)
+        Name:        "test",
+        Description: "Test things",
+    }, testHandler)
 
     log.Println("test-bot is now running")
-	app.Run(1323)
+    app.Run(1323)
 }
 
 func testHandler(ctx *interactions.CommandCtx) {
