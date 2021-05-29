@@ -9,7 +9,7 @@ Add Interactions to your project
 go get -u github.com/Postcord/interactions
 ```
 
-## Example
+### Example
 
 ```go
 package main
