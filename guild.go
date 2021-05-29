@@ -464,7 +464,6 @@ func (c *Client) AddGuildMemberRole(guild, user, role objects.Snowflake, reason 
 		path:        fmt.Sprintf(GuildMemberRoleFmt, guild, user, role),
 		contentType: JsonContentType,
 		reason:      reason,
-		headers:     make(http.Header),
 	})
 	if err != nil {
 		return err

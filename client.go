@@ -19,6 +19,7 @@ func New(config *Config) *Client {
 }
 
 func (c *Client) request(req *request) (*DiscordResponse, error) {
+	req.headers = make(http.Header)
 	if req.reason != "" && req.headers.Get(XAuditLogReasonHeader) == "" {
 		req.headers.Set(XAuditLogReasonHeader, req.reason)
 	}
