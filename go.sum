@@ -16,6 +16,8 @@ github.com/Postcord/rest v0.0.2-0.20210514013411-10be33e73b7c h1:81CYKF+I8epj3oq
 github.com/Postcord/rest v0.0.2-0.20210514013411-10be33e73b7c/go.mod h1:ZN12SnWKyUnKH6J7pDOBEe/JQJy5pHI+nFQ2qp3mAtI=
 github.com/Postcord/rest v0.0.2-0.20210514013542-d7b45f332895 h1:Jhd3GyvTrWNjuaHyPPdZ0bkiKE7qjchscqtPXZ08p/A=
 github.com/Postcord/rest v0.0.2-0.20210514013542-d7b45f332895/go.mod h1:ZN12SnWKyUnKH6J7pDOBEe/JQJy5pHI+nFQ2qp3mAtI=
+github.com/Postcord/rest v0.0.2-0.20210529014305-05e4a49e2b8c h1:q4X0Z9scVcWeEWWLi3S7/P3dtMhL94ZcltP3wA8DUns=
+github.com/Postcord/rest v0.0.2-0.20210529014305-05e4a49e2b8c/go.mod h1:ZN12SnWKyUnKH6J7pDOBEe/JQJy5pHI+nFQ2qp3mAtI=
 github.com/andybalholm/brotli v1.0.0/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
 github.com/andybalholm/brotli v1.0.1 h1:KqhlKozYbRtJvsPrrEeXcO+N2l6NYT5A2QAFmSULpEc=
 github.com/andybalholm/brotli v1.0.1/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
@@ -37,6 +39,8 @@ github.com/go-redis/redis/v8 v8.1.1/go.mod h1:ysgGY09J/QeDYbu3HikWEIPCwaeOkuNoTg
 github.com/go-redis/redis/v8 v8.4.2/go.mod h1:A1tbYoHSa1fXwN+//ljcCYYJeLmVrwL9hbQN45Jdy0M=
 github.com/go-redis/redis/v8 v8.8.2 h1:O/NcHqobw7SEptA0yA6up6spZVFtwE06SXM8rgLtsP8=
 github.com/go-redis/redis/v8 v8.8.2/go.mod h1:F7resOH5Kdug49Otu24RjHWwgK7u9AmtqWMnCV1iP5Y=
+github.com/go-redis/redis/v8 v8.9.0 h1:FTTbB7WqlXfVNdVv0SsxA+oVi0bAwit6bMe3IUucq2o=
+github.com/go-redis/redis/v8 v8.9.0/go.mod h1:ik7vb7+gm8Izylxu6kf6wG26/t2VljgCfSQ1DM4O1uU=
 github.com/go-redsync/redsync/v4 v4.0.4/go.mod h1:QBOJAs1k8O6Eyrre4a++pxQgHe5eQ+HF56KuTVv+8Bs=
 github.com/go-redsync/redsync/v4 v4.3.0 h1:5cNxbHJc/tr1KX04piPv8nylURyuT3nqjmodkW8JCjM=
 github.com/go-redsync/redsync/v4 v4.3.0/go.mod h1:QBOJAs1k8O6Eyrre4a++pxQgHe5eQ+HF56KuTVv+8Bs=

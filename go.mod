@@ -4,9 +4,9 @@ go 1.14
 
 require (
 	github.com/Postcord/objects v0.0.8-0.20210529010146-e918bdcb189e
-	github.com/Postcord/rest v0.0.2-0.20210514013542-d7b45f332895 // indirect
+	github.com/Postcord/rest v0.0.2-0.20210529014305-05e4a49e2b8c // indirect
 	github.com/andybalholm/brotli v1.0.2 // indirect
-	github.com/go-redis/redis/v8 v8.8.2 // indirect
+	github.com/go-redis/redis/v8 v8.9.0 // indirect
 	github.com/go-redsync/redsync/v4 v4.3.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

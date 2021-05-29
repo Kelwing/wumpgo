@@ -53,6 +53,7 @@ func New(config *Config) (*App, error) {
 		Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
 			UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
 			Authorization: config.Token,
+			MaxRetries:    3,
 		}),
 	})
 
