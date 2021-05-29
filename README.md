@@ -1,5 +1,7 @@
 # Postcord Interactions
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Postcord/interactions.svg)](https://pkg.go.dev/github.com/Postcord/interactions)
+
 Interactions is a simple, batteries included HTTP interactions library for Discord.  It is designed to make is fast and easy to create a new Discord server integration using Discords new interactions system.
 
 ## Getting Started
