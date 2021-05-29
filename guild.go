@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Postcord/objects"
-	"github.com/google/go-querystring/query"
 	"image"
 	"image/png"
 	"net/http"
 	"net/url"
+
+	"github.com/Postcord/objects"
+	"github.com/google/go-querystring/query"
 )
 
 type CreateGuildParams struct {
@@ -463,6 +464,7 @@ func (c *Client) AddGuildMemberRole(guild, user, role objects.Snowflake, reason 
 		path:        fmt.Sprintf(GuildMemberRoleFmt, guild, user, role),
 		contentType: JsonContentType,
 		reason:      reason,
+		headers:     make(http.Header),
 	})
 	if err != nil {
 		return err
