@@ -14,14 +14,14 @@ import (
 )
 
 type App struct {
-	Router        *fasthttprouter.Router
-	server        *fasthttp.Server
-	commands      map[string]HandlerFunc
-	buttonHandler ButtonHandlerFunc
-	extraProps    map[string]interface{}
-	propsLock     sync.RWMutex
-	logger        *logrus.Logger
-	restClient    *rest.Client
+	Router           *fasthttprouter.Router
+	server           *fasthttp.Server
+	commands         map[string]HandlerFunc
+	componentHandler ButtonHandlerFunc
+	extraProps       map[string]interface{}
+	propsLock        sync.RWMutex
+	logger           *logrus.Logger
+	restClient       *rest.Client
 }
 
 func New(config *Config) (*App, error) {
@@ -70,8 +70,8 @@ func (a *App) RemoveCommand(commandName string) {
 	delete(a.commands, commandName)
 }
 
-func (a *App) ButtonHandler(handler ButtonHandlerFunc) {
-	a.buttonHandler = handler
+func (a *App) ComponentHandler(handler ButtonHandlerFunc) {
+	a.componentHandler = handler
 }
 
 func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
@@ -134,7 +134,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
 		cmdCtx.Data = &cmdData
 		command(cmdCtx)
 	case objects.InteractionButton:
-		if a.buttonHandler == nil {
+		if a.componentHandler == nil {
 			a.logger.Error("got button event, but button handler not set")
 			return
 		}
@@ -149,7 +149,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
 			return
 		}
 
-		a.buttonHandler(btnCtx)
+		a.componentHandler(btnCtx)
 	}
 
 	return
