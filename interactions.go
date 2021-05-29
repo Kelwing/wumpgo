@@ -17,7 +17,7 @@ type App struct {
 	Router           *fasthttprouter.Router
 	server           *fasthttp.Server
 	commands         map[string]HandlerFunc
-	componentHandler ButtonHandlerFunc
+	componentHandler ComponentHandlerFunc
 	extraProps       map[string]interface{}
 	propsLock        sync.RWMutex
 	logger           *logrus.Logger
@@ -72,7 +72,7 @@ func (a *App) RemoveCommand(commandName string) {
 	delete(a.commands, commandName)
 }
 
-func (a *App) ComponentHandler(handler ButtonHandlerFunc) {
+func (a *App) ComponentHandler(handler ComponentHandlerFunc) {
 	a.componentHandler = handler
 }
 
@@ -141,7 +141,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
 			return
 		}
 
-		btnCtx := &ButtonCtx{
+		btnCtx := &ComponentCtx{
 			Ctx: ctx,
 		}
 

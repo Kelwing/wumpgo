@@ -4,19 +4,19 @@ import (
 	"github.com/Postcord/objects"
 )
 
-type ButtonHandlerFunc func(ctx *ButtonCtx)
+type ComponentHandlerFunc func(ctx *ComponentCtx)
 
-type ButtonCtx struct {
+type ComponentCtx struct {
 	*Ctx
 	Data *objects.ApplicationComponentInteractionData
 }
 
-func (c *ButtonCtx) DeferredMessageUpdate() *ButtonCtx {
+func (c *ComponentCtx) DeferredMessageUpdate() *ComponentCtx {
 	c.Response.Type = objects.ResponseDeferredMessageUpdate
 	return c
 }
 
-func (c *ButtonCtx) UpdateMessage() *ButtonCtx {
+func (c *ComponentCtx) UpdateMessage() *ComponentCtx {
 	c.Response.Type = objects.ResponseUpdateMessage
 	return c
 }

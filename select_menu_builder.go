@@ -25,12 +25,12 @@ func (b *SelectMenuBuilder) Placeholder(placeholder string) *SelectMenuBuilder {
 }
 
 func (b *SelectMenuBuilder) MinValues(min int) *SelectMenuBuilder {
-	b.selectMenu.MinValues = min
+	b.selectMenu.MinValues = &min
 	return b
 }
 
 func (b *SelectMenuBuilder) MaxValues(max int) *SelectMenuBuilder {
-	b.selectMenu.MaxValues = max
+	b.selectMenu.MaxValues = &max
 	return b
 }
 
