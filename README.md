@@ -16,7 +16,7 @@ package main
 
 import (
     "log"
-	"os"
+    "os"
 
     "github.com/Postcord/interactions"
     "github.com/Postcord/objects"
