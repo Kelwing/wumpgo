@@ -6,5 +6,6 @@ type (
 	Config struct {
 		PublicKey string
 		Logger    *logrus.Logger
+		Token     string
 	}
 )

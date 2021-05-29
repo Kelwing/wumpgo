@@ -51,7 +51,8 @@ func New(config *Config) (*App, error) {
 
 	restClient := rest.New(&rest.Config{
 		Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
-			UserAgent: "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
+			UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
+			Authorization: config.Token,
 		}),
 	})
 
@@ -173,4 +174,8 @@ func (a *App) Set(key string, obj interface{}) {
 func (a *App) Run(port int) error {
 	a.logger.Info("listening on port ", port)
 	return a.server.ListenAndServe(fmt.Sprintf(":%d", port))
+}
+
+func (a *App) Rest() *rest.Client {
+	return a.restClient
 }
