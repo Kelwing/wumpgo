@@ -143,8 +143,8 @@ type Component struct {
 	URL         string           `json:"url,omitempty"`
 	Disabled    bool             `json:"disabled,omitempty"`
 	Placeholder string           `json:"placeholder,omitempty"`
-	MinValues   int              `json:"min_values,omitempty"`
-	MaxValues   int              `json:"max_values,omitempty"`
+	MinValues   *int             `json:"min_values,omitempty"`
+	MaxValues   *int             `json:"max_values,omitempty"`
 	Options     []*SelectOptions `json:"options,omitempty"`
 }
 
