@@ -150,6 +150,7 @@ const (
 type ApplicationComponentInteractionData struct {
 	CustomID      string        `json:"custom_id"`
 	ComponentType ComponentType `json:"component_type"`
+	Values        []string      `json:"values,omitempty"`
 }
 
 type ButtonStyle int
