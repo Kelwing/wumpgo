@@ -1,6 +1,7 @@
 package interactions
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/Postcord/objects"
@@ -12,6 +13,28 @@ type Ctx struct {
 	Request  *objects.Interaction
 	Response *objects.InteractionResponse
 	app      *App
+}
+
+func (c *Ctx) UnmarshalJSON(data []byte) error {
+	c.Request = new(objects.Interaction)
+	if err := json.Unmarshal(data, c.Request); err != nil {
+		return err
+	}
+	c.Response = &objects.InteractionResponse{
+		Type: objects.ResponseChannelMessageWithSource,
+		Data: &objects.InteractionApplicationCommandCallbackData{
+			TTS:             false,
+			Content:         "",
+			Embeds:          nil,
+			AllowedMentions: nil,
+			Flags:           0,
+		},
+	}
+	return nil
+}
+
+func (c *Ctx) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.Response)
 }
 
 func (c *Ctx) Clone() (*Ctx, error) {
