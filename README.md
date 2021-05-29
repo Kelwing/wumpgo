@@ -25,6 +25,7 @@ import (
 func main() {
     app, err := interactions.New(&interactions.Config{
         PublicKey: os.Getenv("DISCORD_PUBLIC_KEY"),
+        Token:     "Bot " + os.Getenv("DISCORD_TOKEN"),
     })
     if err != nil {
         panic("failed to create interactions client")

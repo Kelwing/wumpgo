@@ -11,3 +11,8 @@ type CommandCtx struct {
 	options map[string]*CommandOption
 	Data    *objects.ApplicationCommandInteractionData
 }
+
+type CommandData struct {
+	Command *objects.ApplicationCommand
+	Handler HandlerFunc
+}
