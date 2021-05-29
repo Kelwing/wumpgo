@@ -9,7 +9,8 @@ type HandlerFunc func(ctx *CommandCtx)
 type CommandCtx struct {
 	*Ctx
 	options map[string]*CommandOption
-	Data    *objects.ApplicationCommandInteractionData
+	// Data contains the command specific data payload
+	Data *objects.ApplicationCommandInteractionData
 }
 
 type CommandData struct {

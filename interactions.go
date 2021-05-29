@@ -13,6 +13,7 @@ import (
 	"github.com/valyala/fasthttprouter"
 )
 
+// App is the primary interactions server
 type App struct {
 	Router           *fasthttprouter.Router
 	server           *fasthttp.Server
@@ -24,6 +25,7 @@ type App struct {
 	restClient       *rest.Client
 }
 
+// Create a new interactions server instance
 func New(config *Config) (*App, error) {
 	pubKey, err := parsePublicKey(config.PublicKey)
 	if err != nil {
@@ -62,6 +64,7 @@ func New(config *Config) (*App, error) {
 	return a, nil
 }
 
+// AddCommand adds a handler for a slash command
 func (a *App) AddCommand(command *objects.ApplicationCommand, h HandlerFunc) {
 	// TODO check if it exists with Discord, add if it doesn't
 	a.commands[command.Name] = CommandData{
@@ -70,11 +73,14 @@ func (a *App) AddCommand(command *objects.ApplicationCommand, h HandlerFunc) {
 	}
 }
 
+// RemoveCommand removes a handler by command name
 func (a *App) RemoveCommand(commandName string) {
 	// TODO check if it exists with discord, remove if it does
 	delete(a.commands, commandName)
 }
 
+// Commands returns a list of registered commands.
+// Useful for patching all commands to Discord.
 func (a *App) Commands() []*objects.ApplicationCommand {
 	cmds := make([]*objects.ApplicationCommand, 0)
 
@@ -85,6 +91,7 @@ func (a *App) Commands() []*objects.ApplicationCommand {
 	return cmds
 }
 
+// ComponentHandler sets the function to handle Component events.
 func (a *App) ComponentHandler(handler ComponentHandlerFunc) {
 	a.componentHandler = handler
 }
@@ -110,6 +117,9 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 	}
 }
 
+// ProcessRequest is used internally to process a validated request.
+// It is exposed to allow users to tied Postcord in with any web framework
+// of their choosing.  Ensure you only pass validated requests.
 func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
 	ctx = &Ctx{
 		app: a,
@@ -185,11 +195,13 @@ func (a *App) Set(key string, obj interface{}) {
 	a.extraProps[key] = obj
 }
 
+// Run runs the App with a built-in fasthttp web server.  It takes a port as its only argument.
 func (a *App) Run(port int) error {
 	a.logger.Info("listening on port ", port)
 	return a.server.ListenAndServe(fmt.Sprintf(":%d", port))
 }
 
+// Rest exposes the internal Rest client so you can make calls to the Discord API
 func (a *App) Rest() *rest.Client {
 	return a.restClient
 }

@@ -2,11 +2,13 @@ package interactions
 
 import "github.com/Postcord/objects"
 
+// ButtonBuilder makes it easy to generate new buttons
 type ButtonBuilder struct {
 	button *objects.Component
 }
 
-func NewButton() *ButtonBuilder {
+// NewButtonBuilder creates a new button builder
+func NewButtonBuilder() *ButtonBuilder {
 	return &ButtonBuilder{
 		button: &objects.Component{
 			Type: objects.ComponentTypeButton,
