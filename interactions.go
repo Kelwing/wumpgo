@@ -147,6 +147,7 @@ func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
 			ctx.SetContent("Data structure invalid.").Ephemeral()
 			return
 		}
+		cmdCtx.options = make(map[string]*CommandOption)
 		for _, option := range cmdData.Options {
 			cmdCtx.options[option.Name] = &CommandOption{value: option.Value, data: &cmdData, options: option.Options, optionType: objects.ApplicationCommandOptionType(option.Type)}
 		}
