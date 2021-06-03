@@ -587,6 +587,7 @@ type CreateMessageParams struct {
 	Embed            *objects.Embed             `json:"embed,omitempty"`
 	AllowedMentions  *objects.AllowedMentions   `json:"allowed_mentions,omitempty"`
 	MessageReference *objects.MessageReference  `json:"message_reference,omitempty"`
+	Components       []*objects.Component       `json:"components,omitempty"`
 }
 
 func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageParams) (*objects.Message, error) {
