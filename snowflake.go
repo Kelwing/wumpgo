@@ -19,6 +19,11 @@ func (s *Snowflake) UnmarshalJSON(bytes []byte) error {
 		return err
 	}
 
+	if snowflake == "" || snowflake == "null" {
+		*s = 0
+		return nil
+	}
+
 	snowInt, err := strconv.ParseInt(snowflake, 10, 64)
 	if err != nil {
 		return err
