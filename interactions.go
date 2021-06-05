@@ -136,7 +136,7 @@ type InteractionApplicationCommandCallbackData struct {
 
 type InteractionResponse struct {
 	Type ResponseType                               `json:"type"`
-	Data *InteractionApplicationCommandCallbackData `json:"data,omitempty"`
+	Data *InteractionApplicationCommandCallbackData `json:"data"`
 }
 
 type ComponentType int
