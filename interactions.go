@@ -131,12 +131,12 @@ type InteractionApplicationCommandCallbackData struct {
 	Embeds          []*Embed         `json:"embeds,omitempty"`
 	AllowedMentions *AllowedMentions `json:"allowed_mentions,omitempty"`
 	Flags           int              `json:"flags"`
-	Components      []*Component     `json:"components,omitempty"`
+	Components      []*Component     `json:"components"`
 }
 
 type InteractionResponse struct {
 	Type ResponseType                               `json:"type"`
-	Data *InteractionApplicationCommandCallbackData `json:"data"`
+	Data *InteractionApplicationCommandCallbackData `json:"data,omitempty"`
 }
 
 type ComponentType int
