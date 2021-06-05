@@ -51,13 +51,18 @@ func New(config *Config) (*App, error) {
 
 	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
 
-	restClient := rest.New(&rest.Config{
-		Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
-			UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
-			Authorization: config.Token,
-			MaxRetries:    3,
-		}),
-	})
+	var restClient *rest.Client
+	if config.RESTClient == nil {
+		restClient = rest.New(&rest.Config{
+			Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
+				UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
+				Authorization: config.Token,
+				MaxRetries:    3,
+			}),
+		})
+	} else {
+		restClient = config.RESTClient
+	}
 
 	a.restClient = restClient
 

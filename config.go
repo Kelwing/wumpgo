@@ -1,6 +1,9 @@
 package interactions
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/Postcord/rest"
+	"github.com/sirupsen/logrus"
+)
 
 type (
 	// Config contains the configuration values for the interactions App
@@ -11,5 +14,7 @@ type (
 		Logger *logrus.Logger
 		// Token (optional) is your Discord token that will be passed to the internal REST client
 		Token string
+		// RESTClient (optional) is the REST client you are overriding with. Useful for proxies.
+		RESTClient *rest.Client
 	}
 )
