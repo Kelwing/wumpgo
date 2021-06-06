@@ -29,7 +29,7 @@ func (c *CommandCtx) CommandName() string {
 	return data.Name
 }
 
-func (c *CommandCtx) Options() []objects.ApplicationCommandInteractionDataOption {
+func (c *CommandCtx) Options() []*objects.ApplicationCommandInteractionDataOption {
 	var data objects.ApplicationCommandInteractionData
 	err := json.Unmarshal(c.Request.Data, &data)
 	if err != nil {

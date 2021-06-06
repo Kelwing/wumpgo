@@ -14,6 +14,8 @@ github.com/Postcord/objects v0.0.8-0.20210529182423-e343d37d8c29 h1:V4SzGXSg9sqZ
 github.com/Postcord/objects v0.0.8-0.20210529182423-e343d37d8c29/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/objects v0.0.8 h1:UTtoGxXaYeHh2LJo11YE/XXq5kEm9/PoK4P0zkOG1eY=
 github.com/Postcord/objects v0.0.8/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
+github.com/Postcord/objects v0.0.11-0.20210606154159-a696ad5ad3cd h1:+Yrq663w5QZ1jmye93bAvu2lc7hF9fG5RCdvJnsYnxI=
+github.com/Postcord/objects v0.0.11-0.20210606154159-a696ad5ad3cd/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/rest v0.0.1 h1:LojXpJNY1VyM9abOulXA5euKJWkCM7CwotnnRXc0Q4Y=
 github.com/Postcord/rest v0.0.1/go.mod h1:ZN12SnWKyUnKH6J7pDOBEe/JQJy5pHI+nFQ2qp3mAtI=
 github.com/Postcord/rest v0.0.2-0.20210514013411-10be33e73b7c h1:81CYKF+I8epj3oqSmDFYth1UDcEyWskyFm0scvLR5ZY=

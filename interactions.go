@@ -23,6 +23,7 @@ type App struct {
 	propsLock        sync.RWMutex
 	logger           *logrus.Logger
 	restClient       *rest.Client
+	cmdRouter        *CommandRouter
 }
 
 // Create a new interactions server instance
@@ -60,6 +61,8 @@ func New(config *Config) (*App, error) {
 	})
 
 	a.restClient = restClient
+
+	a.cmdRouter = NewCommandRouter(a)
 
 	return a, nil
 }
@@ -137,28 +140,9 @@ func (a *App) ProcessRequest(data []byte) (ctx *Ctx, err error) {
 		ctx = &Ctx{Response: &objects.InteractionResponse{Type: objects.ResponsePong}}
 		return
 	case objects.InteractionApplicationCommand:
-		var cmdData objects.ApplicationCommandInteractionData
-		cmdCtx := &CommandCtx{
-			Ctx: ctx,
+		if err := a.cmdRouter.Execute(ctx); err != nil {
+			ctx.SetContent("Something went wrong").Ephemeral()
 		}
-		err = json.Unmarshal(ctx.Request.Data, &cmdData)
-		if err != nil {
-			a.logger.WithError(err).Error("failed to decode command data")
-			ctx.SetContent("Data structure invalid.").Ephemeral()
-			return
-		}
-		cmdCtx.options = make(map[string]*CommandOption)
-		for _, option := range cmdData.Options {
-			cmdCtx.options[option.Name] = &CommandOption{value: option.Value, data: &cmdData, options: option.Options, optionType: objects.ApplicationCommandOptionType(option.Type)}
-		}
-		command, ok := a.commands[cmdData.Name]
-		if !ok {
-			a.logger.Error(cmdData.Name, " command doesn't have a handler")
-			ctx.SetContent("Command doesn't have a handler.").Ephemeral()
-			return
-		}
-		cmdCtx.Data = &cmdData
-		command.Handler(cmdCtx)
 	case objects.InteractionButton:
 		if a.componentHandler == nil {
 			a.logger.Error("got button event, but button handler not set")
@@ -205,4 +189,9 @@ func (a *App) Run(port int) error {
 // Rest exposes the internal Rest client so you can make calls to the Discord API
 func (a *App) Rest() *rest.Client {
 	return a.restClient
+}
+
+// CmdRouter returns the command router so commands can be added
+func (a *App) CmdRouter() *CommandRouter {
+	return a.cmdRouter
 }
