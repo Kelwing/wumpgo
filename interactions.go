@@ -17,7 +17,7 @@ import (
 type App struct {
 	Router           *fasthttprouter.Router
 	server           *fasthttp.Server
-	commands         map[string]CommandData
+	commands         []*objects.ApplicationCommand
 	componentHandler ComponentHandlerFunc
 	extraProps       map[string]interface{}
 	propsLock        sync.RWMutex
@@ -35,7 +35,7 @@ func New(config *Config) (*App, error) {
 
 	router := fasthttprouter.New()
 	a := &App{
-		commands: make(map[string]CommandData),
+		commands: make([]*objects.ApplicationCommand, 0),
 		server: &fasthttp.Server{
 			Handler: router.Handler,
 			Name:    "Postcord",
@@ -73,30 +73,15 @@ func New(config *Config) (*App, error) {
 }
 
 // AddCommand adds a handler for a slash command
-func (a *App) AddCommand(command *objects.ApplicationCommand, h HandlerFunc) {
+func (a *App) AddCommand(command *objects.ApplicationCommand) {
 	// TODO check if it exists with Discord, add if it doesn't
-	a.commands[command.Name] = CommandData{
-		Command: command,
-		Handler: h,
-	}
-}
-
-// RemoveCommand removes a handler by command name
-func (a *App) RemoveCommand(commandName string) {
-	// TODO check if it exists with discord, remove if it does
-	delete(a.commands, commandName)
+	a.commands = append(a.commands, command)
 }
 
 // Commands returns a list of registered commands.
 // Useful for patching all commands to Discord.
 func (a *App) Commands() []*objects.ApplicationCommand {
-	cmds := make([]*objects.ApplicationCommand, 0)
-
-	for _, cmd := range a.commands {
-		cmds = append(cmds, cmd.Command)
-	}
-
-	return cmds
+	return a.commands
 }
 
 // ComponentHandler sets the function to handle Component events.

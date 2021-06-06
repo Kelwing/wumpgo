@@ -52,6 +52,7 @@ func (b *CommandBuilder) Handler(handler HandlerFunc) *CommandBuilder {
 
 func (b *CommandBuilder) Build() {
 	b.router.AddCommand(b.cmd.Name, b.handler)
+	b.router.app.AddCommand(b.cmd)
 }
 
 func (b *CommandBuilder) GetPrefix() string {
