@@ -115,6 +115,11 @@ type Guild struct {
 	ApproximatePresenceCount    int                        `json:"approximate_presence_count,omitempty"`
 }
 
+type GuildUnavailable struct {
+	ID          Snowflake `json:"id"`
+	Unavailable bool      `json:"unavailable"`
+}
+
 type GuildPreview struct {
 	ID                       Snowflake      `json:"id"`
 	Name                     string         `json:"name"`
