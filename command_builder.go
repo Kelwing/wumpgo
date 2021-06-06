@@ -64,7 +64,7 @@ type OptionBuilder struct {
 	router *CommandRouter
 }
 
-func NewOption(cmd CommandOptionBuilder, router *CommandRouter) CommandOptionBuilder {
+func NewOption(cmd CommandOptionBuilder, router *CommandRouter) *OptionBuilder {
 	return &OptionBuilder{
 		cmd:    cmd,
 		option: &objects.ApplicationCommandOption{},
