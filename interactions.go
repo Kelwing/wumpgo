@@ -98,10 +98,10 @@ type ApplicationCommandInteractionDataOption struct {
 }
 
 type ApplicationCommandInteractionData struct {
-	ID       Snowflake                                 `json:"id"`
-	Name     string                                    `json:"name"`
-	Options  []ApplicationCommandInteractionDataOption `json:"options"`
-	Resolved ApplicationCommandInteractionDataResolved `json:"resolved"`
+	ID       Snowflake                                  `json:"id"`
+	Name     string                                     `json:"name"`
+	Options  []*ApplicationCommandInteractionDataOption `json:"options"`
+	Resolved ApplicationCommandInteractionDataResolved  `json:"resolved"`
 }
 
 type ApplicationCommandInteractionDataResolved struct {
