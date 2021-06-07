@@ -263,6 +263,7 @@ type ExecuteWebhookParams struct {
 	Embeds    []*objects.Embed           `json:"embeds,omitempty" url:"-"`
 
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions,omitempty" url:"-"`
+	Components      []*objects.Component     `json:"components,omitempty"`
 }
 
 func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *ExecuteWebhookParams) (*objects.Message, error) {
@@ -351,9 +352,10 @@ func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *Exec
 }
 
 type EditWebhookMessageParams struct {
-	Content         string                   `json:"content,omitempty"`
-	Embeds          []*objects.Embed         `json:"embeds,omitempty"`
+	Content         string                   `json:"content"`
+	Embeds          []*objects.Embed         `json:"embeds"`
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions,omitempty"`
+	Components      []*objects.Component     `json:"components"`
 }
 
 func (c *Client) EditWebhookMessage(messageID, webhookID objects.Snowflake, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
