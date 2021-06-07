@@ -127,6 +127,7 @@ func (c *Ctx) Edit() error {
 		Content:         c.Response.Data.Content,
 		Embeds:          c.Response.Data.Embeds,
 		AllowedMentions: c.Response.Data.AllowedMentions,
+		Components:      c.Response.Data.Components,
 	})
 
 	return err
