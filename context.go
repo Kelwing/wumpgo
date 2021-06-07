@@ -122,13 +122,11 @@ func (c *Ctx) AddComponent(component *objects.Component) *Ctx {
 }
 
 // Edit sends a request to edit the original interaction response with the values in the current context.  Useful for editing a response from a Go routine.
-func (c *Ctx) Edit() error {
-	_, err := c.app.restClient.EditOriginalInteractionResponse(c.Request.ApplicationID, c.Request.Token, &rest.EditWebhookMessageParams{
+func (c *Ctx) Edit() (*objects.Message, error) {
+	return c.app.restClient.EditOriginalInteractionResponse(c.Request.ApplicationID, c.Request.Token, &rest.EditWebhookMessageParams{
 		Content:         c.Response.Data.Content,
 		Embeds:          c.Response.Data.Embeds,
 		AllowedMentions: c.Response.Data.AllowedMentions,
 		Components:      c.Response.Data.Components,
 	})
-
-	return err
 }
