@@ -16,7 +16,7 @@ var userIdRe = regexp.MustCompile(`\d{16,19}`)
 
 var majorParams = [...]string{"channels", "guilds", "webhooks"}
 
-var MaxRetriesExceeded = errors.New("max retried exceeded")
+var ErrMaxRetriesExceeded = errors.New("max retried exceeded")
 
 func isBucketedParam(comp string) bool {
 	for _, param := range majorParams {

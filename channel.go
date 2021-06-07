@@ -3,15 +3,15 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/Postcord/objects"
-	"github.com/google/go-querystring/query"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/Postcord/objects"
+	"github.com/google/go-querystring/query"
 )
 
 func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
@@ -368,7 +368,7 @@ func (c *Client) getEmoji(emoji interface{}) (string, error) {
 	case string:
 		react = t
 	default:
-		return "", errors.New(fmt.Sprintf("invalid emoji type, %T", t))
+		return "", fmt.Errorf("invalid emoji type, %T", t)
 	}
 
 	return react, nil
@@ -661,9 +661,11 @@ func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageP
 }
 
 type EditMessageParams struct {
-	Content string              `json:"content,omitempty"`
-	Embed   *objects.Embed      `json:"embed,omitempty"`
-	Flags   objects.MessageFlag `json:"flags,omitempty"`
+	Content         string                   `json:"content"`
+	Embed           *objects.Embed           `json:"embed"`
+	Flags           objects.MessageFlag      `json:"flags,omitempty"`
+	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions,omitempty"`
+	Components      []*objects.Component     `json:"components"`
 }
 
 func (c *Client) EditMessage(channel, message objects.Snowflake, params *EditMessageParams) (*objects.Message, error) {

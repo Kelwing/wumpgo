@@ -63,7 +63,7 @@ func (m *MemoryRatelimiter) getSleepTime(bucket *memoryBucket) time.Duration {
 
 func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body []byte, bucket *memoryBucket, retries int, headers http.Header) (*DiscordResponse, error) {
 	if m.MaxRetries > 0 && m.MaxRetries < retries {
-		return nil, MaxRetriesExceeded
+		return nil, ErrMaxRetriesExceeded
 	}
 
 	var reader io.Reader = nil
