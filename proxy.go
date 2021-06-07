@@ -48,6 +48,8 @@ func (p *ProxyRateLimiter) proxiedRequest(method, url, contentType string, body 
 		return nil, err
 	}
 
+	req.URL.Scheme = "http"
+
 	if body != nil {
 		req.Header.Set("Content-Type", contentType)
 	}
