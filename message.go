@@ -70,6 +70,7 @@ type Message struct {
 	Mentions          []*User             `json:"mentions,omitempty"`
 	MentionRoles      []Snowflake         `json:"mention_roles,omitempty"`
 	MentionChannels   []*ChannelMention   `json:"mention_channels,omitempty"`
+	Interaction       *MessageInteraction `json:"interaction,omitempty"`
 	Attachments       []*Attachment       `json:"attachments,omitempty"`
 	Embeds            []*Embed            `json:"embeds"`
 	Reactions         []*Reaction         `json:"reactions,omitempty"`
@@ -84,6 +85,13 @@ type Message struct {
 	Stickers          []*MessageSticker   `json:"stickers,omitempty"`
 	ReferencedMessage *Message            `json:"referenced_message,omitempty"`
 	Components        []*Component        `json:"components,omitempty"`
+}
+
+type MessageInteraction struct {
+	ID   Snowflake       `json:"id"`
+	Type InteractionType `json:"type"`
+	Name string          `json:"name"`
+	User *User           `json:"user"`
 }
 
 type MessageActivity struct {
