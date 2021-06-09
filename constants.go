@@ -91,4 +91,8 @@ const (
 
 	// Interactions
 	EditOriginalInteractionResponseFmt = WebhookWithTokenFmt + "/messages/@original"
+
+	// Permissions
+	GuildApplicationCommandsPermissionsFmt = GuildApplicationsFmt + "/permissions"
+	GuildApplicationCommandPermissionsFmt  = GuildApplicationsFmt + "/%d/permissions"
 )

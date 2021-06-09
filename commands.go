@@ -3,8 +3,9 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Postcord/objects"
 	"net/http"
+
+	"github.com/Postcord/objects"
 )
 
 // Global Commands
@@ -263,4 +264,96 @@ func (c *Client) BulkOverwriteGuildCommands(application, guild objects.Snowflake
 	}
 
 	return cmds, nil
+}
+
+func (c *Client) GetGuildApplicationCommandPermissions(app, guild objects.Snowflake) ([]*objects.GuildApplicationCommandPermissions, error) {
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app, guild),
+		contentType: JsonContentType,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var commands []*objects.GuildApplicationCommandPermissions
+	err = res.JSON(&commands)
+	if err != nil {
+		return nil, err
+	}
+
+	return commands, nil
+}
+
+func (c *Client) GetApplicationCommandPermissions(app, guild, cmd objects.Snowflake) (*objects.GuildApplicationCommandPermissions, error) {
+	res, err := c.request(&request{
+		method:      http.MethodGet,
+		path:        fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app, guild, cmd),
+		contentType: JsonContentType,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return nil, err
+	}
+
+	var command objects.GuildApplicationCommandPermissions
+	err = res.JSON(&command)
+	if err != nil {
+		return nil, err
+	}
+
+	return &command, nil
+}
+
+func (c *Client) EditApplicationCommandPermissions(app, guild, cmd objects.Snowflake, permissions []*objects.ApplicationCommandPermissions) error {
+	data, err := json.Marshal(permissions)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app, guild, cmd),
+		contentType: JsonContentType,
+		body:        data,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) BatchEditApplicationCommandPermissions(app, guild objects.Snowflake, permissions []*objects.GuildApplicationCommandPermissions) error {
+	data, err := json.Marshal(permissions)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.request(&request{
+		method:      http.MethodPut,
+		path:        fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app, guild),
+		contentType: JsonContentType,
+		body:        data,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+		return err
+	}
+
+	return nil
 }
