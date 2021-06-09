@@ -82,7 +82,7 @@ func (p *ProxyRateLimiter) proxiedRequest(method, url, contentType string, body 
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, errors.New("request error")
+		return nil, errors.New("request error: " + string(respBody))
 	}
 
 	return &DiscordResponse{
