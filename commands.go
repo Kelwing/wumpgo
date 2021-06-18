@@ -313,7 +313,9 @@ func (c *Client) GetApplicationCommandPermissions(app, guild, cmd objects.Snowfl
 }
 
 func (c *Client) EditApplicationCommandPermissions(app, guild, cmd objects.Snowflake, permissions []*objects.ApplicationCommandPermissions) error {
-	data, err := json.Marshal(permissions)
+	data, err := json.Marshal(map[string]interface{}{
+		"permissions": permissions,
+	})
 	if err != nil {
 		return err
 	}
