@@ -137,7 +137,7 @@ type CommandRouter struct {
 }
 
 // NewCommandGroup is used to create a sub-command group. Works the same as CommandGroup.NewCommandGroup.
-func (c CommandRouter) NewCommandGroup(name, description string) (*CommandGroup, error) {
+func (c *CommandRouter) NewCommandGroup(name, description string) (*CommandGroup, error) {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
@@ -145,7 +145,7 @@ func (c CommandRouter) NewCommandGroup(name, description string) (*CommandGroup,
 }
 
 // NewCommandBuilder is used to create a builder for a *Command object.
-func (c CommandRouter) NewCommandBuilder(name string) CommandBuilder {
+func (c *CommandRouter) NewCommandBuilder(name string) CommandBuilder {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
@@ -153,7 +153,7 @@ func (c CommandRouter) NewCommandBuilder(name string) CommandBuilder {
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
-func (c CommandRouter) MustNewCommandGroup(name, description string) *CommandGroup {
+func (c *CommandRouter) MustNewCommandGroup(name, description string) *CommandGroup {
 	x, err := c.NewCommandGroup(name, description)
 	if err != nil {
 		panic(err)
@@ -162,7 +162,7 @@ func (c CommandRouter) MustNewCommandGroup(name, description string) *CommandGro
 }
 
 // MarshalJSON implements the json.Marshaler interface.
-func (c CommandRouter) MarshalJSON() ([]byte, error) {
+func (c *CommandRouter) MarshalJSON() ([]byte, error) {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
