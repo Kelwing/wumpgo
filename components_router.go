@@ -88,7 +88,7 @@ func ungenericError(errGeneric interface{}) error {
 }
 
 // Used to build the component router by the parent.
-func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) (func(string) bool, interactions.ComponentHandlerFunc) {
+func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.ComponentHandlerFunc {
 	// Build the router tree.
 	c.prep()
 	root := new(node)
@@ -142,11 +142,8 @@ func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.Intera
 		root.addRoute(k, cb)
 	}
 
-	// Return the router and checker function.
-	check := func(s string) bool {
-		return root.getValue(s, map[string]string{}) != nil
-	}
-	router := func(ctx *objects.Interaction) *objects.InteractionResponse {
+	// Return the router.
+	return func(ctx *objects.Interaction) *objects.InteractionResponse {
 		params := map[string]string{}
 		var data objects.ApplicationComponentInteractionData
 		if err := json.Unmarshal(ctx.Data, &data); err != nil {
@@ -158,5 +155,4 @@ func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.Intera
 		}
 		return route(ctx, &data, params)
 	}
-	return check, router
 }

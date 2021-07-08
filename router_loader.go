@@ -12,7 +12,6 @@ type loaderBuilder struct {
 	components               *ComponentRouter
 	commands                 *CommandRouter
 	errHandler               func(error) *objects.InteractionResponse
-	strictComponentChecksOff bool
 }
 
 func (l *loaderBuilder) ComponentRouter(router *ComponentRouter) LoaderBuilder {
@@ -38,11 +37,6 @@ func genericErrorHandler(err error) *objects.InteractionResponse {
 	return nil
 }
 
-func (l *loaderBuilder) DisableStrictComponentChecks() LoaderBuilder {
-	l.strictComponentChecksOff = true
-	return l
-}
-
 func (l *loaderBuilder) AllowedMentions(config *objects.AllowedMentions) LoaderBuilder {
 	l.globalAllowedMentions = config
 	return l
@@ -62,22 +56,15 @@ func (l *loaderBuilder) Build(app HandlerAccepter) {
 		cb = genericErrorHandler
 	}
 
-	var checker func(string) bool
 	if l.components != nil {
 		// Build and load the components handler.
-		var handler interactions.ComponentHandlerFunc
-		checker, handler = l.components.build(cb, l.globalAllowedMentions)
+		handler := l.components.build(cb, l.globalAllowedMentions)
 		app.ComponentHandler(handler)
-	}
-
-	if l.strictComponentChecksOff {
-		// Nil the checker since we shouldn't be checking.
-		checker = nil
 	}
 
 	if l.commands != nil {
 		// Build and load the commands handler.
-		app.CommandHandler(l.commands.build(cb, checker, l.globalAllowedMentions))
+		app.CommandHandler(l.commands.build(cb, l.globalAllowedMentions))
 	}
 }
 
@@ -94,10 +81,6 @@ type LoaderBuilder interface {
 
 	// AllowedMentions allows you to set a global allowed mentions configuration.
 	AllowedMentions(*objects.AllowedMentions) LoaderBuilder
-
-	// DisableStrictComponentChecks is used to disable strict component checking.
-	// Unless you are doing something incredibly complex with your infrastructure, you don't want to call this.
-	DisableStrictComponentChecks() LoaderBuilder
 
 	// Build is used to execute the build.
 	Build(app HandlerAccepter)
