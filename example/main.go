@@ -1,10 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 	"github.com/Postcord/router"
 	"os"
 	"strconv"
@@ -17,10 +17,10 @@ func main() {
 			Type: objects.ComponentTypeActionRow,
 			Components: []*objects.Component{
 				{
-					Type: objects.ComponentTypeButton,
-					Label: "Add One",
-					Style: objects.ButtonStylePrimary,
-					CustomID: "/set/" + strconv.FormatUint(amount + 1, 10),
+					Type:     objects.ComponentTypeButton,
+					Label:    "Add One",
+					Style:    objects.ButtonStylePrimary,
+					CustomID: "/set/" + strconv.FormatUint(amount+1, 10),
 				},
 			},
 		}
@@ -49,32 +49,35 @@ func main() {
 			ctx.Ephemeral().SetEmbed(embed).SetComponent(component)
 			return nil
 		}).
+		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
 	}
 
 	// Defines a command group.
-	group := commandRouter.MustNewCommandGroup("group", "Defines a command group.")
+	group := commandRouter.MustNewCommandGroup("group", "Defines a command group.", true)
 	_, err = group.NewCommandBuilder("command").Description("Defines a description in a group.").
 		Handler(func(ctx *router.CommandRouterCtx) error {
 			ctx.SetContent("loge!")
 			return nil
 		}).
+		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
 	}
 
 	// Defines a sub-group.
-	subgroups := commandRouter.MustNewCommandGroup("subgroups", "Defines command sub-groups.")
-	group1 := subgroups.MustNewCommandGroup("group1", "Defines the first group.")
-	group2 := subgroups.MustNewCommandGroup("group2", "Defines the second group.")
+	subgroups := commandRouter.MustNewCommandGroup("subgroups", "Defines command sub-groups.", true)
+	group1 := subgroups.MustNewCommandGroup("group1", "Defines the first group.", true)
+	group2 := subgroups.MustNewCommandGroup("group2", "Defines the second group.", true)
 	_, err = group1.NewCommandBuilder("command").Description("Defines a description in a group.").
 		Handler(func(ctx *router.CommandRouterCtx) error {
 			ctx.SetContent("loge!")
 			return nil
 		}).
+		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
@@ -84,6 +87,7 @@ func main() {
 			ctx.SetContent("loge!")
 			return nil
 		}).
+		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
@@ -91,19 +95,31 @@ func main() {
 
 	// Create the interactions app.
 	app, err := interactions.New(&interactions.Config{
-		PublicKey:  os.Getenv("PUBLIC_KEY"),
-		Token:      os.Getenv("TOKEN"),
+		PublicKey: os.Getenv("PUBLIC_KEY"),
+		Token:     "Bot " + os.Getenv("TOKEN"),
+		RESTClient: rest.New(&rest.Config{
+			Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
+				Authorization: "Bot " + os.Getenv("TOKEN"),
+				UserAgent:     "DiscordBot (https://github.com/Postcord/router/example, 1)",
+			}),
+		}),
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	if os.Getenv("RUN") == "" {
-		j, err := json.Marshal(commandRouter.FormulateDiscordCommands())
+	// Dump the Discord commands if specified.
+	if os.Getenv("DUMP") == "1" {
+		commands := commandRouter.FormulateDiscordCommands()
+		me, err := app.Rest().GetCurrentUser()
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(string(j))
+		if _, err := app.Rest().BulkOverwriteGlobalCommands(me.ID, commands); err != nil {
+			panic(err)
+		}
+		fmt.Println("Commands dumped.")
+		return
 	}
 
 	// Create the router builder.

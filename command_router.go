@@ -27,6 +27,9 @@ type CommandRouterCtx struct {
 type CommandGroup struct {
 	level uint
 
+	// DefaultPermission defines if this is the default permission.
+	DefaultPermission bool `json:"default_permission"`
+
 	// Description is the description for the command group.
 	Description string `json:"description"`
 
@@ -41,24 +44,25 @@ type CommandGroup struct {
 var GroupNestedTooDeep = errors.New("sub-command group would be nested too deep")
 
 // NewCommandGroup is used to create a sub-command group.
-func (c *CommandGroup) NewCommandGroup(name, description string) (*CommandGroup, error) {
+func (c *CommandGroup) NewCommandGroup(name, description string, defaultPermission bool) (*CommandGroup, error) {
 	nextLevel := c.level + 1
 	if nextLevel > 2 {
 		return nil, GroupNestedTooDeep
 	}
 	// TODO: Validate name + description.
 	g := &CommandGroup{
-		level:       nextLevel,
-		Description: description,
-		Subcommands: map[string]interface{}{},
+		level:             nextLevel,
+		Description:       description,
+		DefaultPermission: defaultPermission,
+		Subcommands:       map[string]interface{}{},
 	}
 	c.Subcommands[name] = g
 	return g, nil
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
-func (c *CommandGroup) MustNewCommandGroup(name, description string) *CommandGroup {
-	x, err := c.NewCommandGroup(name, description)
+func (c *CommandGroup) MustNewCommandGroup(name, description string, defaultPermission bool) *CommandGroup {
+	x, err := c.NewCommandGroup(name, description, defaultPermission)
 	if err != nil {
 		panic(err)
 	}
@@ -112,7 +116,7 @@ type CommandBuilder interface {
 	// Option is used to add a command option.
 	Option(*objects.ApplicationCommandOption) CommandBuilder
 
-	// DefaultPermission is used to define if the command should have default permissions.
+	// DefaultPermission is used to define if the command should have default permissions. Note this does nothing if the command is in a group.
 	DefaultPermission() CommandBuilder
 
 	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
@@ -137,11 +141,11 @@ type CommandRouter struct {
 }
 
 // NewCommandGroup is used to create a sub-command group. Works the same as CommandGroup.NewCommandGroup.
-func (c *CommandRouter) NewCommandGroup(name, description string) (*CommandGroup, error) {
+func (c *CommandRouter) NewCommandGroup(name, description string, defaultPermission bool) (*CommandGroup, error) {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
-	return c.roots.NewCommandGroup(name, description)
+	return c.roots.NewCommandGroup(name, description, defaultPermission)
 }
 
 // NewCommandBuilder is used to create a builder for a *Command object.
@@ -153,8 +157,8 @@ func (c *CommandRouter) NewCommandBuilder(name string) CommandBuilder {
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
-func (c *CommandRouter) MustNewCommandGroup(name, description string) *CommandGroup {
-	x, err := c.NewCommandGroup(name, description)
+func (c *CommandRouter) MustNewCommandGroup(name, description string, defaultPermission bool) *CommandGroup {
+	x, err := c.NewCommandGroup(name, description, defaultPermission)
 	if err != nil {
 		panic(err)
 	}
@@ -324,7 +328,7 @@ func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionR
 					// Not a group.
 					return exceptionHandler(CommandIsNotSubcommand)
 				}
-				return group.execute(exceptionHandler, baseAllowedMentions, interaction, &data, option)
+				return group.execute(exceptionHandler, baseAllowedMentions, interaction, &data, option.Options[0])
 			case objects.TypeSubCommand:
 				cmdIface, ok := x.Subcommands[option.Name]
 				if !ok {
@@ -438,6 +442,7 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 			defaultPermission = x.DefaultPermission
 		case *CommandGroup:
 			description = x.Description
+			defaultPermission = x.DefaultPermission
 		}
 		if description == "" {
 			description = "No description provided."

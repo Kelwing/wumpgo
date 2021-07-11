@@ -8,10 +8,10 @@ import (
 
 // Defines the builder.
 type loaderBuilder struct {
-	globalAllowedMentions    *objects.AllowedMentions
-	components               *ComponentRouter
-	commands                 *CommandRouter
-	errHandler               func(error) *objects.InteractionResponse
+	globalAllowedMentions *objects.AllowedMentions
+	components            *ComponentRouter
+	commands              *CommandRouter
+	errHandler            func(error) *objects.InteractionResponse
 }
 
 func (l *loaderBuilder) ComponentRouter(router *ComponentRouter) LoaderBuilder {
