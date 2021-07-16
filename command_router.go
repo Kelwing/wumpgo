@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 )
@@ -282,7 +283,7 @@ func (c *CommandGroup) execute(exceptionHandler func(error) *objects.Interaction
 }
 
 // Used to build the component router by the parent.
-func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.CommandHandlerFunc {
+func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.HandlerFunc {
 	baseAllowedMentions := globalAllowedMentions
 	if c.roots.AllowedMentions != nil {
 		baseAllowedMentions = c.roots.AllowedMentions
