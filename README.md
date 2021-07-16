@@ -25,25 +25,28 @@ import (
 )
 
 func main() {
-    app, err := interactions.New(&interactions.Config{
-        PublicKey: os.Getenv("DISCORD_PUBLIC_KEY"),
-        Token:     "Bot " + os.Getenv("DISCORD_TOKEN"),
-    })
-    if err != nil {
-        panic("failed to create interactions client")
-    }
+	app, err := interactions.New(&interactions.Config{
+		PublicKey: os.Getenv("DISCORD_PUBLIC_KEY"),
+		Token:     "Bot " + os.Getenv("DISCORD_TOKEN"),
+	})
+	if err != nil {
+		panic("failed to create interactions client")
+	}
 
-    app.AddCommand(&objects.ApplicationCommand{
-        Name:        "test",
-        Description: "Test things",
-    }, testHandler)
+	app.CommandHandler(testHandler)
 
-    log.Println("test-bot is now running")
-    app.Run(1323)
+	log.Println("test-bot is now running")
+	app.Run(1323)
 }
 
-func testHandler(ctx *interactions.CommandCtx) {
-    ctx.SetContent("Hello world!").Ephemeral()
+func testHandler(ctx *objects.Interaction) *objects.InteractionResponse {
+	return &objects.InteractionResponse{
+		Type: objects.ResponseChannelMessageWithSource,
+		Data: &objects.InteractionApplicationCommandCallbackData{
+			Content: "Hello world!",
+			Flags:   objects.ResponseFlagEphemeral,
+		},
+	}
 }
 ```
 
