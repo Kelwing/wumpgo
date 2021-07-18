@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 )
 
 // CommandRouterCtx is used to define the commands context from the router.
@@ -21,6 +22,9 @@ type CommandRouterCtx struct {
 	// Options is used to define any options that were set in the context. Note that if an option is unset, it will not be in the map.
 	// Note that for User, Channel, Role, and Mentionable; a "*Resolvable<option type>" type is used. This will allow you to get the ID as a Snowflake, string, or attempt to get from resolved.
 	Options map[string]interface{} `json:"options"`
+
+	// RESTClient is used to define the REST client.
+	RESTClient *rest.Client `json:"rest_client"`
 }
 
 // CommandGroup is a group of commands. DO NOT MAKE YOURSELF! USE CommandGroup.NewCommandGroup OR CommandRouter.NewCommandGroup!
@@ -235,7 +239,7 @@ var CommandDoesNotExist = errors.New("the command does not exist")
 var GroupDoesNotExist = errors.New("the group does not exist")
 
 // Execute the group.
-func (c *CommandGroup) execute(exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, nextLevel *objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
+func (c *CommandGroup) execute(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, nextLevel *objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
 	if len(data.Options) != 1 {
 		// data.Options must be 1 here. A valid response will just contain the next node down the tree.
 		return exceptionHandler(CommandIsNotSubcommand)
@@ -258,7 +262,7 @@ func (c *CommandGroup) execute(exceptionHandler func(error) *objects.Interaction
 		if c.AllowedMentions != nil {
 			allowedMentions = c.AllowedMentions
 		}
-		return cmd.execute(exceptionHandler, allowedMentions, interaction, data, nextLevel.Options)
+		return cmd.execute(restClient, exceptionHandler, allowedMentions, interaction, data, nextLevel.Options)
 	case objects.TypeSubCommandGroup:
 		// Expect a group in the map and handle accordingly.
 		cmdIface, ok := c.Subcommands[nextLevel.Name]
@@ -274,7 +278,7 @@ func (c *CommandGroup) execute(exceptionHandler func(error) *objects.Interaction
 		if c.AllowedMentions != nil {
 			allowedMentions = c.AllowedMentions
 		}
-		return group.execute(exceptionHandler, allowedMentions, interaction, data, nextLevel.Options[0])
+		return group.execute(restClient, exceptionHandler, allowedMentions, interaction, data, nextLevel.Options[0])
 	default:
 		// This is just a random argument.
 		return exceptionHandler(CommandIsNotSubcommand)
@@ -282,7 +286,7 @@ func (c *CommandGroup) execute(exceptionHandler func(error) *objects.Interaction
 }
 
 // Used to build the component router by the parent.
-func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.CommandHandlerFunc {
+func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.CommandHandlerFunc {
 	baseAllowedMentions := globalAllowedMentions
 	if c.roots.AllowedMentions != nil {
 		baseAllowedMentions = c.roots.AllowedMentions
@@ -307,7 +311,7 @@ func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionR
 		switch x := cmd.(type) {
 		case *Command:
 			// Just go ahead and call execute. That will handle the option checking anyway.
-			return x.execute(exceptionHandler, baseAllowedMentions, interaction, &data, data.Options)
+			return x.execute(restClient, exceptionHandler, baseAllowedMentions, interaction, &data, data.Options)
 		case *CommandGroup:
 			if len(data.Options) != 1 {
 				// data.Options must be 1 here. A valid response will just contain the next node down the tree.
@@ -328,7 +332,7 @@ func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionR
 					// Not a group.
 					return exceptionHandler(CommandIsNotSubcommand)
 				}
-				return group.execute(exceptionHandler, baseAllowedMentions, interaction, &data, option.Options[0])
+				return group.execute(restClient, exceptionHandler, baseAllowedMentions, interaction, &data, option.Options[0])
 			case objects.TypeSubCommand:
 				cmdIface, ok := x.Subcommands[option.Name]
 				if !ok {
@@ -340,7 +344,7 @@ func (c *CommandRouter) build(exceptionHandler func(error) *objects.InteractionR
 					// Not a command.
 					return exceptionHandler(CommandIsSubcommand)
 				}
-				return cmd.execute(exceptionHandler, baseAllowedMentions, interaction, &data, option.Options)
+				return cmd.execute(restClient, exceptionHandler, baseAllowedMentions, interaction, &data, option.Options)
 			default:
 				// Not a command.
 				return exceptionHandler(CommandDoesNotExist)

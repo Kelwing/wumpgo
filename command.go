@@ -3,6 +3,7 @@ package router
 import (
 	"errors"
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 )
 
 // Command is used to define a Discord (sub-)command. DO NOT MAKE YOURSELF! USE CommandGroup.NewCommandBuilder OR CommandRouter.NewCommandBuilder!
@@ -43,7 +44,7 @@ var NonExistentOption = errors.New("interaction option doesn't exist on command"
 var MismatchedOption = errors.New("mismatched interaction option")
 
 // Execute the command.
-func (c *Command) execute(exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
+func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
 	// Process the options.
 	mappedOptions := map[string]interface{}{}
 	for _, v := range options {
@@ -104,7 +105,7 @@ func (c *Command) execute(exceptionHandler func(error) *objects.InteractionRespo
 	}()
 
 	// Create the context.
-	rctx := &CommandRouterCtx{Interaction: interaction, Command: data.Name, Options: mappedOptions}
+	rctx := &CommandRouterCtx{Interaction: interaction, Command: data.Name, Options: mappedOptions, RESTClient: restClient}
 
 	// Run the command.
 	handler := c.Function

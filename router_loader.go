@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 )
 
 // Defines the builder.
@@ -47,6 +48,7 @@ func (l *loaderBuilder) AllowedMentions(config *objects.AllowedMentions) LoaderB
 type HandlerAccepter interface {
 	ComponentHandler(handler interactions.ComponentHandlerFunc)
 	CommandHandler(handler interactions.CommandHandlerFunc)
+	Rest() *rest.Client
 }
 
 func (l *loaderBuilder) Build(app HandlerAccepter) {
@@ -58,13 +60,13 @@ func (l *loaderBuilder) Build(app HandlerAccepter) {
 
 	if l.components != nil {
 		// Build and load the components handler.
-		handler := l.components.build(cb, l.globalAllowedMentions)
+		handler := l.components.build(app.Rest(), cb, l.globalAllowedMentions)
 		app.ComponentHandler(handler)
 	}
 
 	if l.commands != nil {
 		// Build and load the commands handler.
-		app.CommandHandler(l.commands.build(cb, l.globalAllowedMentions))
+		app.CommandHandler(l.commands.build(app.Rest(), cb, l.globalAllowedMentions))
 	}
 }
 

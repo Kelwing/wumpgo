@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 )
 
 // ComponentRouter is used to route components.
@@ -23,6 +24,9 @@ type ComponentRouterCtx struct {
 
 	// Params are any URL params which were in the path.
 	Params map[string]string `json:"params"`
+
+	// RESTClient is used to define the REST client.
+	RESTClient *rest.Client `json:"rest_client"`
 }
 
 // DeferredMessageUpdate sets the response type to DeferredMessageUpdate
@@ -88,7 +92,7 @@ func ungenericError(errGeneric interface{}) error {
 }
 
 // Used to build the component router by the parent.
-func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.ComponentHandlerFunc {
+func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(err error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.ComponentHandlerFunc {
 	// Build the router tree.
 	c.prep()
 	root := new(node)
@@ -109,6 +113,7 @@ func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.Intera
 				rctx := &ComponentRouterCtx{
 					Interaction: ctx,
 					Params:      params,
+					RESTClient:  restClient,
 				}
 				if err := x(rctx); err != nil {
 					return exceptionHandler(err)
@@ -130,6 +135,7 @@ func (c *ComponentRouter) build(exceptionHandler func(err error) *objects.Intera
 				rctx := &ComponentRouterCtx{
 					Interaction: ctx,
 					Params:      params,
+					RESTClient:  restClient,
 				}
 				if err := x(rctx, values); err != nil {
 					return exceptionHandler(err)
