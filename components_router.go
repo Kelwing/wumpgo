@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
@@ -92,7 +93,7 @@ func ungenericError(errGeneric interface{}) error {
 }
 
 // Used to build the component router by the parent.
-func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(err error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.ComponentHandlerFunc {
+func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(err error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.HandlerFunc {
 	// Build the router tree.
 	c.prep()
 	root := new(node)

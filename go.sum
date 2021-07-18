@@ -1,7 +1,5 @@
-github.com/Postcord/interactions v0.0.12-0.20210704185323-31731f580039 h1:x6qWaJyGYJ1f3dvS7Q9W2zRRzn1Fzjt4HzN7De4YP2w=
-github.com/Postcord/interactions v0.0.12-0.20210704185323-31731f580039/go.mod h1:D6qNm4FqItYyEoxqsoGIVum2+DtQee0TcF0QH1mRmh0=
-github.com/Postcord/interactions v0.0.12 h1:ltH9om0y5OG8hmuvi1MBe69aJLRhs2YU5UnfuenU9DM=
-github.com/Postcord/interactions v0.0.12/go.mod h1:D6qNm4FqItYyEoxqsoGIVum2+DtQee0TcF0QH1mRmh0=
+github.com/Postcord/interactions v0.0.13 h1:g9Q3BdU2eaBhdm8wR5YHI7OVE1Ug9NlWdPK7btC5e88=
+github.com/Postcord/interactions v0.0.13/go.mod h1:D6qNm4FqItYyEoxqsoGIVum2+DtQee0TcF0QH1mRmh0=
 github.com/Postcord/objects v0.0.8/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/objects v0.0.11-0.20210606154159-a696ad5ad3cd h1:+Yrq663w5QZ1jmye93bAvu2lc7hF9fG5RCdvJnsYnxI=
 github.com/Postcord/objects v0.0.11-0.20210606154159-a696ad5ad3cd/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=

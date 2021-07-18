@@ -3,6 +3,9 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"reflect"
+
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
@@ -46,6 +49,9 @@ type CommandGroup struct {
 
 // GroupNestedTooDeep is thrown when the sub-command group would be nested too deep.
 var GroupNestedTooDeep = errors.New("sub-command group would be nested too deep")
+
+// Tag name for option parsing
+const tagName = "discord"
 
 // NewCommandGroup is used to create a sub-command group.
 func (c *CommandGroup) NewCommandGroup(name, description string, defaultPermission bool) (*CommandGroup, error) {
@@ -286,7 +292,7 @@ func (c *CommandGroup) execute(restClient *rest.Client, exceptionHandler func(er
 }
 
 // Used to build the component router by the parent.
-func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.CommandHandlerFunc {
+func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.HandlerFunc {
 	baseAllowedMentions := globalAllowedMentions
 	if c.roots.AllowedMentions != nil {
 		baseAllowedMentions = c.roots.AllowedMentions
@@ -462,4 +468,29 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 		i++
 	}
 	return cmds
+}
+
+// Bind allows you to bind the option values to a struct for easy access
+func (c *CommandRouterCtx) Bind(data interface{}) error {
+	v := reflect.ValueOf(data).Elem()
+	if !v.CanAddr() {
+		return fmt.Errorf("cannot assign to the item passed, item must be a pointer in order to assign")
+	}
+
+	for i := 0; i < v.NumField(); i++ {
+		typeField := v.Type().Field(i)
+		tag := typeField.Tag
+		optionName := tag.Get(tagName)
+		if optionName != "" {
+			if option, ok := c.Options[optionName]; ok {
+				f := v.Field(i)
+				optionVal := reflect.ValueOf(option)
+				if f.Type() == optionVal.Type() {
+					f.Set(optionVal)
+				}
+			}
+		}
+	}
+
+	return nil
 }

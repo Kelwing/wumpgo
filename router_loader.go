@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
@@ -46,8 +47,8 @@ func (l *loaderBuilder) AllowedMentions(config *objects.AllowedMentions) LoaderB
 // HandlerAccepter is an interface for an object which accepts Postcord handler functions.
 // In most cases, you probably want to pass through *interactions.App here.
 type HandlerAccepter interface {
-	ComponentHandler(handler interactions.ComponentHandlerFunc)
-	CommandHandler(handler interactions.CommandHandlerFunc)
+	ComponentHandler(handler interactions.HandlerFunc)
+	CommandHandler(handler interactions.HandlerFunc)
 	Rest() *rest.Client
 }
 
