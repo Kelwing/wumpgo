@@ -124,7 +124,11 @@ func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(e
 		case SelectMenuFunc:
 			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse {
 				values := data.Values
-				if values == nil || data.ComponentType != objects.ComponentTypeSelectMenu {
+				if values == nil {
+					// This is a blank result from Discord.
+					values = []string{}
+				}
+				if data.ComponentType != objects.ComponentTypeSelectMenu {
 					return exceptionHandler(NotSelectionMenu)
 				}
 				defer func() {
