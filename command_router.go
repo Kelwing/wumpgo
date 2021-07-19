@@ -493,9 +493,11 @@ func (c *CommandRouterCtx) Bind(data interface{}) error {
 						idField := f.FieldByName("id")
 						if optionVal.Type().AssignableTo(idField.Type()) {
 							idField.Set(optionVal)
+						} else {
+							return fmt.Errorf("cannot assign resolvable ID %v to %v", optionVal.Type(), f.Type())
 						}
 					default:
-						break
+						return fmt.Errorf("cannot assign %v to %v", optionVal.Type(), f.Type())
 					}
 				}
 			}
