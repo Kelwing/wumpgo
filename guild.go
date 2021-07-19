@@ -382,12 +382,12 @@ func (c *Client) AddGuildMember(guild, user objects.Snowflake, params *AddGuildM
 }
 
 type ModifyGuildMemberParams struct {
-	Nick      *string             `json:"nick,omitempty"`
-	Roles     []objects.Snowflake `json:"roles,omitempty"`
-	Mute      *bool               `json:"mute,omitempty"`
-	Deaf      *bool               `json:"deaf,omitempty"`
-	ChannelID *objects.Snowflake  `json:"channel_id,omitempty"`
-	Reason    string              `json:"-"`
+	Nick      *string              `json:"nick,omitempty"`
+	Roles     *[]objects.Snowflake `json:"roles,omitempty"`
+	Mute      *bool                `json:"mute,omitempty"`
+	Deaf      *bool                `json:"deaf,omitempty"`
+	ChannelID *objects.Snowflake   `json:"channel_id,omitempty"`
+	Reason    string               `json:"-"`
 }
 
 func (c *Client) ModifyGuildMember(guild, member objects.Snowflake, params *ModifyGuildMemberParams) error {
