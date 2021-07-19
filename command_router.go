@@ -487,6 +487,16 @@ func (c *CommandRouterCtx) Bind(data interface{}) error {
 				optionVal := reflect.ValueOf(option)
 				if f.Type() == optionVal.Type() {
 					f.Set(optionVal)
+				} else {
+					switch f.Type().Kind() {
+					case reflect.Struct:
+						idField := f.FieldByName("id")
+						if optionVal.Type().AssignableTo(idField.Type()) {
+							idField.Set(optionVal)
+						}
+					default:
+						break
+					}
 				}
 			}
 		}
