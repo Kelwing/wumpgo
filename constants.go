@@ -76,7 +76,7 @@ const (
 	UsersMeGuilds   = UsersMeFmt + "/guilds"
 	UsersMeGuild    = UsersMeGuilds + "/%d"
 	UsersMeChannels = UsersMeFmt + "/guilds"
-	UserFmt         = BaseURL + "/%d"
+	UserFmt         = UsersFmt + "/%d"
 	UserConnections = UsersMeFmt + "/connections"
 
 	// Voice
