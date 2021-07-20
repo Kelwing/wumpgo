@@ -12,16 +12,13 @@ import (
 
 func main() {
 	// Create the response embed and component.
-	createResponse := func(amount uint64) (*objects.Embed, *objects.Component) {
-		return &objects.Embed{Description: "The value of this is " + strconv.FormatUint(amount, 10)}, &objects.Component{
-			Type: objects.ComponentTypeActionRow,
-			Components: []*objects.Component{
-				{
-					Type:     objects.ComponentTypeButton,
-					Label:    "Add One",
-					Style:    objects.ButtonStylePrimary,
-					CustomID: "/set/" + strconv.FormatUint(amount+1, 10),
-				},
+	createResponse := func(amount uint64) (*objects.Embed, []*objects.Component) {
+		return &objects.Embed{Description: "The value of this is " + strconv.FormatUint(amount, 10)}, []*objects.Component{
+			{
+				Type:     objects.ComponentTypeButton,
+				Label:    "Add One",
+				Style:    objects.ButtonStylePrimary,
+				CustomID: "/set/" + strconv.FormatUint(amount+1, 10),
 			},
 		}
 	}
@@ -34,8 +31,8 @@ func main() {
 			// This would make the route specified invalid.
 			return nil
 		}
-		embed, component := createResponse(number)
-		ctx.Ephemeral().SetEmbed(embed).SetComponent(component)
+		embed, row := createResponse(number)
+		ctx.Ephemeral().SetEmbed(embed).AddComponentRow(row)
 		return nil
 	})
 
@@ -45,8 +42,8 @@ func main() {
 	// Defines a single command.
 	_, err := commandRouter.NewCommandBuilder("add").Description("A demo to show adding numbers.").
 		Handler(func(ctx *router.CommandRouterCtx) error {
-			embed, component := createResponse(0)
-			ctx.Ephemeral().SetEmbed(embed).SetComponent(component)
+			embed, row := createResponse(0)
+			ctx.Ephemeral().SetEmbed(embed).AddComponentRow(row)
 			return nil
 		}).
 		DefaultPermission().
