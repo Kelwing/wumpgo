@@ -13,6 +13,12 @@ import (
 
 // CommandRouterCtx is used to define the commands context from the router.
 type CommandRouterCtx struct {
+	// Defines the error handler.
+	errorHandler func(error) *objects.InteractionResponse
+
+	// Defines the global allowed mentions configuration.
+	globalAllowedMentions *objects.AllowedMentions
+
 	// Defines the response builder.
 	responseBuilder
 

@@ -105,7 +105,7 @@ func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) 
 	}()
 
 	// Create the context.
-	rctx := &CommandRouterCtx{Interaction: interaction, Command: data.Name, Options: mappedOptions, RESTClient: restClient}
+	rctx := &CommandRouterCtx{globalAllowedMentions: allowedMentions, errorHandler: exceptionHandler, Interaction: interaction, Command: data.Name, Options: mappedOptions, RESTClient: restClient}
 
 	// Run the command.
 	handler := c.Function

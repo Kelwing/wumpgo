@@ -66,6 +66,40 @@ func (c *ComponentRouterCtx) Ephemeral() *ComponentRouterCtx {
 	return c
 }
 
+// UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
+func (c *ComponentRouterCtx) UpdateLater(f func(*ComponentRouterCtx) error) *ComponentRouterCtx {
+	cpy := *c
+	cpy.responseBuilder = responseBuilder{}
+	go func() {
+		defer func() {
+			if errGeneric := recover(); errGeneric != nil {
+				cpy.errorHandler(ungenericError(errGeneric))
+			}
+		}()
+		var response *objects.InteractionResponse
+		if err := f(&cpy); err == nil {
+			response = cpy.buildResponse(false, cpy.errorHandler, cpy.globalAllowedMentions)
+		} else {
+			response = cpy.errorHandler(err)
+		}
+		processUpdateLaterResponse(cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+	}()
+	return c
+}
+
+// DeferredChannelMessageWithSource is used to handle updating the response later. The user sees a loading state.
+// Note that the chain does not continue after this since it is impossible to attach additional data.
+func (c *ComponentRouterCtx) DeferredChannelMessageWithSource(f func(*ComponentRouterCtx) error) {
+	c.respType = objects.ResponseDeferredChannelMessageWithSource
+	c.UpdateLater(f)
+}
+
+// ChannelMessageWithSource is used to respond to the interaction with a message.
+func (c *ComponentRouterCtx) ChannelMessageWithSource() *ComponentRouterCtx {
+	c.respType = objects.ResponseChannelMessageWithSource
+	return c
+}
+
 // SetEmbed is used to set the embed, overwriting any previously.
 func (c *CommandRouterCtx) SetEmbed(embed *objects.Embed) *CommandRouterCtx {
 	c.editEmbed(embed, false)
@@ -123,5 +157,39 @@ func (c *CommandRouterCtx) SetTTS(tts bool) *CommandRouterCtx {
 // Ephemeral is used to set the response as ephemeral.
 func (c *CommandRouterCtx) Ephemeral() *CommandRouterCtx {
 	c.ResponseData().Flags = 64
+	return c
+}
+
+// UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
+func (c *CommandRouterCtx) UpdateLater(f func(*CommandRouterCtx) error) *CommandRouterCtx {
+	cpy := *c
+	cpy.responseBuilder = responseBuilder{}
+	go func() {
+		defer func() {
+			if errGeneric := recover(); errGeneric != nil {
+				cpy.errorHandler(ungenericError(errGeneric))
+			}
+		}()
+		var response *objects.InteractionResponse
+		if err := f(&cpy); err == nil {
+			response = cpy.buildResponse(false, cpy.errorHandler, cpy.globalAllowedMentions)
+		} else {
+			response = cpy.errorHandler(err)
+		}
+		processUpdateLaterResponse(cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+	}()
+	return c
+}
+
+// DeferredChannelMessageWithSource is used to handle updating the response later. The user sees a loading state.
+// Note that the chain does not continue after this since it is impossible to attach additional data.
+func (c *CommandRouterCtx) DeferredChannelMessageWithSource(f func(*CommandRouterCtx) error) {
+	c.respType = objects.ResponseDeferredChannelMessageWithSource
+	c.UpdateLater(f)
+}
+
+// ChannelMessageWithSource is used to respond to the interaction with a message.
+func (c *CommandRouterCtx) ChannelMessageWithSource() *CommandRouterCtx {
+	c.respType = objects.ResponseChannelMessageWithSource
 	return c
 }

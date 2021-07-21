@@ -77,6 +77,40 @@ func (c *{{ .Type }}) SetTTS(tts bool) *{{ .Type }} {
 func (c *{{ .Type }}) Ephemeral() *{{ .Type }} {
 	c.ResponseData().Flags = 64
 	return c
+}
+
+// UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
+func (c *{{ .Type }}) UpdateLater(f func(*{{ .Type }}) error) *{{ .Type }} {
+	cpy := *c
+	cpy.responseBuilder = responseBuilder{}
+	go func() {
+		defer func() {
+			if errGeneric := recover(); errGeneric != nil {
+				cpy.errorHandler(ungenericError(errGeneric))
+			}
+		}()
+		var response *objects.InteractionResponse
+		if err := f(&cpy); err == nil {
+			response = cpy.buildResponse(false, cpy.errorHandler, cpy.globalAllowedMentions)
+		} else {
+			response = cpy.errorHandler(err)
+		}
+		processUpdateLaterResponse(cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+	}()
+	return c
+}
+
+// DeferredChannelMessageWithSource is used to handle updating the response later. The user sees a loading state.
+// Note that the chain does not continue after this since it is impossible to attach additional data.
+func (c *{{ .Type }}) DeferredChannelMessageWithSource(f func(*{{ .Type }}) error) {
+	c.respType = objects.ResponseDeferredChannelMessageWithSource
+	c.UpdateLater(f)
+}
+
+// ChannelMessageWithSource is used to respond to the interaction with a message.
+func (c *{{ .Type }}) ChannelMessageWithSource() *{{ .Type }} {
+	c.respType = objects.ResponseChannelMessageWithSource
+	return c
 }`
 
 var types = []string{

@@ -17,6 +17,12 @@ type ComponentRouter struct {
 
 // ComponentRouterCtx is used to define a components router context.
 type ComponentRouterCtx struct {
+	// Defines the error handler.
+	errorHandler func(error) *objects.InteractionResponse
+
+	// Defines the global allowed mentions configuration.
+	globalAllowedMentions *objects.AllowedMentions
+
 	// Defines the response builder.
 	responseBuilder
 
@@ -112,9 +118,11 @@ func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(e
 					}
 				}()
 				rctx := &ComponentRouterCtx{
-					Interaction: ctx,
-					Params:      params,
-					RESTClient:  restClient,
+					errorHandler:          exceptionHandler,
+					globalAllowedMentions: globalAllowedMentions,
+					Interaction:           ctx,
+					Params:                params,
+					RESTClient:            restClient,
 				}
 				if err := x(rctx); err != nil {
 					return exceptionHandler(err)
@@ -138,9 +146,11 @@ func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(e
 					}
 				}()
 				rctx := &ComponentRouterCtx{
-					Interaction: ctx,
-					Params:      params,
-					RESTClient:  restClient,
+					globalAllowedMentions: globalAllowedMentions,
+					errorHandler:          exceptionHandler,
+					Interaction:           ctx,
+					Params:                params,
+					RESTClient:            restClient,
 				}
 				if err := x(rctx, values); err != nil {
 					return exceptionHandler(err)
