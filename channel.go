@@ -37,8 +37,8 @@ func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
 }
 
 type ModifyChannelParams struct {
-	Name                 string                        `json:"name"`
-	Type                 int64                         `json:"type"`
+	Name                 *string                       `json:"name,omitempty"`
+	Type                 *objects.ChannelType          `json:"type,omitempty"`
 	Position             int64                         `json:"position,omitempty"`
 	Topic                string                        `json:"topic,omitempty"`
 	NSFW                 bool                          `json:"nsfw,omitempty"`
