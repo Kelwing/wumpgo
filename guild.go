@@ -235,7 +235,7 @@ func (c *Client) CreateGuildChannel(id objects.Snowflake, params *ChannelCreateP
 		return nil, err
 	}
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+	if err = res.ExpectAnyStatus(http.StatusOK, http.StatusCreated); err != nil {
 		return nil, err
 	}
 
