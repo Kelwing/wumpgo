@@ -21,6 +21,7 @@ const (
 	TypeChannel
 	TypeRole
 	TypeMentionable
+	TypeDouble
 )
 
 // ApplicationCommand types
