@@ -6,6 +6,7 @@ type (
 	ApplicationCommandOptionType int
 	InteractionType              int
 	ResponseType                 int
+	ApplicationCommandType       int
 )
 
 type HandlerFunc func(data *Interaction) *InteractionResponse
@@ -20,6 +21,13 @@ const (
 	TypeChannel
 	TypeRole
 	TypeMentionable
+)
+
+// ApplicationCommand types
+const (
+	CommandTypeChatInput ApplicationCommandType = iota + 1
+	CommandTypeUser
+	CommandTypeMessage
 )
 
 // Interaction types
@@ -57,9 +65,10 @@ type ApplicationCommand struct {
 	ID                Snowflake                  `json:"id,omitempty"`
 	ApplicationID     Snowflake                  `json:"application_id,omitempty"`
 	Name              string                     `json:"name"`
-	Description       string                     `json:"description"`
+	Description       string                     `json:"description,omitempty"`
 	Options           []ApplicationCommandOption `json:"options"`
 	DefaultPermission bool                       `json:"default_permission"`
+	Type              *int                       `json:"type,omitempty"`
 }
 
 type ApplicationCommandOption struct {
@@ -102,6 +111,7 @@ type ApplicationCommandInteractionData struct {
 	Name     string                                     `json:"name"`
 	Options  []*ApplicationCommandInteractionDataOption `json:"options"`
 	Resolved ApplicationCommandInteractionDataResolved  `json:"resolved"`
+	TargetID Snowflake                                  `json:"target_id"`
 }
 
 type ApplicationCommandInteractionDataResolved struct {
@@ -109,6 +119,7 @@ type ApplicationCommandInteractionDataResolved struct {
 	Members  map[Snowflake]GuildMember `json:"members"`
 	Roles    map[Snowflake]Role        `json:"roles"`
 	Channels map[Snowflake]Channel     `json:"channels"`
+	Messages map[Snowflake]Message     `json:"messages"`
 }
 
 type Interaction struct {
