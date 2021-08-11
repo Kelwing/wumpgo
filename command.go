@@ -4,10 +4,14 @@ import (
 	"errors"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
+	"strconv"
 )
 
 // Command is used to define a Discord (sub-)command. DO NOT MAKE YOURSELF! USE CommandGroup.NewCommandBuilder OR CommandRouter.NewCommandBuilder!
 type Command struct {
+	// Defines the command type.
+	commandType int
+
 	// Description is the description for the command.
 	Description string `json:"description"`
 
@@ -47,46 +51,62 @@ var MismatchedOption = errors.New("mismatched interaction option")
 func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
 	// Process the options.
 	mappedOptions := map[string]interface{}{}
-	for _, v := range options {
-		// Find the option.
-		option := findOption(v.Name, c.Options)
-		if option == nil {
-			// Option was provided that was not in this command.
-			return exceptionHandler(NonExistentOption)
-		}
 
-		// Check the option and result match types.
-		if objects.ApplicationCommandOptionType(v.Type) != option.OptionType {
-			return exceptionHandler(MismatchedOption)
+	if data.TargetID != 0 {
+		// Add a special case for "/target". The slash is there as a keyword.
+		if _, ok := data.Resolved.Messages[data.TargetID]; ok {
+			mappedOptions["/target"] = &ResolvableMessage{
+				id:   strconv.FormatUint(uint64(data.TargetID), 10),
+				data: data,
+			}
+		} else if _, ok = data.Resolved.Users[data.TargetID]; ok {
+			mappedOptions["/target"] = &ResolvableUser{
+				id:   strconv.FormatUint(uint64(data.TargetID), 10),
+				data: data,
+			}
 		}
+	} else {
+		for _, v := range options {
+			// Find the option.
+			option := findOption(v.Name, c.Options)
+			if option == nil {
+				// Option was provided that was not in this command.
+				return exceptionHandler(NonExistentOption)
+			}
 
-		// Check what the type is.
-		switch option.OptionType {
-		case objects.TypeChannel:
-			mappedOptions[option.Name] = &ResolvableChannel{
-				id:   v.Value.(string),
-				data: data,
+			// Check the option and result match types.
+			if objects.ApplicationCommandOptionType(v.Type) != option.OptionType {
+				return exceptionHandler(MismatchedOption)
 			}
-		case objects.TypeRole:
-			mappedOptions[option.Name] = &ResolvableRole{
-				id:   v.Value.(string),
-				data: data,
-			}
-		case objects.TypeUser:
-			mappedOptions[option.Name] = &ResolvableUser{
-				id:   v.Value.(string),
-				data: data,
-			}
-		case objects.TypeString:
-			mappedOptions[option.Name] = v.Value.(string)
-		case objects.TypeInteger:
-			mappedOptions[option.Name] = v.Value.(float64)
-		case objects.TypeBoolean:
-			mappedOptions[option.Name] = v.Value.(bool)
-		case objects.TypeMentionable:
-			mappedOptions[option.Name] = &ResolvableMentionable{
-				id:   v.Value.(string),
-				data: data,
+
+			// Check what the type is.
+			switch option.OptionType {
+			case objects.TypeChannel:
+				mappedOptions[option.Name] = &ResolvableChannel{
+					id:   v.Value.(string),
+					data: data,
+				}
+			case objects.TypeRole:
+				mappedOptions[option.Name] = &ResolvableRole{
+					id:   v.Value.(string),
+					data: data,
+				}
+			case objects.TypeUser:
+				mappedOptions[option.Name] = &ResolvableUser{
+					id:   v.Value.(string),
+					data: data,
+				}
+			case objects.TypeString:
+				mappedOptions[option.Name] = v.Value.(string)
+			case objects.TypeInteger:
+				mappedOptions[option.Name] = v.Value.(float64)
+			case objects.TypeBoolean:
+				mappedOptions[option.Name] = v.Value.(bool)
+			case objects.TypeMentionable:
+				mappedOptions[option.Name] = &ResolvableMentionable{
+					id:   v.Value.(string),
+					data: data,
+				}
 			}
 		}
 	}

@@ -31,6 +31,19 @@ func (l *loaderBuilder) CommandRouter(router *CommandRouter) LoaderBuilder {
 	return l
 }
 
+// CombinedRouter is an extension of both CommandRouter and ComponentRouter to combine the two.
+// I'm personally not a huge fan of using this, but it might be appealing to some people who wish to treat it as one router.
+type CombinedRouter struct {
+	CommandRouter
+	ComponentRouter
+}
+
+func (l *loaderBuilder) CombinedRouter(router *CombinedRouter) LoaderBuilder {
+	l.components = &router.ComponentRouter
+	l.commands = &router.CommandRouter
+	return l
+}
+
 func genericErrorHandler(err error) *objects.InteractionResponse {
 	// Log the message.
 	fmt.Println("error on route:", err)
@@ -78,6 +91,9 @@ type LoaderBuilder interface {
 
 	// CommandRouter is used to add a command router to the load process.
 	CommandRouter(*CommandRouter) LoaderBuilder
+
+	// CombinedRouter is used to add a combined router to the load process.
+	CombinedRouter(router *CombinedRouter) LoaderBuilder
 
 	// ErrorHandler is used to add an error handler to the load process.
 	ErrorHandler(func(error) *objects.InteractionResponse) LoaderBuilder

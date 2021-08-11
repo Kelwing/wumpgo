@@ -52,7 +52,7 @@ func (r Resolvable{{ .Type }}) Resolve() *objects.{{ .Type }} {
 }`
 
 var types = []string{
-	"User", "Channel", "Role",
+	"User", "Channel", "Role", "Message",
 }
 
 func main() {

@@ -59,7 +59,6 @@ func main() {
 			ctx.SetContent("loge!")
 			return nil
 		}).
-		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
@@ -74,7 +73,6 @@ func main() {
 			ctx.SetContent("loge!")
 			return nil
 		}).
-		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
@@ -84,11 +82,30 @@ func main() {
 			ctx.SetContent("loge!")
 			return nil
 		}).
-		DefaultPermission().
 		Build()
 	if err != nil {
 		panic(err)
 	}
+
+	// Add a user target command.
+	commandRouter.NewCommandBuilder("user-target").
+		UserCommand().
+		DefaultPermission().
+		Handler(func(ctx *router.CommandRouterCtx, member *objects.GuildMember) error {
+			ctx.SetContent("You clicked " + member.User.Username)
+			return nil
+		}).
+		MustBuild()
+
+	// Add a message target command.
+	commandRouter.NewCommandBuilder("message-target").
+		MessageCommand().
+		DefaultPermission().
+		Handler(func(ctx *router.CommandRouterCtx, message *objects.Message) error {
+			ctx.SetContent("The message was made by " + message.Author.Username)
+			return nil
+		}).
+		MustBuild()
 
 	// Create the interactions app.
 	app, err := interactions.New(&interactions.Config{

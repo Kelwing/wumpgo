@@ -36,6 +36,49 @@ type CommandRouterCtx struct {
 	RESTClient *rest.Client `json:"rest_client"`
 }
 
+// TargetMessage is used to try and get the target message. If this was not targeted at a message, returns nil.
+func (c *CommandRouterCtx) TargetMessage() *objects.Message {
+	message, _ := c.Options["/target"].(*ResolvableMessage)
+	if message == nil {
+		return nil
+	}
+	return message.Resolve()
+}
+
+// TargetMember is used to try and get the target member. If this was not targeted at a member, returns nil.
+func (c *CommandRouterCtx) TargetMember() *objects.GuildMember {
+	member, _ := c.Options["/target"].(*ResolvableUser)
+	if member == nil {
+		return nil
+	}
+	return member.ResolveMember()
+}
+
+// InvalidTarget is thrown when the command target is not valid.
+var InvalidTarget = errors.New("wrong or no target specified")
+
+// Used to wrap a callback that returns a targeted message into a context only friendly format.
+func messageTargetWrapper(cb func(*CommandRouterCtx, *objects.Message) error) func(*CommandRouterCtx) error {
+	return func(ctx *CommandRouterCtx) error {
+		message := ctx.TargetMessage()
+		if message == nil {
+			return InvalidTarget
+		}
+		return cb(ctx, message)
+	}
+}
+
+// Used to wrap a callback that returns a targeted member into a context only friendly format.
+func memberTargetWrapper(cb func(*CommandRouterCtx, *objects.GuildMember) error) func(*CommandRouterCtx) error {
+	return func(ctx *CommandRouterCtx) error {
+		member := ctx.TargetMember()
+		if member == nil {
+			return InvalidTarget
+		}
+		return cb(ctx, member)
+	}
+}
+
 // CommandGroup is a group of commands. DO NOT MAKE YOURSELF! USE CommandGroup.NewCommandGroup OR CommandRouter.NewCommandGroup!
 type CommandGroup struct {
 	level uint
@@ -83,72 +126,6 @@ func (c *CommandGroup) MustNewCommandGroup(name, description string, defaultPerm
 		panic(err)
 	}
 	return x
-}
-
-// Defines the command builder structure.
-type commandBuilder struct {
-	name string
-	map_ map[string]interface{}
-	cmd  Command
-}
-
-func (c *commandBuilder) Description(description string) CommandBuilder {
-	// TODO: Validate description
-	c.cmd.Description = description
-	return c
-}
-
-func (c *commandBuilder) Option(option *objects.ApplicationCommandOption) CommandBuilder {
-	c.cmd.Options = append(c.cmd.Options, option)
-	return c
-}
-
-func (c *commandBuilder) DefaultPermission() CommandBuilder {
-	c.cmd.DefaultPermission = true
-	return c
-}
-
-func (c *commandBuilder) AllowedMentions(config *objects.AllowedMentions) CommandBuilder {
-	c.cmd.AllowedMentions = config
-	return c
-}
-
-func (c *commandBuilder) Handler(handler func(*CommandRouterCtx) error) CommandBuilder {
-	c.cmd.Function = handler
-	return c
-}
-
-func (c *commandBuilder) Build() (*Command, error) {
-	// TODO: Handle blank description.
-	c.map_[c.name] = &c.cmd
-	return &c.cmd, nil
-}
-
-// CommandBuilder is used to define a builder for a Command object.
-type CommandBuilder interface {
-	// Description is used to define the commands description.
-	Description(string) CommandBuilder
-
-	// Option is used to add a command option.
-	Option(*objects.ApplicationCommandOption) CommandBuilder
-
-	// DefaultPermission is used to define if the command should have default permissions. Note this does nothing if the command is in a group.
-	DefaultPermission() CommandBuilder
-
-	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
-	AllowedMentions(*objects.AllowedMentions) CommandBuilder
-
-	// Handler is used to add a command handler.
-	Handler(func(*CommandRouterCtx) error) CommandBuilder
-
-	// Build is used to build the command and insert it into the command router.
-	Build() (*Command, error)
-}
-
-// NewCommandBuilder is used to create a builder for a *Command object.
-func (c CommandGroup) NewCommandBuilder(name string) CommandBuilder {
-	// TODO: Validate name
-	return &commandBuilder{name: name, map_: c.Subcommands}
 }
 
 // CommandRouter is used to route commands.
@@ -381,7 +358,7 @@ func getOptions(cmdOrCat interface{}) []objects.ApplicationCommandOption {
 		i := 0
 		for k, v := range x.Subcommands {
 			// Create a option based on the sub-command.
-			processCommand := func(cmdName, description string, default_ bool, options []*objects.ApplicationCommandOption) objects.ApplicationCommandOption {
+			processCommand := func(cmdName, description string, options []*objects.ApplicationCommandOption) objects.ApplicationCommandOption {
 				if description == "" {
 					description = "No description provided."
 				}
@@ -392,7 +369,6 @@ func getOptions(cmdOrCat interface{}) []objects.ApplicationCommandOption {
 				return objects.ApplicationCommandOption{
 					OptionType:  objects.TypeSubCommand,
 					Name:        cmdName,
-					Default:     default_,
 					Description: description,
 					Options:     unptr,
 				}
@@ -400,7 +376,7 @@ func getOptions(cmdOrCat interface{}) []objects.ApplicationCommandOption {
 			switch y := v.(type) {
 			case *Command:
 				// Create a sub-command.
-				cmds[i] = processCommand(k, y.Description, y.DefaultPermission, y.Options)
+				cmds[i] = processCommand(k, y.Description, y.Options)
 			case *CommandGroup:
 				// Do some incredibly mind spiralling shit.
 				description := y.Description
@@ -412,7 +388,7 @@ func getOptions(cmdOrCat interface{}) []objects.ApplicationCommandOption {
 				for k, v := range y.Subcommands {
 					switch x := v.(type) {
 					case *Command:
-						children[childrenIndex] = processCommand(k, x.Description, x.DefaultPermission, x.Options)
+						children[childrenIndex] = processCommand(k, x.Description, x.Options)
 					case *CommandGroup:
 						description := x.Description
 						if description == "" {
@@ -452,22 +428,35 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 		// Create the command.
 		description := ""
 		defaultPermission := false
+		commandType := int(objects.CommandTypeChatInput)
 		switch x := v.(type) {
 		case *Command:
 			description = x.Description
 			defaultPermission = x.DefaultPermission
+			if x.commandType != 0 {
+				commandType = x.commandType
+			}
 		case *CommandGroup:
 			description = x.Description
 			defaultPermission = x.DefaultPermission
 		}
+
 		if description == "" {
-			description = "No description provided."
+			// If the description is mandatory, set it to a none provided message.
+			if commandType == int(objects.CommandTypeChatInput) {
+				description = "No description provided."
+			}
+		} else if commandType != int(objects.CommandTypeChatInput) {
+			// If no description is mandatory, make sure it is unset.
+			description = ""
 		}
+
 		cmds[i] = &objects.ApplicationCommand{
 			Name:              k,
 			Description:       description,
 			Options:           getOptions(v),
 			DefaultPermission: defaultPermission,
+			Type:              &commandType,
 		}
 
 		// Add to the index.
