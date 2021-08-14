@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
-	"strconv"
-
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
+	"reflect"
 )
 
 // CommandRouterCtx is used to define the commands context from the router.
@@ -20,8 +18,8 @@ type CommandRouterCtx struct {
 	// Defines the global allowed mentions configuration.
 	globalAllowedMentions *objects.AllowedMentions
 
-	// Defines the last void.
-	lastVoid int
+	// Defines the void ID generator.
+	voidGenerator
 
 	// Defines the response builder.
 	responseBuilder
@@ -38,12 +36,6 @@ type CommandRouterCtx struct {
 
 	// RESTClient is used to define the REST client.
 	RESTClient *rest.Client `json:"rest_client"`
-}
-
-// VoidCustomID is used to return a unique custom ID for this context that resolves to a void.
-func (c *CommandRouterCtx) VoidCustomID() string {
-	c.lastVoid++
-	return "/_postcord/void/" + strconv.Itoa(c.lastVoid)
 }
 
 // TargetMessage is used to try and get the target message. If this was not targeted at a message, returns nil.

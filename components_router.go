@@ -23,6 +23,9 @@ type ComponentRouterCtx struct {
 	// Defines the global allowed mentions configuration.
 	globalAllowedMentions *objects.AllowedMentions
 
+	// Defines the void ID generator.
+	voidGenerator
+
 	// Defines the response builder.
 	responseBuilder
 
