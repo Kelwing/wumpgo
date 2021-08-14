@@ -103,9 +103,16 @@ func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(e
 	// Build the router tree.
 	c.prep()
 	root := new(node)
-	root.addRoute("/_postcord/void/:number", func(*objects.Interaction, *objects.ApplicationComponentInteractionData, map[string]string) *objects.InteractionResponse {
-		// The point of this route is to just return nil.
-		return nil
+	root.addRoute("/_postcord/void/:number", func(ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse {
+		// The point of this route is to just return the default handler.
+		rctx := &ComponentRouterCtx{
+			errorHandler:          exceptionHandler,
+			globalAllowedMentions: globalAllowedMentions,
+			Interaction:           ctx,
+			Params:                params,
+			RESTClient:            restClient,
+		}
+		return rctx.buildResponse(true, exceptionHandler, globalAllowedMentions)
 	})
 	for k, v := range c.routes {
 		var cb contextCallback
