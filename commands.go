@@ -49,7 +49,7 @@ func (c *Client) AddCommand(app objects.Snowflake, command *objects.ApplicationC
 		return nil, err
 	}
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+	if err = res.ExpectAnyStatus(http.StatusOK, http.StatusCreated); err != nil {
 		return nil, err
 	}
 
