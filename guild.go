@@ -371,7 +371,7 @@ func (c *Client) AddGuildMember(guild, user objects.Snowflake, params *AddGuildM
 		return nil, err
 	}
 
-	if res.Status == http.StatusCreated {
+	if res.StatusCode == http.StatusCreated {
 		member := &objects.GuildMember{}
 		if err = res.JSON(member); err != nil {
 			return nil, err

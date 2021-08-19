@@ -14,7 +14,8 @@ import (
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 )
 
-var _ Ratelimiter = (*RedisRatelimiter)(nil)
+// Commented out for draft PR/local dev
+// var _ Ratelimiter = (*RedisRatelimiter)(nil)
 
 type RedisConf struct {
 	Options       *redis.Options
@@ -205,8 +206,8 @@ func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body [
 	}
 
 	return &DiscordResponse{
-		Body:   respBody,
-		Status: resp.StatusCode,
+		Body:       respBody,
+		StatusCode: resp.StatusCode,
 	}, nil
 }
 
