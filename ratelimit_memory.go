@@ -61,11 +61,11 @@ func (m *MemoryRatelimiter) requestLocked(httpClient HTTPClient, r *request, buc
 
 	resp, err := httpClient.Request(r)
 	if err != nil {
-		_ = m.updateBucket(bucket, resp.Header)
+		_ = m.updateBucket(bucket, resp)
 		return nil, err
 	}
 
-	if err = m.updateBucket(bucket, resp.Header); err != nil {
+	if err = m.updateBucket(bucket, resp); err != nil {
 		return nil, err
 	}
 
@@ -96,7 +96,12 @@ func (m *MemoryRatelimiter) Request(httpClient HTTPClient, req *request) (*Disco
 	return m.requestLocked(httpClient, req, bucket, 0)
 }
 
-func (m *MemoryRatelimiter) updateBucket(bucket *memoryBucket, headers http.Header) error {
+func (m *MemoryRatelimiter) updateBucket(bucket *memoryBucket, resp *DiscordResponse) error {
+	if resp == nil {
+		return nil
+	}
+
+	headers := resp.Header
 	remaining := headers.Get("X-RateLimit-Remaining")
 	reset := headers.Get("X-RateLimit-Reset")
 	global := headers.Get("X-RateLimit-Global")

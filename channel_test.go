@@ -41,7 +41,7 @@ func testChannelSnowflake(t *testing.T) objects.Snowflake {
 	return objects.Snowflake(484093378993192971)
 }
 
-func TestClient_GetChannel(t *testing.T) {
+func TestClient_GetChannel_Integration(t *testing.T) {
 	client := getRealClient(t)
 
 	c, err := client.GetChannel(testChannelSnowflake(t))
@@ -52,7 +52,7 @@ func TestClient_GetChannel(t *testing.T) {
 	t.Log(c)
 }
 
-func TestClient_GetChannelMessages(t *testing.T) {
+func TestClient_GetChannelMessages_Integration(t *testing.T) {
 	client := getRealClient(t)
 
 	c, err := client.GetChannelMessages(testChannelSnowflake(t), nil)
