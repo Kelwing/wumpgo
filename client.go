@@ -47,19 +47,16 @@ func (c *Client) request(req *request) (*DiscordResponse, error) {
 			return data, nil
 		}
 	}
-
+  
 	var resp *DiscordResponse
 	var err error
 	if c.rateLimiter != nil {
 		resp, err = c.rateLimiter.Request(c.httpClient, req)
 	} else {
 		resp, err = c.httpClient.Request(req)
-	}
-	if err != nil {
-		return nil, err
-	}
+  }
 
-	if c.cache != nil {
+	if req.method == "GET" && c.cache != nil {
 		c.cache.Put(req.path, resp)
 	}
 
