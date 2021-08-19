@@ -50,6 +50,9 @@ func testHandler(ctx *objects.Interaction) *objects.InteractionResponse {
 }
 ```
 
+## Command Routing
+If you're looking for a more batteries included solution that includes command and interaction routing.  Check out our [router](https://github.com/Postcord/router) package.
+
 ## Documentation
 
 Documentation is still a work in progress.
