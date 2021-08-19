@@ -1,12 +1,17 @@
 package rest
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 type HTTPClient interface {
 	Request(req *request) (*DiscordResponse, error)
 }
 
 type Config struct {
+	Token       string
+	UserAgent   string
 	Ratelimiter Ratelimiter
 	Cache       Cache
 }
@@ -20,6 +25,13 @@ type Client struct {
 func New(config *Config) *Client {
 	return &Client{
 		rateLimiter: config.Ratelimiter,
+		httpClient: &DefaultHTTPClient{
+			doer: &http.Client{
+				Timeout: time.Second * 5,
+			},
+			userAgent:     config.UserAgent,
+			authorization: config.Token,
+		},
 	}
 }
 
@@ -36,7 +48,13 @@ func (c *Client) request(req *request) (*DiscordResponse, error) {
 		}
 	}
 
-	resp, err := c.rateLimiter.Request(c.httpClient, req)
+	var resp *DiscordResponse
+	var err error
+	if c.rateLimiter != nil {
+		resp, err = c.rateLimiter.Request(c.httpClient, req)
+	} else {
+		resp, err = c.httpClient.Request(req)
+	}
 	if err != nil {
 		return nil, err
 	}

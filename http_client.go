@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-	"time"
 )
 
 type DefaultHTTPClient struct {
@@ -16,16 +15,6 @@ type DefaultHTTPClient struct {
 	}
 	userAgent     string
 	authorization string
-}
-
-func NewDefaultHTTPClient(userAgent, authorization string) *DefaultHTTPClient {
-	return &DefaultHTTPClient{
-		doer: &http.Client{
-			Timeout: time.Second * 5,
-		},
-		userAgent:     userAgent,
-		authorization: authorization,
-	}
 }
 
 func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
