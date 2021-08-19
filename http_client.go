@@ -27,7 +27,7 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	rawReq.Header = req.headers
+	rawReq.Header = req.headers.Clone()
 
 	if reader != nil {
 		rawReq.Header.Set("Content-Type", req.contentType)
