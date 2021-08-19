@@ -27,7 +27,10 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	rawReq.Header = req.headers.Clone()
+
+	if req.headers != nil {
+		rawReq.Header = req.headers.Clone()
+	}
 
 	if reader != nil {
 		rawReq.Header.Set("Content-Type", req.contentType)
@@ -54,6 +57,7 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 	return &DiscordResponse{
 		Body:       respBody,
 		StatusCode: resp.StatusCode,
+		Header:     resp.Header,
 	}, nil
 }
 
