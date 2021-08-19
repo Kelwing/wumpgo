@@ -36,7 +36,7 @@ func (c *Client) request(req *request) (*DiscordResponse, error) {
 		return nil, err
 	}
 
-	if c.cache != nil {
+	if req.method == "GET" && c.cache != nil {
 		c.cache.Put(req.path, resp)
 	}
 
@@ -62,7 +62,7 @@ func (c *Client) requestNoAuth(req *request) (*DiscordResponse, error) {
 		return nil, err
 	}
 
-	if c.cache != nil {
+	if req.method == "GET" && c.cache != nil {
 		c.cache.Put(req.path, resp)
 	}
 
