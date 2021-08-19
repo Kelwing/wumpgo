@@ -9,9 +9,7 @@ import (
 )
 
 type MemoryConf struct {
-	Authorization string
-	MaxRetries    int
-	UserAgent     string
+	MaxRetries int
 }
 
 func NewMemoryRatelimiter(conf *MemoryConf) *MemoryRatelimiter {
