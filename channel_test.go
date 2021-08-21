@@ -23,9 +23,9 @@ func getRealClient(t *testing.T) *Client {
 	}
 
 	return New(&Config{
-		Token:       fmt.Sprintf("Bot %s", tokenEnv),
-		UserAgent:   fmt.Sprintf("Postcord/1.0 %s (%s)", runtime.GOOS, runtime.GOARCH),
-		Ratelimiter: NewMemoryRatelimiter(&MemoryConf{MaxRetries: 3}),
+		Authorization: fmt.Sprintf("Bot %s", tokenEnv),
+		UserAgent:     fmt.Sprintf("Postcord/1.0 %s (%s)", runtime.GOOS, runtime.GOARCH),
+		Ratelimiter:   NewMemoryRatelimiter(&MemoryConf{MaxRetries: 3}),
 	})
 }
 

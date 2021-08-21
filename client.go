@@ -10,10 +10,10 @@ type HTTPClient interface {
 }
 
 type Config struct {
-	Token       string
-	UserAgent   string
-	Ratelimiter Ratelimiter
-	Cache       Cache
+	Authorization string
+	UserAgent     string
+	Ratelimiter   Ratelimiter
+	Cache         Cache
 }
 
 type Client struct {
@@ -30,7 +30,7 @@ func New(config *Config) *Client {
 				Timeout: time.Second * 5,
 			},
 			userAgent:     config.UserAgent,
-			authorization: config.Token,
+			authorization: config.Authorization,
 		},
 	}
 }
@@ -47,14 +47,14 @@ func (c *Client) request(req *request) (*DiscordResponse, error) {
 			return data, nil
 		}
 	}
-  
+
 	var resp *DiscordResponse
 	var err error
 	if c.rateLimiter != nil {
 		resp, err = c.rateLimiter.Request(c.httpClient, req)
 	} else {
 		resp, err = c.httpClient.Request(req)
-  }
+	}
 
 	if req.method == "GET" && c.cache != nil {
 		c.cache.Put(req.path, resp)

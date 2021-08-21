@@ -41,7 +41,7 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 	}
 
 	if req.omitAuth == false {
-		rawReq.Header.Set("authorization", c.authorization)
+		rawReq.Header.Set("Authorization", c.authorization)
 	}
 
 	resp, err := c.doer.Do(rawReq)
