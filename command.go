@@ -109,7 +109,7 @@ func (c *Command) execute(opts commandExecutionOptions) *objects.InteractionResp
 			case objects.TypeString:
 				mappedOptions[option.Name] = v.Value.(string)
 			case objects.TypeInteger:
-				mappedOptions[option.Name] = v.Value.(float64)
+				mappedOptions[option.Name] = int(v.Value.(float64))
 			case objects.TypeBoolean:
 				mappedOptions[option.Name] = v.Value.(bool)
 			case objects.TypeMentionable:
@@ -117,6 +117,8 @@ func (c *Command) execute(opts commandExecutionOptions) *objects.InteractionResp
 					id:   v.Value.(string),
 					data: opts.data,
 				}
+			case objects.TypeDouble:
+				mappedOptions[option.Name] = v.Value.(float64)
 			}
 		}
 	}
