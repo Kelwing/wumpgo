@@ -1,6 +1,7 @@
 package router
 
 import (
+	"container/list"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,8 +32,8 @@ type CommandRouterCtx struct {
 	// Command defines the command that was invoked.
 	Command string `json:"command"`
 
-	// Options is used to define any options that were set in the context. Note that if an option is unset, it will not be in the map.
-	// Note that for User, Channel, Role, and Mentionable; a "*Resolvable<option type>" type is used. This will allow you to get the ID as a Snowflake, string, or attempt to get from resolved.
+	// Options is used to define any options that were set in the context. Note that if an option is unset from Discord, it will not be in the map.
+	// Note that for User, Channel, Role, and Mentionable from Discord; a "*Resolvable<option type>" type is used. This will allow you to get the ID as a Snowflake, string, or attempt to get from resolved.
 	Options map[string]interface{} `json:"options"`
 
 	// RESTClient is used to define the REST client.
@@ -86,6 +87,9 @@ func memberTargetWrapper(cb func(*CommandRouterCtx, *objects.GuildMember) error)
 type CommandGroup struct {
 	level uint
 
+	// Middleware defines all of the groups middleware.
+	Middleware []MiddlewareFunc `json:"middleware"`
+
 	// DefaultPermission defines if this is the default permission.
 	DefaultPermission bool `json:"default_permission"`
 
@@ -97,6 +101,11 @@ type CommandGroup struct {
 
 	// Subcommands is a map of all of the subcommands. It is a interface{} since it can be *Command or *CommandGroup. DO NOT ADD TO THIS! USE THE ATTACHED FUNCTIONS!
 	Subcommands map[string]interface{} `json:"subcommands"`
+}
+
+// Use is used to add middleware to the group.
+func (c *CommandGroup) Use(f MiddlewareFunc) {
+	c.Middleware = append(c.Middleware, f)
 }
 
 // GroupNestedTooDeep is thrown when the sub-command group would be nested too deep.
@@ -133,7 +142,13 @@ func (c *CommandGroup) MustNewCommandGroup(name, description string, defaultPerm
 
 // CommandRouter is used to route commands.
 type CommandRouter struct {
-	roots CommandGroup
+	roots      CommandGroup
+	middleware []MiddlewareFunc
+}
+
+// Use is used to add middleware to the router.
+func (c *CommandRouter) Use(f MiddlewareFunc) {
+	c.middleware = append(c.middleware, f)
 }
 
 // NewCommandGroup is used to create a sub-command group. Works the same as CommandGroup.NewCommandGroup.
@@ -240,10 +255,17 @@ type groupExecutionOptions struct {
 }
 
 // Execute the group.
-func (c *CommandGroup) execute(opts groupExecutionOptions) *objects.InteractionResponse {
+func (c *CommandGroup) execute(opts groupExecutionOptions, middlewareList *list.List) *objects.InteractionResponse {
 	if len(opts.data.Options) != 1 {
 		// data.Options must be 1 here. A valid response will just contain the next node down the tree.
 		return opts.exceptionHandler(CommandIsNotSubcommand)
+	}
+
+	// Inject our middleware.
+	if c.Middleware != nil {
+		for _, v := range c.Middleware {
+			middlewareList.PushBack(v)
+		}
 	}
 
 	// Do a switch on the type.
@@ -270,7 +292,7 @@ func (c *CommandGroup) execute(opts groupExecutionOptions) *objects.InteractionR
 			interaction:      opts.interaction,
 			data:             opts.data,
 			options:          opts.nextLevel.Options,
-		})
+		}, middlewareList)
 	case objects.TypeSubCommandGroup:
 		// Expect a group in the map and handle accordingly.
 		cmdIface, ok := c.Subcommands[opts.nextLevel.Name]
@@ -286,7 +308,7 @@ func (c *CommandGroup) execute(opts groupExecutionOptions) *objects.InteractionR
 		if c.AllowedMentions != nil {
 			opts.allowedMentions = c.AllowedMentions
 		}
-		return group.execute(opts)
+		return group.execute(opts, middlewareList)
 	default:
 		// This is just a random argument.
 		return opts.exceptionHandler(CommandIsNotSubcommand)
@@ -300,6 +322,14 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 		baseAllowedMentions = c.roots.AllowedMentions
 	}
 	return func(interaction *objects.Interaction) *objects.InteractionResponse {
+		// Handle middleware.
+		middlewareList := list.New()
+		if c.middleware != nil {
+			for _, v := range c.middleware {
+				middlewareList.PushBack(v)
+			}
+		}
+
 		// Parse the data JSON.
 		var data objects.ApplicationCommandInteractionData
 		if err := json.Unmarshal(interaction.Data, &data); err != nil {
@@ -326,7 +356,7 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 				interaction:      interaction,
 				data:             &data,
 				options:          data.Options,
-			})
+			}, middlewareList)
 		case *CommandGroup:
 			if len(data.Options) != 1 {
 				// data.Options must be 1 here. A valid response will just contain the next node down the tree.
@@ -347,6 +377,11 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 					// Not a group.
 					return exceptionHandler(CommandIsNotSubcommand)
 				}
+				if x.Middleware != nil {
+					for _, v := range x.Middleware {
+						middlewareList.PushBack(v)
+					}
+				}
 				return group.execute(groupExecutionOptions{
 					restClient:       restClient,
 					exceptionHandler: exceptionHandler,
@@ -354,7 +389,7 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 					interaction:      interaction,
 					data:             &data,
 					nextLevel:        option.Options[0],
-				})
+				}, middlewareList)
 			case objects.TypeSubCommand:
 				cmdIface, ok := x.Subcommands[option.Name]
 				if !ok {
@@ -366,6 +401,11 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 					// Not a command.
 					return exceptionHandler(CommandIsSubcommand)
 				}
+				if x.Middleware != nil {
+					for _, v := range x.Middleware {
+						middlewareList.PushBack(v)
+					}
+				}
 				return cmd.execute(commandExecutionOptions{
 					restClient:       restClient,
 					exceptionHandler: exceptionHandler,
@@ -373,7 +413,7 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 					interaction:      interaction,
 					data:             &data,
 					options:          option.Options,
-				})
+				}, middlewareList)
 			default:
 				// Not a command.
 				return exceptionHandler(CommandDoesNotExist)

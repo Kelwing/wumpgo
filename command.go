@@ -1,6 +1,7 @@
 package router
 
 import (
+	"container/list"
 	"errors"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
@@ -58,7 +59,7 @@ type commandExecutionOptions struct {
 }
 
 // Execute the command.
-func (c *Command) execute(opts commandExecutionOptions) *objects.InteractionResponse {
+func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.List) *objects.InteractionResponse {
 	// Process the options.
 	mappedOptions := map[string]interface{}{}
 
@@ -150,8 +151,25 @@ func (c *Command) execute(opts commandExecutionOptions) *objects.InteractionResp
 		// don't nil crash
 		handler = func(ctx *CommandRouterCtx) error { return nil }
 	}
-	if err := handler(rctx); err != nil {
-		return opts.exceptionHandler(err)
+	if middlewareList.Len() == 0 {
+		// Just call the command function.
+		if err := handler(rctx); err != nil {
+			return opts.exceptionHandler(err)
+		}
+	} else {
+		// Wrap the end command function in a middleware function and push it.
+		middlewareWrapper := func(ctx MiddlewareCtx) error {
+			return handler(ctx.CommandRouterCtx)
+		}
+		middlewareList.PushBack(middlewareWrapper)
+
+		// Create the middleware context.
+		mctx := MiddlewareCtx{CommandRouterCtx: rctx, middlewareList: middlewareList}
+
+		// Call the middleware chain.
+		if err := mctx.Next(); err != nil {
+			return opts.exceptionHandler(err)
+		}
 	}
 	return rctx.buildResponse(false, opts.exceptionHandler, opts.allowedMentions)
 }
