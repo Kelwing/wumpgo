@@ -1,10 +1,7 @@
 package rest
 
 import (
-	"bytes"
 	"context"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,34 +14,27 @@ import (
 var _ Ratelimiter = (*RedisRatelimiter)(nil)
 
 type RedisConf struct {
-	Options       *redis.Options
-	Authorization string
-	MaxRetries    int
-	UserAgent     string
+	Options    *redis.Options
+	MaxRetries int
 }
 
 func NewRedisRatelimiter(conf *RedisConf) (*RedisRatelimiter, error) {
+	// TODO: Allow this client to be injected.
 	r := redis.NewClient(conf.Options)
 	if _, err := r.Ping(context.Background()).Result(); err != nil {
 		return nil, err
 	}
 	return &RedisRatelimiter{
-		redis:         r,
-		http:          &http.Client{Timeout: time.Second * 5},
-		authorization: conf.Authorization,
-		redsync:       redsync.New(goredis.NewPool(r)),
-		MaxRetries:    conf.MaxRetries,
-		UserAgent:     conf.UserAgent,
+		redis:      r,
+		redsync:    redsync.New(goredis.NewPool(r)),
+		MaxRetries: conf.MaxRetries,
 	}, nil
 }
 
 type RedisRatelimiter struct {
-	redis         *redis.Client
-	redsync       *redsync.Redsync
-	http          *http.Client
-	authorization string
-	MaxRetries    int
-	UserAgent     string
+	redis      *redis.Client
+	redsync    *redsync.Redsync
+	MaxRetries int
 }
 
 func (r *RedisRatelimiter) getSleepTime(bucketID string) (time.Duration, error) {
@@ -88,12 +78,13 @@ func (r *RedisRatelimiter) acquireLock(bucketID string, opts ...redsync.Option) 
 	return mutex, nil
 }
 
-func (r *RedisRatelimiter) updateBucket(key string, resp *http.Response) error {
+func (r *RedisRatelimiter) updateBucket(key string, resp *DiscordResponse) error {
 	if resp == nil {
 		return nil
 	}
 
 	headers := resp.Header
+
 	remaining := headers.Get("X-RateLimit-Remaining")
 	reset := headers.Get("X-RateLimit-Reset")
 	global := headers.Get("X-RateLimit-Global")
@@ -140,42 +131,12 @@ func (r *RedisRatelimiter) updateBucket(key string, resp *http.Response) error {
 	return nil
 }
 
-func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body []byte, bucketID string, retries int, headers http.Header) (*DiscordResponse, error) {
+func (r *RedisRatelimiter) requestLocked(httpClient HTTPClient, req *request, bucketID string, retries int) (*DiscordResponse, error) {
 	if r.MaxRetries > 0 && r.MaxRetries < retries {
 		return nil, ErrMaxRetriesExceeded
 	}
-	var reader io.Reader = nil
-	if body != nil {
-		reader = bytes.NewReader(body)
-	}
-	req, err := http.NewRequest(method, url, reader)
-	if err != nil {
-		return nil, err
-	}
 
-	if body != nil {
-		req.Header.Set("Content-Type", contentType)
-	}
-
-	if r.UserAgent != "" {
-		req.Header.Set("User-Agent", r.UserAgent)
-	}
-
-	if len(r.authorization) > 0 {
-		req.Header.Set("authorization", r.authorization)
-	}
-
-	for k := range headers {
-		// Overwrite previous headers
-		v := headers.Get(k)
-		if v == "" {
-			req.Header.Del(k)
-		} else {
-			req.Header.Set(k, v)
-		}
-	}
-
-	resp, err := r.http.Do(req)
+	resp, err := httpClient.Request(req)
 	if err != nil {
 		_ = r.updateBucket(bucketID, resp)
 		return nil, err
@@ -194,38 +155,20 @@ func (r *RedisRatelimiter) requestLocked(method, url, contentType string, body [
 		if delay > time.Duration(0) {
 			time.Sleep(delay)
 		}
-		return r.requestLocked(method, url, contentType, body, bucketID, retries+1, headers)
+		return r.requestLocked(httpClient, req, bucketID, retries+1)
 	case http.StatusBadGateway:
-		return r.requestLocked(method, url, contentType, body, bucketID, retries+1, headers)
+		return r.requestLocked(httpClient, req, bucketID, retries+1)
 	}
 
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DiscordResponse{
-		Body:   respBody,
-		Status: resp.StatusCode,
-	}, nil
+	return resp, nil
 }
 
-func (r *RedisRatelimiter) Request(method, url, contentType string, body []byte) (*DiscordResponse, error) {
-	bucketID := getBucketID(url)
+func (r *RedisRatelimiter) Request(httpClient HTTPClient, req *request) (*DiscordResponse, error) {
+	bucketID := getBucketID(req.path)
 	mutex, err := r.acquireLock(bucketID)
 	if err != nil {
 		return nil, err
 	}
 	defer mutex.Unlock()
-	return r.requestLocked(method, url, contentType, body, bucketID, 0, nil)
-}
-
-func (r *RedisRatelimiter) RequestWithHeaders(method, url, contentType string, body []byte, headers http.Header) (*DiscordResponse, error) {
-	bucketID := getBucketID(url)
-	mutex, err := r.acquireLock(bucketID)
-	if err != nil {
-		return nil, err
-	}
-	defer mutex.Unlock()
-	return r.requestLocked(method, url, contentType, body, bucketID, 0, headers)
+	return r.requestLocked(httpClient, req, bucketID, 0)
 }

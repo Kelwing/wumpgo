@@ -1,9 +1,6 @@
 package rest
 
 import (
-	"bytes"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
@@ -12,20 +9,15 @@ import (
 )
 
 type MemoryConf struct {
-	Authorization string
-	MaxRetries    int
-	UserAgent     string
+	MaxRetries int
 }
 
 func NewMemoryRatelimiter(conf *MemoryConf) *MemoryRatelimiter {
 	global := int64(0)
 	return &MemoryRatelimiter{
-		http:          &http.Client{Timeout: time.Second * 5},
-		authorization: conf.Authorization,
-		MaxRetries:    conf.MaxRetries,
-		UserAgent:     conf.UserAgent,
-		buckets:       make(map[string]*memoryBucket),
-		global:        &global,
+		MaxRetries: conf.MaxRetries,
+		buckets:    make(map[string]*memoryBucket),
+		global:     &global,
 	}
 }
 
@@ -40,12 +32,9 @@ type memoryBucket struct {
 
 type MemoryRatelimiter struct {
 	sync.Mutex
-	http          *http.Client
-	authorization string
-	MaxRetries    int
-	UserAgent     string
-	buckets       map[string]*memoryBucket
-	global        *int64
+	MaxRetries int
+	buckets    map[string]*memoryBucket
+	global     *int64
 }
 
 func (m *MemoryRatelimiter) getSleepTime(bucket *memoryBucket) time.Duration {
@@ -61,47 +50,16 @@ func (m *MemoryRatelimiter) getSleepTime(bucket *memoryBucket) time.Duration {
 	return time.Duration(0)
 }
 
-func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body []byte, bucket *memoryBucket, retries int, headers http.Header) (*DiscordResponse, error) {
+func (m *MemoryRatelimiter) requestLocked(httpClient HTTPClient, r *request, bucket *memoryBucket, retries int) (*DiscordResponse, error) {
 	if m.MaxRetries > 0 && m.MaxRetries < retries {
 		return nil, ErrMaxRetriesExceeded
-	}
-
-	var reader io.Reader = nil
-	if body != nil {
-		reader = bytes.NewReader(body)
-	}
-
-	req, err := http.NewRequest(method, url, reader)
-	if err != nil {
-		return nil, err
-	}
-
-	if body != nil {
-		req.Header.Set("Content-Type", contentType)
-	}
-
-	if m.UserAgent != "" {
-		req.Header.Set("User-Agent", m.UserAgent)
-	}
-
-	if len(m.authorization) > 0 {
-		req.Header.Set("authorization", m.authorization)
-	}
-
-	for k := range headers {
-		v := headers.Get(k)
-		if v == "" {
-			req.Header.Del(k)
-		} else {
-			req.Header.Set(k, v)
-		}
 	}
 
 	if delay := m.getSleepTime(bucket); delay > time.Duration(0) {
 		time.Sleep(delay)
 	}
 
-	resp, err := m.http.Do(req)
+	resp, err := httpClient.Request(r)
 	if err != nil {
 		_ = m.updateBucket(bucket, resp)
 		return nil, err
@@ -116,25 +74,17 @@ func (m *MemoryRatelimiter) requestLocked(method, url, contentType string, body 
 		if delay := m.getSleepTime(bucket); delay > time.Duration(0) {
 			time.Sleep(delay)
 		}
-		return m.requestLocked(method, url, contentType, body, bucket, retries+1, headers)
+		return m.requestLocked(httpClient, r, bucket, retries+1)
 	case http.StatusBadGateway:
-		return m.requestLocked(method, url, contentType, body, bucket, retries+1, headers)
+		return m.requestLocked(httpClient, r, bucket, retries+1)
 	}
 
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DiscordResponse{
-		Body:   respBody,
-		Status: resp.StatusCode,
-	}, nil
+	return resp, nil
 }
 
-func (m *MemoryRatelimiter) Request(method, url, contentType string, body []byte) (*DiscordResponse, error) {
+func (m *MemoryRatelimiter) Request(httpClient HTTPClient, req *request) (*DiscordResponse, error) {
 	m.Lock()
-	bucketID := getBucketID(url)
+	bucketID := getBucketID(req.path)
 	bucket, ok := m.buckets[bucketID]
 	if !ok {
 		bucket = &memoryBucket{id: bucketID}
@@ -143,24 +93,10 @@ func (m *MemoryRatelimiter) Request(method, url, contentType string, body []byte
 	bucket.Lock()
 	m.Unlock()
 	defer bucket.Unlock()
-	return m.requestLocked(method, url, contentType, body, bucket, 0, nil)
+	return m.requestLocked(httpClient, req, bucket, 0)
 }
 
-func (m *MemoryRatelimiter) RequestWithHeaders(method, url, contentType string, body []byte, headers http.Header) (*DiscordResponse, error) {
-	m.Lock()
-	bucketID := getBucketID(url)
-	bucket, ok := m.buckets[bucketID]
-	if !ok {
-		bucket = &memoryBucket{id: bucketID}
-		m.buckets[bucketID] = bucket
-	}
-	bucket.Lock()
-	m.Unlock()
-	defer bucket.Unlock()
-	return m.requestLocked(method, url, contentType, body, bucket, 0, headers)
-}
-
-func (m *MemoryRatelimiter) updateBucket(bucket *memoryBucket, resp *http.Response) error {
+func (m *MemoryRatelimiter) updateBucket(bucket *memoryBucket, resp *DiscordResponse) error {
 	if resp == nil {
 		return nil
 	}
