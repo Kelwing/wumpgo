@@ -47,36 +47,46 @@ var NonExistentOption = errors.New("interaction option doesn't exist on command"
 // MismatchedOption is thrown when the option types mismatch.
 var MismatchedOption = errors.New("mismatched interaction option")
 
+// Defines the options for command execution.
+type commandExecutionOptions struct {
+	restClient       *rest.Client
+	exceptionHandler func(error) *objects.InteractionResponse
+	allowedMentions  *objects.AllowedMentions
+	interaction      *objects.Interaction
+	data             *objects.ApplicationCommandInteractionData
+	options          []*objects.ApplicationCommandInteractionDataOption
+}
+
 // Execute the command.
-func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
+func (c *Command) execute(opts commandExecutionOptions) *objects.InteractionResponse {
 	// Process the options.
 	mappedOptions := map[string]interface{}{}
 
-	if data.TargetID != 0 {
+	if opts.data.TargetID != 0 {
 		// Add a special case for "/target". The slash is there as a keyword.
-		if _, ok := data.Resolved.Messages[data.TargetID]; ok {
+		if _, ok := opts.data.Resolved.Messages[opts.data.TargetID]; ok {
 			mappedOptions["/target"] = &ResolvableMessage{
-				id:   strconv.FormatUint(uint64(data.TargetID), 10),
-				data: data,
+				id:   strconv.FormatUint(uint64(opts.data.TargetID), 10),
+				data: opts.data,
 			}
-		} else if _, ok = data.Resolved.Users[data.TargetID]; ok {
+		} else if _, ok = opts.data.Resolved.Users[opts.data.TargetID]; ok {
 			mappedOptions["/target"] = &ResolvableUser{
-				id:   strconv.FormatUint(uint64(data.TargetID), 10),
-				data: data,
+				id:   strconv.FormatUint(uint64(opts.data.TargetID), 10),
+				data: opts.data,
 			}
 		}
 	} else {
-		for _, v := range options {
+		for _, v := range opts.options {
 			// Find the option.
 			option := findOption(v.Name, c.Options)
 			if option == nil {
 				// Option was provided that was not in this command.
-				return exceptionHandler(NonExistentOption)
+				return opts.exceptionHandler(NonExistentOption)
 			}
 
 			// Check the option and result match types.
 			if objects.ApplicationCommandOptionType(v.Type) != option.OptionType {
-				return exceptionHandler(MismatchedOption)
+				return opts.exceptionHandler(MismatchedOption)
 			}
 
 			// Check what the type is.
@@ -84,17 +94,17 @@ func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) 
 			case objects.TypeChannel:
 				mappedOptions[option.Name] = &ResolvableChannel{
 					id:   v.Value.(string),
-					data: data,
+					data: opts.data,
 				}
 			case objects.TypeRole:
 				mappedOptions[option.Name] = &ResolvableRole{
 					id:   v.Value.(string),
-					data: data,
+					data: opts.data,
 				}
 			case objects.TypeUser:
 				mappedOptions[option.Name] = &ResolvableUser{
 					id:   v.Value.(string),
-					data: data,
+					data: opts.data,
 				}
 			case objects.TypeString:
 				mappedOptions[option.Name] = v.Value.(string)
@@ -105,7 +115,7 @@ func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) 
 			case objects.TypeMentionable:
 				mappedOptions[option.Name] = &ResolvableMentionable{
 					id:   v.Value.(string),
-					data: data,
+					data: opts.data,
 				}
 			}
 		}
@@ -113,19 +123,24 @@ func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) 
 
 	// Get the allowed mentions configuration.
 	if c.AllowedMentions != nil {
-		allowedMentions = c.AllowedMentions
+		opts.allowedMentions = c.AllowedMentions
 	}
 
 	// Attempt to catch errors from here.
 	defer func() {
 		if errGeneric := recover(); errGeneric != nil {
 			// Shouldn't try and return from defer.
-			exceptionHandler(ungenericError(errGeneric))
+			opts.exceptionHandler(ungenericError(errGeneric))
 		}
 	}()
 
 	// Create the context.
-	rctx := &CommandRouterCtx{globalAllowedMentions: allowedMentions, errorHandler: exceptionHandler, Interaction: interaction, Command: data.Name, Options: mappedOptions, RESTClient: restClient}
+	rctx := &CommandRouterCtx{
+		globalAllowedMentions: opts.allowedMentions,
+		errorHandler:          opts.exceptionHandler,
+		Interaction:           opts.interaction, Command: opts.data.Name,
+		Options: mappedOptions, RESTClient: opts.restClient,
+	}
 
 	// Run the command.
 	handler := c.Function
@@ -134,7 +149,7 @@ func (c *Command) execute(restClient *rest.Client, exceptionHandler func(error) 
 		handler = func(ctx *CommandRouterCtx) error { return nil }
 	}
 	if err := handler(rctx); err != nil {
-		return exceptionHandler(err)
+		return opts.exceptionHandler(err)
 	}
-	return rctx.buildResponse(false, exceptionHandler, allowedMentions)
+	return rctx.buildResponse(false, opts.exceptionHandler, opts.allowedMentions)
 }

@@ -230,50 +230,66 @@ var CommandDoesNotExist = errors.New("the command does not exist")
 // GroupDoesNotExist is thrown when the group specified does not exist.
 var GroupDoesNotExist = errors.New("the group does not exist")
 
+type groupExecutionOptions struct {
+	restClient       *rest.Client
+	exceptionHandler func(error) *objects.InteractionResponse
+	allowedMentions  *objects.AllowedMentions
+	interaction      *objects.Interaction
+	data             *objects.ApplicationCommandInteractionData
+	nextLevel        *objects.ApplicationCommandInteractionDataOption
+}
+
 // Execute the group.
-func (c *CommandGroup) execute(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, allowedMentions *objects.AllowedMentions, interaction *objects.Interaction, data *objects.ApplicationCommandInteractionData, nextLevel *objects.ApplicationCommandInteractionDataOption) *objects.InteractionResponse {
-	if len(data.Options) != 1 {
+func (c *CommandGroup) execute(opts groupExecutionOptions) *objects.InteractionResponse {
+	if len(opts.data.Options) != 1 {
 		// data.Options must be 1 here. A valid response will just contain the next node down the tree.
-		return exceptionHandler(CommandIsNotSubcommand)
+		return opts.exceptionHandler(CommandIsNotSubcommand)
 	}
 
 	// Do a switch on the type.
-	switch objects.ApplicationCommandOptionType(nextLevel.Type) {
+	switch objects.ApplicationCommandOptionType(opts.nextLevel.Type) {
 	case objects.TypeSubCommand:
 		// Expect a sub-command in the map and handle accordingly.
-		cmdIface, ok := c.Subcommands[nextLevel.Name]
+		cmdIface, ok := c.Subcommands[opts.nextLevel.Name]
 		if !ok {
 			// The command does not exist.
-			return exceptionHandler(CommandDoesNotExist)
+			return opts.exceptionHandler(CommandDoesNotExist)
 		}
 		cmd, ok := cmdIface.(*Command)
 		if !ok {
 			// Not a command.
-			return exceptionHandler(CommandIsSubcommand)
+			return opts.exceptionHandler(CommandIsSubcommand)
 		}
 		if c.AllowedMentions != nil {
-			allowedMentions = c.AllowedMentions
+			opts.allowedMentions = c.AllowedMentions
 		}
-		return cmd.execute(restClient, exceptionHandler, allowedMentions, interaction, data, nextLevel.Options)
+		return cmd.execute(commandExecutionOptions{
+			restClient:       opts.restClient,
+			exceptionHandler: opts.exceptionHandler,
+			allowedMentions:  opts.allowedMentions,
+			interaction:      opts.interaction,
+			data:             opts.data,
+			options:          opts.nextLevel.Options,
+		})
 	case objects.TypeSubCommandGroup:
 		// Expect a group in the map and handle accordingly.
-		cmdIface, ok := c.Subcommands[nextLevel.Name]
+		cmdIface, ok := c.Subcommands[opts.nextLevel.Name]
 		if !ok {
 			// The group does not exist.
-			return exceptionHandler(GroupDoesNotExist)
+			return opts.exceptionHandler(GroupDoesNotExist)
 		}
 		group, ok := cmdIface.(*CommandGroup)
 		if !ok {
 			// Not a group.
-			return exceptionHandler(CommandIsSubcommand)
+			return opts.exceptionHandler(CommandIsSubcommand)
 		}
 		if c.AllowedMentions != nil {
-			allowedMentions = c.AllowedMentions
+			opts.allowedMentions = c.AllowedMentions
 		}
-		return group.execute(restClient, exceptionHandler, allowedMentions, interaction, data, nextLevel.Options[0])
+		return group.execute(opts)
 	default:
 		// This is just a random argument.
-		return exceptionHandler(CommandIsNotSubcommand)
+		return opts.exceptionHandler(CommandIsNotSubcommand)
 	}
 }
 
@@ -303,7 +319,14 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 		switch x := cmd.(type) {
 		case *Command:
 			// Just go ahead and call execute. That will handle the option checking anyway.
-			return x.execute(restClient, exceptionHandler, baseAllowedMentions, interaction, &data, data.Options)
+			return x.execute(commandExecutionOptions{
+				restClient:       restClient,
+				exceptionHandler: exceptionHandler,
+				allowedMentions:  baseAllowedMentions,
+				interaction:      interaction,
+				data:             &data,
+				options:          data.Options,
+			})
 		case *CommandGroup:
 			if len(data.Options) != 1 {
 				// data.Options must be 1 here. A valid response will just contain the next node down the tree.
@@ -324,7 +347,14 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 					// Not a group.
 					return exceptionHandler(CommandIsNotSubcommand)
 				}
-				return group.execute(restClient, exceptionHandler, baseAllowedMentions, interaction, &data, option.Options[0])
+				return group.execute(groupExecutionOptions{
+					restClient:       restClient,
+					exceptionHandler: exceptionHandler,
+					allowedMentions:  baseAllowedMentions,
+					interaction:      interaction,
+					data:             &data,
+					nextLevel:        option.Options[0],
+				})
 			case objects.TypeSubCommand:
 				cmdIface, ok := x.Subcommands[option.Name]
 				if !ok {
@@ -336,7 +366,14 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 					// Not a command.
 					return exceptionHandler(CommandIsSubcommand)
 				}
-				return cmd.execute(restClient, exceptionHandler, baseAllowedMentions, interaction, &data, option.Options)
+				return cmd.execute(commandExecutionOptions{
+					restClient:       restClient,
+					exceptionHandler: exceptionHandler,
+					allowedMentions:  baseAllowedMentions,
+					interaction:      interaction,
+					data:             &data,
+					options:          option.Options,
+				})
 			default:
 				// Not a command.
 				return exceptionHandler(CommandDoesNotExist)

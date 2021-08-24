@@ -112,7 +112,7 @@ const optionInterface = `type {{ .OutputInterface }} interface {
 	DoubleOption(name, description string, required bool, choices []DoubleChoice) {{ .InterfaceName }}
 }`
 
-var builderTypes = []struct{
+var builderTypes = []struct {
 	Struct      string
 	BuilderType string
 	CommandType string
@@ -144,7 +144,7 @@ var builderTypes = []struct{
 	},
 }
 
-var interfaceTypes = []struct{
+var interfaceTypes = []struct {
 	InterfaceName   string
 	OutputInterface string
 }{
