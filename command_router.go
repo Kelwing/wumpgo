@@ -30,7 +30,7 @@ type CommandRouterCtx struct {
 	*objects.Interaction
 
 	// Command defines the command that was invoked.
-	Command string `json:"command"`
+	Command *Command `json:"command"`
 
 	// Options is used to define any options that were set in the context. Note that if an option is unset from Discord, it will not be in the map.
 	// Note that for User, Channel, Role, and Mentionable from Discord; a "*Resolvable<option type>" type is used. This will allow you to get the ID as a Snowflake, string, or attempt to get from resolved.
@@ -87,6 +87,9 @@ func memberTargetWrapper(cb func(*CommandRouterCtx, *objects.GuildMember) error)
 type CommandGroup struct {
 	level uint
 
+	// Defines the parent.
+	parent *CommandGroup
+
 	// Middleware defines all of the groups middleware.
 	Middleware []MiddlewareFunc `json:"middleware"`
 
@@ -127,6 +130,7 @@ func (c *CommandGroup) NewCommandGroup(name, description string, defaultPermissi
 		DefaultPermission: defaultPermission,
 		Subcommands:       map[string]interface{}{},
 	}
+	g.parent = c
 	c.Subcommands[name] = g
 	return g, nil
 }
@@ -156,7 +160,12 @@ func (c *CommandRouter) NewCommandGroup(name, description string, defaultPermiss
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
-	return c.roots.NewCommandGroup(name, description, defaultPermission)
+	g, err := c.roots.NewCommandGroup(name, description, defaultPermission)
+	if err != nil {
+		return nil, err
+	}
+	g.parent = nil
+	return g, nil
 }
 
 // NewCommandBuilder is used to create a builder for a *Command object.

@@ -13,6 +13,9 @@ type Command struct {
 	// Defines the command type.
 	commandType int
 
+	// Defines the parent.
+	parent *CommandGroup
+
 	// Description is the description for the command.
 	Description string `json:"description"`
 
@@ -141,8 +144,10 @@ func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.Lis
 	rctx := &CommandRouterCtx{
 		globalAllowedMentions: opts.allowedMentions,
 		errorHandler:          opts.exceptionHandler,
-		Interaction:           opts.interaction, Command: opts.data.Name,
-		Options: mappedOptions, RESTClient: opts.restClient,
+		Interaction:           opts.interaction,
+		Command:               c,
+		Options:               mappedOptions,
+		RESTClient:            opts.restClient,
 	}
 
 	// Run the command.
@@ -172,4 +177,13 @@ func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.Lis
 		}
 	}
 	return rctx.buildResponse(false, opts.exceptionHandler, opts.allowedMentions)
+}
+
+// Groups is used to get the command groups that this belongs to.
+func (c *Command) Groups() []*CommandGroup {
+	s := []*CommandGroup{}
+	for x := c.parent; x != nil; x = x.parent {
+		s = append([]*CommandGroup{x}, s...)
+	}
+	return s
 }

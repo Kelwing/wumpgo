@@ -72,7 +72,7 @@ func (c userCommandBuilder) Handler(handler func(*CommandRouterCtx, *objects.Gui
 }
 
 // NewCommandBuilder is used to create a builder for a *Command object.
-func (c CommandGroup) NewCommandBuilder(name string) SubCommandBuilder {
-	x := &commandBuilder{name: name, map_: c.Subcommands, cmd: Command{commandType: int(objects.CommandTypeChatInput)}}
+func (c *CommandGroup) NewCommandBuilder(name string) SubCommandBuilder {
+	x := &commandBuilder{name: name, map_: c.Subcommands, cmd: Command{commandType: int(objects.CommandTypeChatInput), parent: c}}
 	return subcommandBuilder{x}
 }
