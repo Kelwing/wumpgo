@@ -2,10 +2,11 @@ package rest
 
 import (
 	"fmt"
-	"github.com/Postcord/objects"
-	"github.com/google/go-querystring/query"
 	"net/http"
 	"net/url"
+
+	"github.com/Postcord/objects"
+	"github.com/google/go-querystring/query"
 )
 
 type GetInviteParams struct {

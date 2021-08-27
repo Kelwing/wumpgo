@@ -198,12 +198,13 @@ func (c *Client) ModifyWebhookWithToken(id objects.Snowflake, token string, para
 		reason = params.Reason
 	}
 
-	res, err := c.requestNoAuth(&request{
+	res, err := c.request(&request{
 		method:      http.MethodPatch,
 		path:        fmt.Sprintf(WebhookWithTokenFmt, id, token),
 		contentType: JsonContentType,
 		body:        data,
 		reason:      reason,
+		omitAuth:    true,
 	})
 	if err != nil {
 		return nil, err
@@ -238,10 +239,11 @@ func (c *Client) DeleteWebhook(id objects.Snowflake) error {
 }
 
 func (c *Client) DeleteWebhookWithToken(id objects.Snowflake, token string) error {
-	res, err := c.requestNoAuth(&request{
+	res, err := c.request(&request{
 		method:      http.MethodDelete,
 		path:        fmt.Sprintf(WebhookWithTokenFmt, id, token),
 		contentType: JsonContentType,
+		omitAuth:    true,
 	})
 	if err != nil {
 		return err
@@ -326,11 +328,12 @@ func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *Exec
 
 	u.RawQuery = v.Encode()
 
-	res, err := c.requestNoAuth(&request{
+	res, err := c.request(&request{
 		method:      http.MethodPost,
 		path:        u.String(),
 		contentType: contentType,
 		body:        body,
+		omitAuth:    true,
 	})
 	if err != nil {
 		return nil, err
@@ -340,7 +343,7 @@ func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *Exec
 		return nil, err
 	}
 
-	if res.Status == http.StatusNoContent {
+	if res.StatusCode == http.StatusNoContent {
 		return nil, nil
 	}
 
@@ -404,11 +407,12 @@ func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake
 		return nil, err
 	}
 
-	res, err := c.requestNoAuth(&request{
+	res, err := c.request(&request{
 		method:      http.MethodPatch,
 		path:        fmt.Sprintf(EditOriginalInteractionResponseFmt, applicationID, token),
 		contentType: JsonContentType,
 		body:        data,
+		omitAuth:    true,
 	})
 	if err != nil {
 		return nil, err

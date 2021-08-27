@@ -86,8 +86,8 @@ func (p *ProxyRateLimiter) proxiedRequest(method, url, contentType string, body 
 	}
 
 	return &DiscordResponse{
-		Body:   respBody,
-		Status: resp.StatusCode,
+		Body:       respBody,
+		StatusCode: resp.StatusCode,
 	}, nil
 }
 

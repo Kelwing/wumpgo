@@ -1,8 +1,9 @@
 package rest
 
 import (
-	"github.com/Postcord/objects"
 	"net/http"
+
+	"github.com/Postcord/objects"
 )
 
 func (c *Client) GetVoiceRegions() ([]*objects.VoiceRegion, error) {
