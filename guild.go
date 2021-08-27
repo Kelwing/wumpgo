@@ -531,7 +531,7 @@ func (c *Client) GetGuildBans(guild objects.Snowflake) ([]*objects.Ban, error) {
 	return bans, nil
 }
 
-func (c *Client) GetBan(guild, user objects.Snowflake) (*objects.Ban, error) {
+func (c *Client) GetGuildBan(guild, user objects.Snowflake) (*objects.Ban, error) {
 	res, err := c.request(&request{
 		method:      http.MethodGet,
 		path:        fmt.Sprintf(GuildBanUserFmt, guild, user),
@@ -573,7 +573,7 @@ func (c *Client) CreateBan(guild, user objects.Snowflake, params *CreateGuildBan
 		return err
 	}
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
+	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
 		return err
 	}
 	return nil
