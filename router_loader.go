@@ -39,8 +39,13 @@ type CombinedRouter struct {
 }
 
 func (l *loaderBuilder) CombinedRouter(router *CombinedRouter) LoaderBuilder {
-	l.components = &router.ComponentRouter
-	l.commands = &router.CommandRouter
+	if router == nil {
+		l.components = nil
+		l.commands = nil
+	} else {
+		l.components = &router.ComponentRouter
+		l.commands = &router.CommandRouter
+	}
 	return l
 }
 

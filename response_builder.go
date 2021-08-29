@@ -74,6 +74,9 @@ func (r *responseBuilder) buildResponse(component bool, errorHandler func(error)
 
 // Internal method to edit embeds.
 func (r *responseBuilder) editEmbed(embed *objects.Embed, appendEmbed bool) {
+	if embed == nil {
+		return
+	}
 	d := r.ResponseData()
 	if appendEmbed {
 		d.Embeds = append(d.Embeds, embed)
@@ -84,6 +87,9 @@ func (r *responseBuilder) editEmbed(embed *objects.Embed, appendEmbed bool) {
 
 // Internal method to edit components.
 func (r *responseBuilder) editComponent(component *objects.Component, appendComponent bool) {
+	if component == nil {
+		return
+	}
 	d := r.ResponseData()
 	if appendComponent {
 		d.Components = append(d.Components, component)
