@@ -75,7 +75,7 @@ const (
 	UsersMeFmt      = UsersFmt + "/@me"
 	UsersMeGuilds   = UsersMeFmt + "/guilds"
 	UsersMeGuild    = UsersMeGuilds + "/%d"
-	UsersMeChannels = UsersMeFmt + "/guilds"
+	UsersMeChannels = UsersMeFmt + "/channels"
 	UserFmt         = UsersFmt + "/%d"
 	UserConnections = UsersMeFmt + "/connections"
 
