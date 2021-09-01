@@ -3,7 +3,6 @@ package router
 import "github.com/Postcord/objects"
 
 type commandBuilder struct {
-	name string
 	map_ map[string]interface{}
 	cmd  Command
 }
@@ -29,7 +28,7 @@ func (c *commandBuilder) Handler(handler func(*CommandRouterCtx) error) CommandB
 }
 
 func (c *commandBuilder) Build() (*Command, error) {
-	c.map_[c.name] = &c.cmd
+	c.map_[c.cmd.Name] = &c.cmd
 	return &c.cmd, nil
 }
 
@@ -73,6 +72,6 @@ func (c userCommandBuilder) Handler(handler func(*CommandRouterCtx, *objects.Gui
 
 // NewCommandBuilder is used to create a builder for a *Command object.
 func (c *CommandGroup) NewCommandBuilder(name string) SubCommandBuilder {
-	x := &commandBuilder{name: name, map_: c.Subcommands, cmd: Command{commandType: int(objects.CommandTypeChatInput), parent: c}}
+	x := &commandBuilder{map_: c.Subcommands, cmd: Command{Name: name, commandType: int(objects.CommandTypeChatInput), parent: c}}
 	return subcommandBuilder{x}
 }

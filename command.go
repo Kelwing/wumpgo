@@ -16,6 +16,9 @@ type Command struct {
 	// Defines the parent.
 	parent *CommandGroup
 
+	// Name is the commands name.
+	Name string `json:"name"`
+
 	// Description is the description for the command.
 	Description string `json:"description"`
 
