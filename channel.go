@@ -51,3 +51,10 @@ type FollowedChannel struct {
 	ChannelID Snowflake `json:"channel_id"`
 	WebhookID Snowflake `json:"webhook_id"`
 }
+
+type ThreadMember struct {
+	ID       Snowflake `json:"id"`
+	UserID   Snowflake `json:"user_id"`
+	JoinedAt Time      `json:"join_timestamp"`
+	Flags    uint      `json:"flags"`
+}
