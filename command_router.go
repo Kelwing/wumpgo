@@ -173,7 +173,7 @@ func (c *CommandRouter) NewCommandBuilder(name string) CommandBuilder {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
-	return &commandBuilder{name: name, map_: c.roots.Subcommands}
+	return &commandBuilder{cmd: Command{Name: name}, map_: c.roots.Subcommands}
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
