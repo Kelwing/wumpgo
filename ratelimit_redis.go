@@ -169,6 +169,8 @@ func (r *RedisRatelimiter) Request(httpClient HTTPClient, req *request) (*Discor
 	if err != nil {
 		return nil, err
 	}
-	defer mutex.Unlock()
+	defer func() {
+		_, _ = mutex.Unlock()
+	}()
 	return r.requestLocked(httpClient, req, bucketID, 0)
 }
