@@ -103,7 +103,8 @@ func (r *request) SendRaw(c *Client) (*DiscordResponse, error) {
 	}
 
 	if r.method == "GET" && c.cache != nil {
-		c.cache.Put(r.path, resp)
+		// if this fails, there's not much of a recovery that can be done
+		_ = c.cache.Put(r.path, resp)
 	}
 
 	return resp, err
