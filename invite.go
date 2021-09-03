@@ -26,47 +26,27 @@ func (c *Client) GetInvite(code string, params *GetInviteParams) (*objects.Invit
 
 	u.RawQuery = v.Encode()
 
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        u.String(),
-		contentType: JsonContentType,
-	})
+	invite := &objects.Invite{}
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(invite).
+		Send(c)
 
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	inv := &objects.Invite{}
-	if err = res.JSON(inv); err != nil {
-		return nil, err
-	}
-
-	return inv, nil
+	return invite, err
 }
 
 func (c *Client) DeleteInvite(code, reason string) (*objects.Invite, error) {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(InviteFmt, code),
-		contentType: JsonContentType,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
+	invite := &objects.Invite{}
+	err := NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(InviteFmt, code)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(invite).
+		Send(c)
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	inv := &objects.Invite{}
-	if err = res.JSON(inv); err != nil {
-		return nil, err
-	}
-
-	return inv, nil
+	return invite, err
 }

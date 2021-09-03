@@ -11,47 +11,29 @@ import (
 )
 
 func (c *Client) GetCurrentUser() (*objects.User, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        UsersMeFmt,
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
+	user := &objects.User{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(UsersMeFmt).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(user).
+		Send(c)
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	me := &objects.User{}
-	if err = res.JSON(me); err != nil {
-		return nil, err
-	}
-
-	return me, nil
+	return user, err
 }
 
 func (c *Client) GetUser(user objects.Snowflake) (*objects.User, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(UserFmt, user),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	u := &objects.User{}
-	if err = res.JSON(u); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(UserFmt, user)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(user).
+		Send(c)
 
-	return u, nil
+	return u, err
 }
 
 type ModifyCurrentUserParams struct {
@@ -70,27 +52,18 @@ func (c *Client) ModifyCurrentUser(params *ModifyCurrentUserParams) (*objects.Us
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        UsersMeFmt,
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	u := &objects.User{}
-	if err = res.JSON(u); err != nil {
-		return nil, err
-	}
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(UsersMeFmt).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Bind(u).
+		Send(c)
 
-	return u, nil
+	return u, err
 }
 
 type CurrentUserGuildsParams struct {
@@ -112,42 +85,24 @@ func (c *Client) GetCurrentUserGuilds(params *CurrentUserGuildsParams) ([]*objec
 
 	u.RawQuery = v.Encode()
 
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        u.String(),
-		contentType: JsonContentType,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	var guilds []*objects.Guild
-	if err = res.JSON(&guilds); err != nil {
-		return nil, err
-	}
-	return guilds, nil
+	guilds := []*objects.Guild{}
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(&guilds).
+		Send(c)
+	return guilds, err
 }
 
 func (c *Client) LeaveGuild(guild objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(UsersMeGuild, guild),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(UsersMeGuild, guild)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 type CreateDMParams struct {
@@ -166,27 +121,18 @@ func (c *Client) CreateDM(params *CreateDMParams) (*objects.Channel, error) {
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        UsersMeChannels,
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	channel := &objects.Channel{}
-	if err = res.JSON(channel); err != nil {
-		return nil, err
-	}
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(UsersMeChannels).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Bind(channel).
+		Send(c)
 
-	return channel, nil
+	return channel, err
 }
 
 type CreateGroupDMParams struct {
@@ -206,48 +152,29 @@ func (c *Client) CreateGroupDM(params *CreateGroupDMParams) (*objects.Channel, e
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        UsersMeChannels,
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	channel := &objects.Channel{}
-	if err = res.JSON(channel); err != nil {
-		return nil, err
-	}
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(UsersMeChannels).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Bind(channel).
+		Send(c)
 
-	return channel, nil
+	return channel, err
 }
 
 func (c *Client) GetUserConnections() ([]*objects.Connection, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        UserConnections,
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
+	connections := []*objects.Connection{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(UserConnections).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(&connections).
+		Send(c)
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	var conn []*objects.Connection
-	if err = res.JSON(&conn); err != nil {
-		return nil, err
-	}
-
-	return conn, nil
+	return connections, err
 }

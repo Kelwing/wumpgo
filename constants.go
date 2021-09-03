@@ -9,21 +9,31 @@ const (
 	JsonContentType = "application/json"
 
 	// Channels
-	ChannelBaseFmt        = BaseURL + "/channels/%d"
-	ChannelMessagesFmt    = ChannelBaseFmt + "/messages"
-	ChannelMessageFmt     = ChannelMessagesFmt + "/%d"
-	CrosspostMessageFmt   = ChannelMessageFmt + "/crosspost"
-	ReactionsBaseFmt      = ChannelMessageFmt + "/reactions"
-	ReactionsFmt          = ReactionsBaseFmt + "/%s"
-	ReactionFmt           = ReactionsFmt + "/%s"
-	ReactionUserFmt       = ReactionsFmt + "/%d"
-	BulkDeleteMessagesFmt = ChannelMessagesFmt + "/bulk-delete"
-	ChannelPermissionsFmt = ChannelBaseFmt + "/permissions/%d"
-	ChannelInvitesFmt     = ChannelBaseFmt + "/invites"
-	ChannelPinsFmt        = ChannelBaseFmt + "/pins"
-	ChannelPinnedFmt      = ChannelPinsFmt + "/%d"
-	ChannelFollowersFmt   = ChannelBaseFmt + "/followers"
-	ChannelTypingFmt      = ChannelBaseFmt + "/typing"
+	ChannelBaseFmt                   = BaseURL + "/channels/%d"
+	ChannelMessagesFmt               = ChannelBaseFmt + "/messages"
+	ChannelMessageFmt                = ChannelMessagesFmt + "/%d"
+	CrosspostMessageFmt              = ChannelMessageFmt + "/crosspost"
+	ReactionsBaseFmt                 = ChannelMessageFmt + "/reactions"
+	ReactionsFmt                     = ReactionsBaseFmt + "/%s"
+	ReactionFmt                      = ReactionsFmt + "/%s"
+	ReactionUserFmt                  = ReactionsFmt + "/%d"
+	BulkDeleteMessagesFmt            = ChannelMessagesFmt + "/bulk-delete"
+	ChannelPermissionsFmt            = ChannelBaseFmt + "/permissions/%d"
+	ChannelInvitesFmt                = ChannelBaseFmt + "/invites"
+	ChannelPinsFmt                   = ChannelBaseFmt + "/pins"
+	ChannelPinnedFmt                 = ChannelPinsFmt + "/%d"
+	ChannelFollowersFmt              = ChannelBaseFmt + "/followers"
+	ChannelTypingFmt                 = ChannelBaseFmt + "/typing"
+	ChannelMessageThreadsFmt         = ChannelMessageFmt + "/threads"
+	ChannelThreadsFmt                = ChannelBaseFmt + "/threads"
+	ChannelThreadMembersFmt          = ChannelBaseFmt + "/thread-members"
+	ChannelThreadMembersUserFmt      = ChannelThreadMembersFmt + "/%d"
+	ChannelThreadMembersMeFmt        = ChannelThreadMembersFmt + "/@me"
+	ChannelThreadsActiveFmt          = ChannelThreadsFmt + "/active"
+	ChannelThreadsArchivedFmt        = ChannelThreadsFmt + "/archived"
+	ChannelThreadsArchivedPublicFmt  = ChannelThreadsArchivedFmt + "/public"
+	ChannelThreadsArchivedPrivateFmt = ChannelThreadsArchivedFmt + "/private"
+	ChannelUsersMeThreadsArchivedFmt = ChannelBaseFmt + "/users/@me/threads/archived/private"
 
 	// Commands
 	ApplicationFmt              = BaseURL + "/applications"
@@ -51,6 +61,7 @@ const (
 	GuildVanityURLFmt                 = GuildBaseFmt + "/vanity-url"
 	GuildWidgetImageFmt               = GuildWidgetFmt + ".png"
 	GuildMembershipScreeningFmt       = GuildBaseFmt + "/member-verification"
+	GuildThreadsFmt                   = GuildBaseFmt + "/threads/active"
 
 	// Roles
 	GuildMemberRoleFmt = GuildBaseFmt + "/members/%d/roles/%d"
@@ -90,7 +101,8 @@ const (
 	WebhookMessageFmt   = WebhookWithTokenFmt + "/messages/%d"
 
 	// Interactions
-	EditOriginalInteractionResponseFmt = WebhookWithTokenFmt + "/messages/@original"
+	CreateInteractionResponseFmt   = BaseURL + "/interactions/%d/%s/callback"
+	OriginalInteractionResponseFmt = WebhookWithTokenFmt + "/messages/@original"
 
 	// Permissions
 	GuildApplicationCommandsPermissionsFmt = GuildApplicationsFmt + "/permissions"

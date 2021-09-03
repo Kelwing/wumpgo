@@ -40,7 +40,7 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 		rawReq.Header.Set("User-Agent", c.userAgent)
 	}
 
-	if req.omitAuth == false {
+	if !req.omitAuth {
 		rawReq.Header.Set("Authorization", c.authorization)
 	}
 
