@@ -288,7 +288,7 @@ func (c *Client) AddGuildMember(guild, user objects.Snowflake, params *AddGuildM
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusCreated).
+		Expect(http.StatusCreated, http.StatusNoContent).
 		Bind(member).
 		Send(c)
 
