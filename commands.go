@@ -83,8 +83,6 @@ func (c *Client) DeleteCommand(app, commandID objects.Snowflake) error {
 		ContentType(JsonContentType).
 		Expect(http.StatusNoContent).
 		Send(c)
-
-	return nil
 }
 
 func (c *Client) BulkOverwriteGlobalCommands(app objects.Snowflake, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
@@ -247,7 +245,7 @@ func (c *Client) EditApplicationCommandPermissions(app, guild, cmd objects.Snowf
 		Bind(&perms).
 		Send(c)
 
-	return &perms, nil
+	return &perms, err
 }
 
 func (c *Client) BatchEditApplicationCommandPermissions(app, guild objects.Snowflake, permissions []*objects.GuildApplicationCommandPermissions) ([]*objects.GuildApplicationCommandPermissions, error) {

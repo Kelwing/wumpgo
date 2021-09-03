@@ -25,7 +25,7 @@ func (c *Client) CreateGuildFromTemplate(code string, reason string) (*objects.G
 	guild := &objects.Guild{}
 	err := NewRequest().
 		Method(http.MethodPost).
-		Path(fmt.Sprintf(GuildTemplateFmt, code)).
+		Path(fmt.Sprintf(TemplateFmt, code)).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(guild).
@@ -38,7 +38,7 @@ func (c *Client) GetGuildTemplates(guild objects.Snowflake) ([]*objects.Template
 	templates := []*objects.Template{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(GuildTemplatesFmt, guild)).
+		Path(fmt.Sprintf(GuildTemplateFmt, guild)).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(templates).
@@ -66,7 +66,7 @@ func (c *Client) CreateGuildTemplate(guild objects.Snowflake, params *CreateGuil
 	template := &objects.Template{}
 	err = NewRequest().
 		Method(http.MethodPost).
-		Path(fmt.Sprintf(GuildTemplatesFmt, guild)).
+		Path(fmt.Sprintf(GuildTemplateFmt, guild)).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(template).
