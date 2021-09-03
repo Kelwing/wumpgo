@@ -13,7 +13,7 @@ func (c *Client) GetVoiceRegions() ([]*objects.VoiceRegion, error) {
 		Path(VoiceRegions).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(regions).
+		Bind(&regions).
 		Send(c)
 
 	return regions, err

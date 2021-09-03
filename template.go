@@ -41,7 +41,7 @@ func (c *Client) GetGuildTemplates(guild objects.Snowflake) ([]*objects.Template
 		Path(fmt.Sprintf(GuildTemplateFmt, guild)).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
-		Bind(templates).
+		Bind(&templates).
 		Send(c)
 	return templates, err
 }

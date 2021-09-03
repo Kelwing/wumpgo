@@ -140,7 +140,7 @@ func (c *Client) GetGuildChannels(id objects.Snowflake) ([]*objects.Channel, err
 		Path(fmt.Sprintf(GuildChannelsFmt, id)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(channels).
+		Bind(&channels).
 		Send(c)
 
 	return channels, err
@@ -213,7 +213,7 @@ func (c *Client) ListActiveThreads(id objects.Snowflake) ([]*ListThreadsResponse
 		Path(fmt.Sprintf(GuildThreadsFmt, id)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(channels).
+		Bind(&channels).
 		Send(c)
 
 	return channels, err
@@ -255,7 +255,7 @@ func (c *Client) ListGuildMembers(guild objects.Snowflake, params *ListGuildMemb
 		Path(u.String()).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(members).
+		Bind(&members).
 		Send(c)
 
 	return members, err
@@ -395,7 +395,7 @@ func (c *Client) GetGuildBans(guild objects.Snowflake) ([]*objects.Ban, error) {
 		Path(fmt.Sprintf(GuildBansFmt, guild)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(bans).
+		Bind(&bans).
 		Send(c)
 
 	return bans, err
@@ -451,7 +451,7 @@ func (c *Client) GetGuildRoles(guild objects.Snowflake) ([]*objects.Role, error)
 		Path(fmt.Sprintf(GuildRolesFmt, guild)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(roles).
+		Bind(&roles).
 		Send(c)
 	return roles, err
 }
@@ -506,7 +506,7 @@ func (c *Client) ModifyGuildRolePositions(guild objects.Snowflake, params []*Mod
 		ContentType(JsonContentType).
 		Body(data).
 		Expect(http.StatusOK).
-		Bind(roles).
+		Bind(&roles).
 		Send(c)
 
 	return roles, err
