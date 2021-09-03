@@ -34,7 +34,10 @@ func (r ResolvableUser) String() string {
 
 // Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
 func (r ResolvableUser) Resolve() *objects.User {
-	x, _ := r.data.Resolved.Users[r.Snowflake()]
+	x, ok := r.data.Resolved.Users[r.Snowflake()]
+	if !ok {
+		return nil
+	}
 	return &x
 }
 
@@ -62,7 +65,10 @@ func (r ResolvableChannel) String() string {
 
 // Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
 func (r ResolvableChannel) Resolve() *objects.Channel {
-	x, _ := r.data.Resolved.Channels[r.Snowflake()]
+	x, ok := r.data.Resolved.Channels[r.Snowflake()]
+	if !ok {
+		return nil
+	}
 	return &x
 }
 
@@ -90,7 +96,10 @@ func (r ResolvableRole) String() string {
 
 // Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
 func (r ResolvableRole) Resolve() *objects.Role {
-	x, _ := r.data.Resolved.Roles[r.Snowflake()]
+	x, ok := r.data.Resolved.Roles[r.Snowflake()]
+	if !ok {
+		return nil
+	}
 	return &x
 }
 
@@ -118,6 +127,9 @@ func (r ResolvableMessage) String() string {
 
 // Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
 func (r ResolvableMessage) Resolve() *objects.Message {
-	x, _ := r.data.Resolved.Messages[r.Snowflake()]
+	x, ok := r.data.Resolved.Messages[r.Snowflake()]
+	if !ok {
+		return nil
+	}
 	return &x
 }
