@@ -22,6 +22,111 @@ type Client struct {
 	cache       Cache
 }
 
+type request struct {
+	method      string
+	path        string
+	contentType string
+	body        []byte
+	reason      string
+
+	omitAuth bool
+
+	headers http.Header
+
+	out            interface{}
+	expectedStatus []int
+}
+
+func NewRequest() *request {
+	return &request{}
+}
+
+func (r *request) Expect(status ...int) *request {
+	r.expectedStatus = status
+	return r
+}
+
+func (r *request) OmitAuth() *request {
+	r.omitAuth = true
+	return r
+}
+
+func (r *request) Bind(out interface{}) *request {
+	r.out = out
+	return r
+}
+
+func (r *request) Method(method string) *request {
+	r.method = method
+	return r
+}
+
+func (r *request) Path(path string) *request {
+	r.path = path
+	return r
+}
+
+func (r *request) Body(body []byte) *request {
+	r.body = body
+	return r
+}
+
+func (r *request) ContentType(contentType string) *request {
+	r.contentType = contentType
+	return r
+}
+
+func (r *request) Reason(reason string) *request {
+	r.reason = reason
+	return r
+}
+
+func (r *request) SendRaw(c *Client) (*DiscordResponse, error) {
+	if r.method == "GET" && c.cache != nil {
+		data, err := c.cache.Get(r.path)
+		if err == nil {
+			return data, nil
+		}
+	}
+	var resp *DiscordResponse
+	var err error
+	if c.rateLimiter != nil {
+		resp, err = c.rateLimiter.Request(c.httpClient, r)
+	} else {
+		resp, err = c.httpClient.Request(r)
+	}
+
+	for _, status := range r.expectedStatus {
+		if err = resp.ExpectsStatus(status); err != nil {
+			return nil, err
+		}
+	}
+
+	if r.method == "GET" && c.cache != nil {
+		c.cache.Put(r.path, resp)
+	}
+
+	return resp, err
+}
+
+func (r *request) Send(c *Client) error {
+	r.headers = make(http.Header)
+	if r.reason != "" && r.headers.Get(XAuditLogReasonHeader) == "" {
+		r.headers.Set(XAuditLogReasonHeader, r.reason)
+	}
+
+	resp, err := r.SendRaw(c)
+	if err != nil {
+		return err
+	}
+
+	if r.out != nil {
+		return resp.JSON(r.out)
+	} else {
+		return nil
+	}
+}
+
 func New(config *Config) *Client {
 	return &Client{
 		rateLimiter: config.Ratelimiter,
@@ -35,30 +140,30 @@ func New(config *Config) *Client {
 	}
 }
 
-func (c *Client) request(req *request) (*DiscordResponse, error) {
-	req.headers = make(http.Header)
-	if req.reason != "" && req.headers.Get(XAuditLogReasonHeader) == "" {
-		req.headers.Set(XAuditLogReasonHeader, req.reason)
-	}
+// func (c *Client) request(req *request) (*DiscordResponse, error) {
+// 	req.headers = make(http.Header)
+// 	if req.reason != "" && req.headers.Get(XAuditLogReasonHeader) == "" {
+// 		req.headers.Set(XAuditLogReasonHeader, req.reason)
+// 	}
 
-	if req.method == "GET" && c.cache != nil {
-		data, err := c.cache.Get(req.path)
-		if err == nil {
-			return data, nil
-		}
-	}
+// 	if req.method == "GET" && c.cache != nil {
+// 		data, err := c.cache.Get(req.path)
+// 		if err == nil {
+// 			return data, nil
+// 		}
+// 	}
 
-	var resp *DiscordResponse
-	var err error
-	if c.rateLimiter != nil {
-		resp, err = c.rateLimiter.Request(c.httpClient, req)
-	} else {
-		resp, err = c.httpClient.Request(req)
-	}
+// 	var resp *DiscordResponse
+// 	var err error
+// 	if c.rateLimiter != nil {
+// 		resp, err = c.rateLimiter.Request(c.httpClient, req)
+// 	} else {
+// 		resp, err = c.httpClient.Request(req)
+// 	}
 
-	if req.method == "GET" && c.cache != nil {
-		c.cache.Put(req.path, resp)
-	}
+// 	if req.method == "GET" && c.cache != nil {
+// 		c.cache.Put(req.path, resp)
+// 	}
 
-	return resp, err
-}
+// 	return resp, err
+// }

@@ -31,113 +31,71 @@ func (c *Client) CreateWebhook(channel objects.Snowflake, params *CreateWebhookP
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(ChannelWebhookFmt, channel),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	webhook := &objects.Webhook{}
-	if err = res.JSON(webhook); err != nil {
-		return nil, err
-	}
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelWebhookFmt, channel)).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Expect(http.StatusOK).
+		Bind(webhook).
+		Send(c)
 
-	return webhook, nil
+	return webhook, err
 }
 
 func (c *Client) GetChannelWebhooks(channel objects.Snowflake) ([]*objects.Webhook, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(ChannelWebhookFmt, channel),
-		contentType: JsonContentType,
-	})
+	webhooks := []*objects.Webhook{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(ChannelWebhookFmt, channel)).
+		ContentType(JsonContentType).
+		Expect(http.StatusOK).
+		Bind(&webhooks).
+		Send(c)
 
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	var webhooks []*objects.Webhook
-	if err = res.JSON(&webhooks); err != nil {
-		return nil, err
-	}
-	return webhooks, nil
+	return webhooks, err
 }
 
 func (c *Client) GetGuildWebhooks(guild objects.Snowflake) ([]*objects.Webhook, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(GuildWebhookFmt, guild),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
+	webhooks := []*objects.Webhook{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(GuildWebhookFmt, guild)).
+		ContentType(JsonContentType).
+		Expect(http.StatusOK).
+		Bind(&webhooks).
+		Send(c)
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	var webhooks []*objects.Webhook
-	if err = res.JSON(&webhooks); err != nil {
-		return nil, err
-	}
-	return webhooks, nil
+	return webhooks, err
 }
 
 func (c *Client) GetWebhook(id objects.Snowflake) (*objects.Webhook, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(WebhookFmt, id),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	webhook := &objects.Webhook{}
-	if err = res.JSON(webhook); err != nil {
-		return nil, err
-	}
-	return webhook, nil
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(WebhookFmt, id)).
+		ContentType(JsonContentType).
+		Expect(http.StatusOK).
+		Bind(webhook).
+		Send(c)
+
+	return webhook, err
 }
 
 func (c *Client) GetWebhookWithToken(id objects.Snowflake, token string) (*objects.Webhook, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(WebhookWithTokenFmt, id, token),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	webhook := &objects.Webhook{}
-	if err = res.JSON(webhook); err != nil {
-		return nil, err
-	}
-	return webhook, nil
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(WebhookWithTokenFmt, id, token)).
+		ContentType(JsonContentType).
+		Expect(http.StatusOK).
+		Bind(webhook).
+		OmitAuth().
+		Send(c)
+
+	return webhook, err
 }
 
 type ModifyWebhookParams struct {
@@ -158,27 +116,18 @@ func (c *Client) ModifyWebhook(id objects.Snowflake, params *ModifyWebhookParams
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(WebhookFmt, id),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	webhook := &objects.Webhook{}
-	if err = res.JSON(webhook); err != nil {
-		return nil, err
-	}
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(fmt.Sprintf(WebhookFmt, id)).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Expect(http.StatusOK).
+		Bind(webhook).
+		Send(c)
 
-	return webhook, nil
+	return webhook, err
 }
 
 type ModifyWebhookWithTokenParams struct {
@@ -198,60 +147,37 @@ func (c *Client) ModifyWebhookWithToken(id objects.Snowflake, token string, para
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(WebhookWithTokenFmt, id, token),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-		omitAuth:    true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return nil, err
-	}
-
 	webhook := &objects.Webhook{}
-	if err = res.JSON(webhook); err != nil {
-		return nil, err
-	}
-	return webhook, nil
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(fmt.Sprintf(WebhookWithTokenFmt, id, token)).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Expect(http.StatusOK).
+		Bind(webhook).
+		OmitAuth().
+		Send(c)
+	return webhook, err
 }
 
 func (c *Client) DeleteWebhook(id objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(WebhookFmt, id),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(WebhookFmt, id)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) DeleteWebhookWithToken(id objects.Snowflake, token string) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(WebhookWithTokenFmt, id, token),
-		contentType: JsonContentType,
-		omitAuth:    true,
-	})
-	if err != nil {
-		return err
-	}
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(WebhookWithTokenFmt, id, token)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		OmitAuth().
+		Send(c)
 }
 
 type ExecuteWebhookParams struct {
@@ -328,30 +254,17 @@ func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *Exec
 
 	u.RawQuery = v.Encode()
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        u.String(),
-		contentType: contentType,
-		body:        body,
-		omitAuth:    true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectAnyStatus(http.StatusOK, http.StatusNoContent); err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode == http.StatusNoContent {
-		return nil, nil
-	}
-
 	msg := &objects.Message{}
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
-	return msg, nil
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(u.String()).
+		ContentType(contentType).
+		Body(body).
+		Expect(http.StatusOK, http.StatusNoContent).
+		Bind(msg).
+		OmitAuth().Send(c)
+
+	return msg, err
 }
 
 type EditWebhookMessageParams struct {
@@ -367,60 +280,26 @@ func (c *Client) EditWebhookMessage(messageID, webhookID objects.Snowflake, toke
 		return nil, err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(WebhookMessageFmt, webhookID, token, messageID),
-		contentType: JsonContentType,
-		body:        data,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	msg := &objects.Message{}
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
-	return msg, nil
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(fmt.Sprintf(WebhookMessageFmt, webhookID, token, messageID)).
+		ContentType(JsonContentType).
+		Body(data).
+		Expect(http.StatusOK).
+		Bind(msg).
+		OmitAuth().
+		Send(c)
+
+	return msg, err
 }
 
 func (c *Client) DeleteWebhookMessage(messageID, webhookID objects.Snowflake, token string) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(WebhookMessageFmt, webhookID, token, messageID),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectAnyStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
-	data, err := json.Marshal(params)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(EditOriginalInteractionResponseFmt, applicationID, token),
-		contentType: JsonContentType,
-		body:        data,
-		omitAuth:    true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	msg := &objects.Message{}
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
-	return msg, nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(WebhookMessageFmt, webhookID, token, messageID)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		OmitAuth().
+		Send(c)
 }

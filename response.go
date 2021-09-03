@@ -47,15 +47,3 @@ func (r *DiscordResponse) ExpectAnyStatus(statusCodes ...int) error {
 		Status:  r.StatusCode,
 	}
 }
-
-type request struct {
-	method      string
-	path        string
-	contentType string
-	body        []byte
-	reason      string
-
-	omitAuth bool
-
-	headers http.Header
-}

@@ -15,25 +15,17 @@ import (
 )
 
 func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
-	resp, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(ChannelBaseFmt, id),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err = resp.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	channel := &objects.Channel{}
 
-	if err = resp.JSON(channel); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(ChannelBaseFmt, id)).
+		ContentType(JsonContentType).
+		Bind(channel).
+		Expect(http.StatusOK).
+		Send(c)
 
-	return channel, nil
+	return channel, err
 }
 
 type ModifyChannelParams struct {
@@ -60,52 +52,33 @@ func (c *Client) ModifyChannel(id objects.Snowflake, params *ModifyChannelParams
 	if params != nil {
 		reason = params.Reason
 	}
-
-	resp, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(ChannelBaseFmt, id),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err = resp.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	channel := &objects.Channel{}
 
-	if err = resp.JSON(channel); err != nil {
-		return nil, err
-	}
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(fmt.Sprintf(ChannelBaseFmt, id)).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Expect(http.StatusOK).
+		Bind(channel).
+		Send(c)
 
-	return channel, nil
+	return channel, err
 }
 
 func (c *Client) DeleteChannel(id objects.Snowflake, reason string) (*objects.Channel, error) {
-	resp, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ChannelBaseFmt, id),
-		contentType: JsonContentType,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = resp.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	channel := &objects.Channel{}
+	err := NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ChannelBaseFmt, id)).
+		Reason(reason).
+		ContentType(JsonContentType).
+		Expect(http.StatusOK).
+		Bind(channel).
+		Send(c)
 
-	if err = resp.JSON(channel); err != nil {
-		return nil, err
-	}
-
-	return channel, nil
+	return channel, err
 }
 
 type GetChannelMessagesParams struct {
@@ -126,89 +99,51 @@ func (c *Client) GetChannelMessages(id objects.Snowflake, params *GetChannelMess
 	}
 	u.RawQuery = q.Encode()
 
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        u.String(),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	var messages []*objects.Message
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		ContentType(JsonContentType).
+		Bind(&messages).
+		Expect(http.StatusOK).
+		Send(c)
 
-	if err = res.JSON(&messages); err != nil {
-		return nil, err
-	}
-
-	return messages, nil
+	return messages, err
 }
 
 func (c *Client) GetChannelMessage(channel, message objects.Snowflake) (*objects.Message, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(ChannelMessageFmt, channel, message),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	msg := &objects.Message{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
+		ContentType(JsonContentType).
+		Bind(msg).
+		Expect(http.StatusOK).
+		Send(c)
 
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
-
-	return msg, nil
+	return msg, err
 }
 
 func (c *Client) CrossPostMessage(channel, message objects.Snowflake) (*objects.Message, error) {
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(CrosspostMessageFmt, channel, message),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	msg := &objects.Message{}
+	err := NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(CrosspostMessageFmt, channel, message)).
+		ContentType(JsonContentType).
+		Bind(msg).
+		Expect(http.StatusOK).
+		Send(c)
 
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
-
-	return msg, nil
+	return msg, err
 }
 
 func (c *Client) DeleteMessage(channel, message objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ChannelMessageFmt, channel, message),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 type DeleteMessagesParams struct {
@@ -221,21 +156,13 @@ func (c *Client) BulkDeleteMessages(channel objects.Snowflake, params *DeleteMes
 		return err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(BulkDeleteMessagesFmt, channel),
-		contentType: JsonContentType,
-		body:        data,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(BulkDeleteMessagesFmt, channel)).
+		ContentType(JsonContentType).
+		Body(data).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 type EditChannelParams struct {
@@ -256,61 +183,37 @@ func (c *Client) EditChannelPermissions(channel, overwrite objects.Snowflake, pa
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPut,
-		path:        fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-	return nil
+	return NewRequest().
+		Method(http.MethodPut).
+		Path(fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite)).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) DeleteChannelPermission(channel, overwrite objects.Snowflake, reason string) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite),
-		contentType: JsonContentType,
-		reason:      reason,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite)).
+		Reason(reason).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) GetChannelInvites(channel objects.Snowflake) ([]*objects.Invite, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(ChannelInvitesFmt, channel),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	var invites []*objects.Invite
-	if err = res.JSON(&invites); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(ChannelInvitesFmt, channel)).
+		ContentType(JsonContentType).
+		Bind(&invites).
+		Expect(http.StatusOK).
+		Send(c)
 
-	return invites, nil
+	return invites, err
 }
 
 type CreateInviteParams struct {
@@ -334,27 +237,19 @@ func (c *Client) CreateChannelInvite(channel objects.Snowflake, params *CreateIn
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(ChannelInvitesFmt, channel),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	invite := &objects.Invite{}
 
-	if err = res.JSON(invite); err != nil {
-		return nil, err
-	}
-	return invite, nil
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelInvitesFmt, channel)).
+		ContentType(JsonContentType).
+		Body(data).
+		Reason(reason).
+		Bind(&invite).
+		Expect(http.StatusOK).
+		Send(c)
+
+	return invite, err
 }
 
 func (c *Client) getEmoji(emoji interface{}) (string, error) {
@@ -380,19 +275,12 @@ func (c *Client) CreateReaction(channel, message objects.Snowflake, emoji interf
 		return err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPut,
-		path:        fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-	return nil
+	return NewRequest().
+		Method(http.MethodPut).
+		Path(fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me")).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) DeleteOwnReaction(channel, message objects.Snowflake, emoji interface{}) error {
@@ -401,20 +289,12 @@ func (c *Client) DeleteOwnReaction(channel, message objects.Snowflake, emoji int
 		return err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me"),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me")).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) DeleteUserReaction(channel, message, user objects.Snowflake, emoji interface{}) error {
@@ -423,20 +303,12 @@ func (c *Client) DeleteUserReaction(channel, message, user objects.Snowflake, em
 		return err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ReactionUserFmt, channel, message, url.QueryEscape(react), user),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ReactionUserFmt, channel, message, url.QueryEscape(react), user)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 type GetReactionsParams struct {
@@ -462,40 +334,24 @@ func (c *Client) GetReactions(channel, message objects.Snowflake, emoji interfac
 	}
 	u.RawQuery = q.Encode()
 
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        u.String(),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	var users []*objects.User
-	if err = res.JSON(&users); err != nil {
-		return nil, err
-	}
-	return users, nil
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		ContentType(JsonContentType).
+		Bind(&users).
+		Expect(http.StatusOK).
+		Send(c)
+	return users, err
 }
 
 func (c *Client) DeleteAllReactions(channel, message objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ReactionsBaseFmt, channel, message),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ReactionsBaseFmt, channel, message)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) DeleteEmojiReactions(channel, message objects.Snowflake, emoji interface{}) error {
@@ -504,73 +360,43 @@ func (c *Client) DeleteEmojiReactions(channel, message objects.Snowflake, emoji 
 		return err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ReactionsFmt, channel, message, reaction),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ReactionsFmt, channel, message, reaction)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) GetPinnedMessages(channel objects.Snowflake) ([]*objects.Message, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(ChannelPinsFmt, channel),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	var messages []*objects.Message
-	if err = res.JSON(&messages); err != nil {
-		return nil, err
-	}
-	return messages, nil
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(ChannelPinsFmt, channel)).
+		ContentType(JsonContentType).
+		Bind(&messages).
+		Expect(http.StatusOK).
+		Send(c)
+
+	return messages, err
 }
 
 func (c *Client) AddPinnedMessage(channel, message objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodPut,
-		path:        fmt.Sprintf(ChannelPinnedFmt, channel, message),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-	return nil
+	return NewRequest().
+		Method(http.MethodPut).
+		Path(fmt.Sprintf(ChannelPinnedFmt, channel, message)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 func (c *Client) DeletePinnedMessage(channel, message objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ChannelPinnedFmt, channel, message),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return err
-	}
-
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
-	}
-	return nil
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ChannelPinnedFmt, channel, message)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
 }
 
 type CreateMessageFileParams struct {
@@ -637,27 +463,17 @@ func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageP
 			return nil, err
 		}
 	}
-
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(ChannelMessagesFmt, channel),
-		contentType: contentType,
-		body:        body,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	msg := &objects.Message{}
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelMessagesFmt, channel)).
+		ContentType(contentType).
+		Body(body).
+		Bind(&msg).
+		Expect(http.StatusOK).
+		Send(c)
 
-	return msg, nil
+	return msg, err
 }
 
 type EditMessageParams struct {
@@ -674,57 +490,197 @@ func (c *Client) EditMessage(channel, message objects.Snowflake, params *EditMes
 		return nil, err
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(ChannelMessageFmt, channel, message),
-		contentType: JsonContentType,
-		body:        body,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	msg := &objects.Message{}
-	if err = res.JSON(msg); err != nil {
-		return nil, err
-	}
-	return msg, nil
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
+		ContentType(JsonContentType).
+		Body(body).
+		Bind(&msg).
+		Expect(http.StatusOK).
+		Send(c)
+	return msg, err
 }
 
 func (c *Client) FollowNewsChannel(channel objects.Snowflake) (*objects.FollowedChannel, error) {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(ChannelFollowersFmt, channel),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	followedChannel := &objects.FollowedChannel{}
-	if err = res.JSON(followedChannel); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelFollowersFmt, channel)).
+		ContentType(JsonContentType).
+		Bind(&followedChannel).
+		Expect(http.StatusOK).
+		Send(c)
 
-	return followedChannel, nil
+	return followedChannel, err
 }
 
 func (c *Client) StartTyping(channel objects.Snowflake) error {
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(ChannelTypingFmt, channel),
-		contentType: JsonContentType,
-	})
+	return NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelTypingFmt, channel)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
+}
+
+type StartThreadParams struct {
+	Name                string `json:"name"`
+	AutoArchiveDuration int    `json:"auto_archive_duration"`
+	Type                int    `json:"type,omitempty"`
+	Invitable           bool   `json:"invitable,omitempty"`
+}
+
+func (c *Client) StartThreadWithMessage(channel objects.Snowflake, message objects.Snowflake, params *StartThreadParams) (*objects.Channel, error) {
+	body, err := json.Marshal(params)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err = res.ExpectsStatus(http.StatusNoContent); err != nil {
-		return err
+	thread := &objects.Channel{}
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelMessageThreadsFmt, channel, message)).
+		ContentType(JsonContentType).
+		Body(body).
+		Bind(&thread).
+		Expect(http.StatusOK).
+		Send(c)
+	return thread, err
+}
+
+func (c *Client) StartThread(channel objects.Snowflake, params *StartThreadParams) (*objects.Channel, error) {
+	body, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	thread := &objects.Channel{}
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelThreadsFmt, channel)).
+		ContentType(JsonContentType).
+		Body(body).
+		Bind(&thread).
+		Expect(http.StatusOK).
+		Send(c)
+	return thread, err
+}
+
+func (c *Client) JoinThread(thread objects.Snowflake) error {
+	return NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
+}
+
+func (c *Client) AddThreadMember(thread, user objects.Snowflake) error {
+	return NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread, user)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
+}
+
+func (c *Client) LeaveThread(thread objects.Snowflake) error {
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
+}
+
+func (c *Client) RemoveThreadMember(thread, user objects.Snowflake) error {
+	return NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread, user)).
+		ContentType(JsonContentType).
+		Expect(http.StatusNoContent).
+		Send(c)
+}
+
+func (c *Client) ListThreadMembers(thread objects.Snowflake) ([]*objects.ThreadMember, error) {
+	members := []*objects.ThreadMember{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(ChannelThreadMembersFmt, thread)).
+		Bind(&members).
+		Expect(http.StatusOK).
+		Send(c)
+	return members, err
+}
+
+type ListThreadsResponse struct {
+	Threads []*objects.Channel      `json:"threads"`
+	Members []*objects.ThreadMember `json:"members"`
+	HasMore bool                    `json:"has_more"`
+}
+
+type ListThreadsParams struct {
+	Before objects.Time `json:"before,omitempty"`
+	Limit  int          `json:"limit,omitempty"`
+}
+
+func (c *Client) ListPublicArchivedThreads(channel objects.Snowflake, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelThreadsArchivedPublicFmt, channel))
+	if err != nil {
+		return nil, err
+	}
+	q, err := query.Values(params)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = q.Encode()
+	threads := &ListThreadsResponse{}
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		Bind(&threads).
+		Expect(http.StatusOK).
+		Send(c)
+	return threads, err
+}
+
+func (c *Client) ListPrivateArchivedThreads(channel objects.Snowflake, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelThreadsArchivedPrivateFmt, channel))
+	if err != nil {
+		return nil, err
+	}
+	q, err := query.Values(params)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = q.Encode()
+	threads := &ListThreadsResponse{}
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		Bind(&threads).
+		Expect(http.StatusOK).
+		Send(c)
+	return threads, err
+}
+
+func (c *Client) ListJoinedPrivateArchivedThreads(channel objects.Snowflake, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelUsersMeThreadsArchivedFmt, channel))
+	if err != nil {
+		return nil, err
+	}
+	q, err := query.Values(params)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = q.Encode()
+	threads := &ListThreadsResponse{}
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		Bind(&threads).
+		Expect(http.StatusOK).
+		Send(c)
+	return threads, err
 }

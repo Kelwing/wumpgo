@@ -28,26 +28,14 @@ func (c *Client) GetAuditLogs(guild objects.Snowflake, params *GetAuditLogParams
 	}
 
 	u.RawQuery = q.Encode()
-
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        u.String(),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	entries := &objects.AuditLog{}
+	err = NewRequest().
+		Method(http.MethodGet).
+		Path(u.String()).
+		ContentType(JsonContentType).
+		Bind(entries).
+		Expect(http.StatusOK).
+		Send(c)
 
-	err = res.JSON(entries)
-	if err != nil {
-		return nil, err
-	}
-
-	return entries, nil
+	return entries, err
 }

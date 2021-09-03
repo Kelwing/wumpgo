@@ -7,22 +7,14 @@ import (
 )
 
 func (c *Client) GetVoiceRegions() ([]*objects.VoiceRegion, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        VoiceRegions,
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
+	regions := []*objects.VoiceRegion{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(VoiceRegions).
+		ContentType(JsonContentType).
+		Expect(http.StatusOK).
+		Bind(regions).
+		Send(c)
 
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	var regions []*objects.VoiceRegion
-	if err = res.JSON(&regions); err != nil {
-		return nil, err
-	}
-	return regions, nil
+	return regions, err
 }

@@ -9,65 +9,41 @@ import (
 )
 
 func (c *Client) GetTemplate(code string) (*objects.Template, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(TemplateFmt, code),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	template := &objects.Template{}
-	if err = res.JSON(template); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(TemplateFmt, code)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(template).
+		Send(c)
 
-	return template, nil
+	return template, err
 }
 
 func (c *Client) CreateGuildFromTemplate(code string, reason string) (*objects.Guild, error) {
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(TemplateFmt, code),
-		contentType: JsonContentType,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	guild := &objects.Guild{}
-	if err = res.JSON(guild); err != nil {
-		return nil, err
-	}
-	return guild, nil
+	err := NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(GuildTemplateFmt, code)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(guild).
+		Reason(reason).
+		Send(c)
+	return guild, err
 }
 
 func (c *Client) GetGuildTemplates(guild objects.Snowflake) ([]*objects.Template, error) {
-	res, err := c.request(&request{
-		method:      http.MethodGet,
-		path:        fmt.Sprintf(GuildTemplateFmt, guild),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var templates []*objects.Template
-	if err = res.JSON(&templates); err != nil {
-		return nil, err
-	}
-
-	return templates, nil
+	templates := []*objects.Template{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(templates).
+		Send(c)
+	return templates, err
 }
 
 type CreateGuildTemplateParams struct {
@@ -87,49 +63,29 @@ func (c *Client) CreateGuildTemplate(guild objects.Snowflake, params *CreateGuil
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPost,
-		path:        fmt.Sprintf(GuildTemplateFmt, guild),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	template := &objects.Template{}
-	if err = res.JSON(template); err != nil {
-		return nil, err
-	}
-
-	return template, nil
+	err = NewRequest().
+		Method(http.MethodPost).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(template).
+		Reason(reason).
+		Body(data).
+		Send(c)
+	return template, err
 }
 
 func (c *Client) SyncGuildTemplate(guild objects.Snowflake, code string) (*objects.Template, error) {
-	res, err := c.request(&request{
-		method:      http.MethodPut,
-		path:        fmt.Sprintf(GuildTemplatesFmt, guild, code),
-		contentType: JsonContentType,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	template := &objects.Template{}
-	if err = res.JSON(template); err != nil {
-		return nil, err
-	}
-
-	return template, nil
+	err := NewRequest().
+		Method(http.MethodPut).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild, code)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(template).
+		Send(c)
+	return template, err
 }
 
 type ModifyGuildTemplateParams struct {
@@ -149,47 +105,31 @@ func (c *Client) ModifyGuildTemplate(guild objects.Snowflake, code string, param
 		reason = params.Reason
 	}
 
-	res, err := c.request(&request{
-		method:      http.MethodPatch,
-		path:        fmt.Sprintf(GuildTemplatesFmt, guild, code),
-		contentType: JsonContentType,
-		body:        data,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	template := &objects.Template{}
-	if err = res.JSON(template); err != nil {
-		return nil, err
-	}
-	return template, nil
+
+	err = NewRequest().
+		Method(http.MethodPatch).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild, code)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Reason(reason).
+		Body(data).
+		Bind(template).
+		Send(c)
+
+	return template, err
 }
 
 func (c *Client) DeleteGuildTemplate(guild objects.Snowflake, code, reason string) (*objects.Template, error) {
-	res, err := c.request(&request{
-		method:      http.MethodDelete,
-		path:        fmt.Sprintf(GuildTemplatesFmt, guild, code),
-		contentType: JsonContentType,
-		reason:      reason,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if err = res.ExpectsStatus(http.StatusOK); err != nil {
-		return nil, err
-	}
-
 	template := &objects.Template{}
-	if err = res.JSON(template); err != nil {
-		return nil, err
-	}
+	err := NewRequest().
+		Method(http.MethodDelete).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild, code)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Reason(reason).
+		Bind(template).
+		Send(c)
 
-	return template, nil
+	return template, err
 }
