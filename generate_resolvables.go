@@ -47,7 +47,10 @@ func (r Resolvable{{ .Type }}) String() string {
 
 // Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
 func (r Resolvable{{ .Type }}) Resolve() *objects.{{ .Type }} {
-	x, _ := r.data.Resolved.{{ .Type }}s[r.Snowflake()]
+	x, ok := r.data.Resolved.{{ .Type }}s[r.Snowflake()]
+	if !ok {
+		return nil
+	}
 	return &x
 }`
 
