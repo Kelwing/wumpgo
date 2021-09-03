@@ -140,31 +140,3 @@ func New(config *Config) *Client {
 		},
 	}
 }
-
-// func (c *Client) request(req *request) (*DiscordResponse, error) {
-// 	req.headers = make(http.Header)
-// 	if req.reason != "" && req.headers.Get(XAuditLogReasonHeader) == "" {
-// 		req.headers.Set(XAuditLogReasonHeader, req.reason)
-// 	}
-
-// 	if req.method == "GET" && c.cache != nil {
-// 		data, err := c.cache.Get(req.path)
-// 		if err == nil {
-// 			return data, nil
-// 		}
-// 	}
-
-// 	var resp *DiscordResponse
-// 	var err error
-// 	if c.rateLimiter != nil {
-// 		resp, err = c.rateLimiter.Request(c.httpClient, req)
-// 	} else {
-// 		resp, err = c.httpClient.Request(req)
-// 	}
-
-// 	if req.method == "GET" && c.cache != nil {
-// 		c.cache.Put(req.path, resp)
-// 	}
-
-// 	return resp, err
-// }
