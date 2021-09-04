@@ -57,10 +57,10 @@ func New(config *Config) (*App, error) {
 	var restClient *rest.Client
 	if config.RESTClient == nil {
 		restClient = rest.New(&rest.Config{
+			UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
+			Authorization: config.Token,
 			Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
-				UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
-				Authorization: config.Token,
-				MaxRetries:    3,
+				MaxRetries: 3,
 			}),
 		})
 	} else {
