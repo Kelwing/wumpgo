@@ -134,6 +134,9 @@ func TestComponentRouter_build(t *testing.T) {
 			},
 			init: func(_ *testing.T, r *ComponentRouter) {
 				r.RegisterButton("/a", func(ctx *ComponentRouterCtx) error {
+					if ctx.RESTClient != dummyRestClient {
+						return errors.New("not dummy rest client")
+					}
 					ctx.SetContent("hello world")
 					return nil
 				})
@@ -209,6 +212,9 @@ func TestComponentRouter_build(t *testing.T) {
 			init: func(t *testing.T, r *ComponentRouter) {
 				r.RegisterSelectMenu("/a", func(ctx *ComponentRouterCtx, values []string) error {
 					t.Helper()
+					if ctx.RESTClient != dummyRestClient {
+						return errors.New("not dummy rest client")
+					}
 					assert.Equal(t, []string{"a", "b", "c"}, values)
 					ctx.SetContent("hello world")
 					return nil
