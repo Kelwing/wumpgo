@@ -1,7 +1,6 @@
 package router
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/Postcord/objects"
@@ -299,28 +298,6 @@ func Test_responseBuilder_editComponent(t *testing.T) {
 			b.editComponent(tt.component, tt.append)
 			assert.Equal(t, tt.expected, b.ResponseData().Components)
 		})
-	}
-}
-
-func callBuilderFunction(t *testing.T, builder interface{}, funcName string, args ...interface{}) {
-	t.Helper()
-	r := reflect.ValueOf(builder).MethodByName(funcName)
-	if r.IsZero() {
-		t.Fatal("function does not exist")
-	}
-	reflectArgs := make([]reflect.Value, len(args))
-	for i, v := range args {
-		reflectArgs[i] = reflect.ValueOf(v)
-	}
-	if r.Kind() != reflect.Func {
-		t.Fatal("not a function")
-	}
-	res := r.Call(reflectArgs)
-	if len(res) != 1 {
-		t.Fatal("arg count not correct for builder:", res)
-	}
-	if res[0].Interface() != builder {
-		t.Fatal("the argument returned was not the builder")
 	}
 }
 

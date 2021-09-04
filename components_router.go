@@ -96,7 +96,7 @@ func ungenericError(errGeneric interface{}) error {
 	case error:
 		err = x
 	default:
-		err = fmt.Errorf("%s", errGeneric)
+		err = errors.New(fmt.Sprint(errGeneric))
 	}
 	return err
 }

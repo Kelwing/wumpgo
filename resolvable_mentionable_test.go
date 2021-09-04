@@ -8,40 +8,15 @@ import (
 )
 
 func TestResolvableMentionable_Snowflake(t *testing.T) {
-	tests := []struct {
-		name string
-
-		id      string
-		expects objects.Snowflake
-	}{
-		{
-			name:    "invalid",
-			id:      "this_is_not_valid",
-			expects: 0,
-		},
-		{
-			name:    "snowflake value",
-			id:      "1234",
-			expects: 1234,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := ResolvableMentionable{id: tt.id}
-			assert.Equal(t, tt.expects, r.Snowflake())
-		})
-	}
+	testSnowflake(t, &ResolvableMentionable{})
 }
 
 func TestResolvableMentionable_MarshalJSON(t *testing.T) {
-	r := ResolvableMentionable{id: "testing"}
-	b, _ := r.MarshalJSON()
-	assert.Equal(t, `"testing"`, string(b))
+	testMarshalJSON(t, &ResolvableMentionable{})
 }
 
 func TestResolvableMentionable_String(t *testing.T) {
-	r := ResolvableMentionable{id: "testing"}
-	assert.Equal(t, "testing", r.String())
+	testString(t, &ResolvableMentionable{})
 }
 
 func TestResolvableMentionable_Resolve(t *testing.T) {
