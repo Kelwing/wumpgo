@@ -15,7 +15,7 @@ func TestRouterBuilder(t *testing.T) {
 }
 
 func TestLoaderBuilder_AllowedMentions(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 
 		allowedMentions *objects.AllowedMentions
@@ -35,7 +35,7 @@ func TestLoaderBuilder_AllowedMentions(t *testing.T) {
 			l := RouterLoader().(*loaderBuilder)
 			if tt.allowedMentions == nil {
 				// Ensure it is nil-ed.
-				l.globalAllowedMentions	= &objects.AllowedMentions{}
+				l.globalAllowedMentions = &objects.AllowedMentions{}
 			}
 			l.AllowedMentions(tt.allowedMentions)
 			assert.Equal(t, tt.allowedMentions, l.globalAllowedMentions)
@@ -44,7 +44,7 @@ func TestLoaderBuilder_AllowedMentions(t *testing.T) {
 }
 
 func TestLoaderBuilder_ErrorHandler(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 
 		handler func(error) *objects.InteractionResponse
@@ -75,13 +75,13 @@ func TestLoaderBuilder_ErrorHandler(t *testing.T) {
 }
 
 func TestLoaderBuilder_ComponentRouter(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 
 		value *ComponentRouter
 	}{
 		{
-			name: "value",
+			name:  "value",
 			value: &ComponentRouter{},
 		},
 		{
@@ -102,13 +102,13 @@ func TestLoaderBuilder_ComponentRouter(t *testing.T) {
 }
 
 func TestLoaderBuilder_CommandRouter(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 
 		value *CommandRouter
 	}{
 		{
-			name: "value",
+			name:  "value",
 			value: &CommandRouter{},
 		},
 		{
@@ -129,13 +129,13 @@ func TestLoaderBuilder_CommandRouter(t *testing.T) {
 }
 
 func TestLoaderBuilder_CombinedRouter(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
 
 		value *CombinedRouter
 	}{
 		{
-			name: "value",
+			name:  "value",
 			value: &CombinedRouter{},
 		},
 		{
@@ -183,33 +183,33 @@ func TestLoaderBuilder_Build(t *testing.T) {
 		name string
 
 		allowedMentions *objects.AllowedMentions
-		components *ComponentRouter
-		commands *CommandRouter
-		errHandler func(error) *objects.InteractionResponse
+		components      *ComponentRouter
+		commands        *CommandRouter
+		errHandler      func(error) *objects.InteractionResponse
 	}{
 		{
 			name: "all nil",
 		},
 		{
-			name: "command router nil",
+			name:       "command router nil",
 			components: &ComponentRouter{},
 		},
 		{
-			name: "component router nil",
+			name:     "component router nil",
 			commands: &CommandRouter{},
 		},
 		{
-			name: "error handler present",
+			name:       "error handler present",
 			components: &ComponentRouter{},
-			commands: &CommandRouter{},
+			commands:   &CommandRouter{},
 			errHandler: func(err error) *objects.InteractionResponse {
 				return nil
 			},
 		},
 		{
-			name: "allowed mentions present",
-			components: &ComponentRouter{},
-			commands: &CommandRouter{},
+			name:            "allowed mentions present",
+			components:      &ComponentRouter{},
+			commands:        &CommandRouter{},
 			allowedMentions: &objects.AllowedMentions{},
 		},
 	}

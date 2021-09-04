@@ -5,8 +5,12 @@ import (
 	"github.com/Postcord/rest"
 )
 
+type restEditInteractionResponse interface {
+	EditOriginalInteractionResponse(objects.Snowflake, string, *rest.EditWebhookMessageParams) (*objects.Message, error)
+}
+
 // Process the result and update the webhook.
-func processUpdateLaterResponse(restClient *rest.Client, applicationID objects.Snowflake, token string, response *objects.InteractionResponse) {
+func processUpdateLaterResponse(restClient restEditInteractionResponse, applicationID objects.Snowflake, token string, response *objects.InteractionResponse) {
 	if response.Type == objects.ResponseDeferredMessageUpdate || response.Type == objects.ResponseDeferredChannelMessageWithSource {
 		// We can ignore this! The token will get passed up the chain.
 		return

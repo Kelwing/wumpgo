@@ -6,8 +6,9 @@ import "github.com/Postcord/objects"
 func (r ResolvableUser) ResolveMember() *objects.GuildMember {
 	snowflake := r.Snowflake()
 	if x, ok := r.data.Resolved.Members[snowflake]; ok {
-		u, _ := r.data.Resolved.Users[snowflake]
-		x.User = &u
+		if u, ok := r.data.Resolved.Users[snowflake]; ok {
+			x.User = &u
+		}
 		return &x
 	}
 	return nil

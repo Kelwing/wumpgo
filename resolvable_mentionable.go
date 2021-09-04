@@ -32,21 +32,21 @@ func (r ResolvableMentionable) String() string {
 func (r ResolvableMentionable) Resolve() interface{} {
 	snowflake := r.Snowflake()
 	data := r.data.Resolved
-	var peek interface{}
-	var ok bool
 
-	// I'm so sorry, this is probably the fastest way to do this but it's not nice looking.
-	if peek, ok = data.Channels[snowflake]; !ok {
-		if peek, ok = data.Roles[snowflake]; !ok {
-			if m, ok := data.Members[snowflake]; ok {
-				u := data.Users[snowflake]
-				m.User = &u
-				peek = m
-			} else if peek, ok = data.Users[snowflake]; !ok {
-				return nil
-			}
-		}
+	if c, ok := data.Channels[snowflake]; ok {
+		return &c
 	}
-
-	return peek
+	if role, ok := data.Roles[snowflake]; ok {
+		return &role
+	}
+	if m, ok := data.Members[snowflake]; ok {
+		if u, ok := data.Users[snowflake]; ok {
+			m.User = &u
+		}
+		return &m
+	}
+	if u, ok := data.Users[snowflake]; ok {
+		return &u
+	}
+	return nil
 }

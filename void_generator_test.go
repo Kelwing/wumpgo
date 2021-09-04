@@ -7,7 +7,7 @@ import (
 )
 
 func Test_voidGenerator_VoidCustomID(t *testing.T) {
-	tests := [] struct{
+	tests := []struct {
 		name string
 
 		runs  int
