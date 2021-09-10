@@ -1,6 +1,9 @@
 package interactions
 
 import (
+	"bytes"
+	"context"
+	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,6 +11,7 @@ import (
 
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttprouter"
@@ -27,6 +31,7 @@ type App struct {
 	restClient       *rest.Client
 	commandHandler   HandlerFunc
 	componentHandler HandlerFunc
+	pubKey           ed25519.PublicKey
 }
 
 // Create a new interactions server instance
@@ -44,6 +49,7 @@ func New(config *Config) (*App, error) {
 		},
 		extraProps: make(map[string]interface{}),
 		Router:     router,
+		pubKey:     pubKey,
 	}
 
 	if config.Logger == nil {
@@ -101,6 +107,43 @@ func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) 
 	if err != nil {
 		log.Println("failed to write response: ", err)
 	}
+}
+
+func (a *App) LambdaHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	signature := req.Headers["X-Signature-Ed25519"]
+	body := req.Body
+	body = req.Headers["X-Signature-Timestamp"] + body
+	if !verifyMessage([]byte(body), string(signature), a.pubKey) {
+		return events.APIGatewayProxyResponse{
+			StatusCode: fasthttp.StatusUnauthorized,
+		}, nil
+	}
+	resp, err := a.ProcessRequest([]byte(req.Body))
+	if err != nil {
+		a.logger.WithError(err).Error("failed to process request: ", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "An unknown error occurred",
+		}, nil
+	}
+	var buf bytes.Buffer
+	respData, err := json.Marshal(resp)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       "Internal server error",
+		}, err
+	}
+	json.HTMLEscape(&buf, respData)
+
+	return events.APIGatewayProxyResponse{
+		StatusCode:      200,
+		IsBase64Encoded: false,
+		Body:            buf.String(),
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+	}, nil
 }
 
 // ProcessRequest is used internally to process a validated request.

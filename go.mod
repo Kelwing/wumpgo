@@ -6,6 +6,7 @@ require (
 	github.com/Postcord/objects v0.0.13
 	github.com/Postcord/rest v0.0.6
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/aws/aws-lambda-go v1.26.0
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/go-redsync/redsync/v4 v4.4.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
