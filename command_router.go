@@ -168,14 +168,6 @@ func (c *CommandRouter) NewCommandGroup(name, description string, defaultPermiss
 	return g, nil
 }
 
-// NewCommandBuilder is used to create a builder for a *Command object.
-func (c *CommandRouter) NewCommandBuilder(name string) CommandBuilder {
-	if c.roots.Subcommands == nil {
-		c.roots.Subcommands = map[string]interface{}{}
-	}
-	return &commandBuilder{cmd: Command{Name: name}, map_: c.roots.Subcommands}
-}
-
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
 func (c *CommandRouter) MustNewCommandGroup(name, description string, defaultPermission bool) *CommandGroup {
 	x, err := c.NewCommandGroup(name, description, defaultPermission)
@@ -183,6 +175,14 @@ func (c *CommandRouter) MustNewCommandGroup(name, description string, defaultPer
 		panic(err)
 	}
 	return x
+}
+
+// NewCommandBuilder is used to create a builder for a *Command object.
+func (c *CommandRouter) NewCommandBuilder(name string) CommandBuilder {
+	if c.roots.Subcommands == nil {
+		c.roots.Subcommands = map[string]interface{}{}
+	}
+	return &commandBuilder{cmd: Command{Name: name}, map_: c.roots.Subcommands}
 }
 
 // MarshalJSON implements the json.Marshaler interface.
@@ -193,59 +193,10 @@ func (c *CommandRouter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.roots.Subcommands)
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface.
-func (c *CommandGroup) UnmarshalJSON(b []byte) error {
-	res := struct {
-		Description string                     `json:"description"`
-		Subcommands map[string]json.RawMessage `json:"subcommands"`
-	}{}
-	if err := json.Unmarshal(b, &res); err != nil {
-		return err
-	}
-	generic := make(map[string]interface{})
-	for k, v := range res.Subcommands {
-		var cmd Command
-		if err := json.Unmarshal(v, &cmd); err == nil {
-			generic[k] = &cmd
-		} else {
-			var group CommandGroup
-			if err := json.Unmarshal(v, &group); err != nil {
-				return err
-			}
-			generic[k] = &group
-		}
-	}
-	*c = CommandGroup{Description: res.Description, Subcommands: generic}
-	return nil
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface.
-func (c *CommandRouter) UnmarshalJSON(b []byte) error {
-	var m map[string]json.RawMessage
-	if err := json.Unmarshal(b, &m); err != nil {
-		return err
-	}
-	generic := make(map[string]interface{})
-	for k, v := range m {
-		var cmd Command
-		if err := json.Unmarshal(v, &cmd); err == nil {
-			generic[k] = &cmd
-		} else {
-			var group CommandGroup
-			if err := json.Unmarshal(v, &group); err != nil {
-				return err
-			}
-			generic[k] = &group
-		}
-	}
-	*c = CommandRouter{roots: CommandGroup{Subcommands: generic}}
-	return nil
-}
-
 // CommandIsSubcommand is thrown when the router expects a command group and gets a command.
 var CommandIsSubcommand = errors.New("expected *CommandGroup, found *Command")
 
-// CommandIsSubcommand is thrown when the router expects a command and gets a command group.
+// CommandIsNotSubcommand is thrown when the router expects a command and gets a command group.
 var CommandIsNotSubcommand = errors.New("expected *Command, found *CommandGroup")
 
 // CommandDoesNotExist is thrown when the command specified does not exist.
@@ -428,7 +379,7 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 				return exceptionHandler(CommandDoesNotExist)
 			}
 		default:
-			panic("internal error - unknown root command type")
+			panic("postcord internal error - unknown root command type")
 		}
 	}
 }
@@ -505,7 +456,7 @@ func getOptions(cmdOrCat interface{}) []objects.ApplicationCommandOption {
 		}
 		return cmds
 	default:
-		panic("internal error - unknown command type")
+		panic("postcord internal error - unknown command type")
 	}
 }
 

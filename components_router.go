@@ -172,7 +172,7 @@ func (c *ComponentRouter) build(restClient *rest.Client, exceptionHandler func(e
 				return rctx.buildResponse(true, exceptionHandler, globalAllowedMentions)
 			}
 		default:
-			panic("internal error: invalid interaction type")
+			panic("postcord internal error - invalid interaction type")
 		}
 		root.addRoute(k, cb)
 	}
