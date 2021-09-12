@@ -96,10 +96,14 @@ func (r *request) SendRaw(c *Client) (*DiscordResponse, error) {
 		resp, err = c.httpClient.Request(r)
 	}
 
+	exptectedStatus := false
 	for _, status := range r.expectedStatus {
-		if err = resp.ExpectsStatus(status); err != nil {
-			return nil, err
+		if err = resp.ExpectsStatus(status); err == nil {
+			exptectedStatus = true
 		}
+	}
+	if !exptectedStatus {
+		return resp, err
 	}
 
 	if r.method == "GET" && c.cache != nil {
