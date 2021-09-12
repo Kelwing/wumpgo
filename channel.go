@@ -544,7 +544,7 @@ func (c *Client) StartThreadWithMessage(channel objects.Snowflake, message objec
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(&thread).
-		Expect(http.StatusOK).
+		Expect(http.StatusOK, http.StatusCreated).
 		Send(c)
 	return thread, err
 }
@@ -562,7 +562,7 @@ func (c *Client) StartThread(channel objects.Snowflake, params *StartThreadParam
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(&thread).
-		Expect(http.StatusOK).
+		Expect(http.StatusOK, http.StatusCreated).
 		Send(c)
 	return thread, err
 }
