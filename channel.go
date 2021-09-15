@@ -245,7 +245,7 @@ func (c *Client) CreateChannelInvite(channel objects.Snowflake, params *CreateIn
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Bind(&invite).
+		Bind(invite).
 		Expect(http.StatusOK).
 		Send(c)
 
@@ -469,7 +469,7 @@ func (c *Client) CreateMessage(channel objects.Snowflake, params *CreateMessageP
 		Path(fmt.Sprintf(ChannelMessagesFmt, channel)).
 		ContentType(contentType).
 		Body(body).
-		Bind(&msg).
+		Bind(msg).
 		Expect(http.StatusOK).
 		Send(c)
 
@@ -496,7 +496,7 @@ func (c *Client) EditMessage(channel, message objects.Snowflake, params *EditMes
 		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
 		ContentType(JsonContentType).
 		Body(body).
-		Bind(&msg).
+		Bind(msg).
 		Expect(http.StatusOK).
 		Send(c)
 	return msg, err
@@ -508,7 +508,7 @@ func (c *Client) FollowNewsChannel(channel objects.Snowflake) (*objects.Followed
 		Method(http.MethodPost).
 		Path(fmt.Sprintf(ChannelFollowersFmt, channel)).
 		ContentType(JsonContentType).
-		Bind(&followedChannel).
+		Bind(followedChannel).
 		Expect(http.StatusOK).
 		Send(c)
 
@@ -543,7 +543,7 @@ func (c *Client) StartThreadWithMessage(channel objects.Snowflake, message objec
 		Path(fmt.Sprintf(ChannelMessageThreadsFmt, channel, message)).
 		ContentType(JsonContentType).
 		Body(body).
-		Bind(&thread).
+		Bind(thread).
 		Expect(http.StatusOK, http.StatusCreated).
 		Send(c)
 	return thread, err
@@ -561,7 +561,7 @@ func (c *Client) StartThread(channel objects.Snowflake, params *StartThreadParam
 		Path(fmt.Sprintf(ChannelThreadsFmt, channel)).
 		ContentType(JsonContentType).
 		Body(body).
-		Bind(&thread).
+		Bind(thread).
 		Expect(http.StatusOK, http.StatusCreated).
 		Send(c)
 	return thread, err
@@ -639,7 +639,7 @@ func (c *Client) ListPublicArchivedThreads(channel objects.Snowflake, params ...
 	err = NewRequest().
 		Method(http.MethodGet).
 		Path(u.String()).
-		Bind(&threads).
+		Bind(threads).
 		Expect(http.StatusOK).
 		Send(c)
 	return threads, err
@@ -659,7 +659,7 @@ func (c *Client) ListPrivateArchivedThreads(channel objects.Snowflake, params ..
 	err = NewRequest().
 		Method(http.MethodGet).
 		Path(u.String()).
-		Bind(&threads).
+		Bind(threads).
 		Expect(http.StatusOK).
 		Send(c)
 	return threads, err
@@ -679,7 +679,7 @@ func (c *Client) ListJoinedPrivateArchivedThreads(channel objects.Snowflake, par
 	err = NewRequest().
 		Method(http.MethodGet).
 		Path(u.String()).
-		Bind(&threads).
+		Bind(threads).
 		Expect(http.StatusOK).
 		Send(c)
 	return threads, err

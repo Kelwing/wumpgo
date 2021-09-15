@@ -322,7 +322,7 @@ func (c *Client) ModifyGuildMember(guild, member objects.Snowflake, params *Modi
 		Body(data).
 		Reason(reason).
 		Expect(http.StatusOK).
-		Bind(member).
+		Bind(m).
 		Send(c)
 
 	return m, err
@@ -540,7 +540,7 @@ func (c *Client) ModifyGuildRole(guild, role objects.Snowflake, params *ModifyGu
 		Body(data).
 		Reason(reason).
 		Expect(http.StatusOK).
-		Bind(role).
+		Bind(r).
 		Send(c)
 	return r, err
 }
@@ -628,7 +628,7 @@ func (c *Client) GetGuildVoiceRegions(guild objects.Snowflake) ([]*objects.Voice
 		Path(fmt.Sprintf(GuildVoiceRegionsFmt, guild)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(regions).
+		Bind(&regions).
 		Send(c)
 
 	return regions, err
@@ -641,7 +641,7 @@ func (c *Client) GetGuildInvites(guild objects.Snowflake) ([]*objects.Invite, er
 		Path(fmt.Sprintf(GuildInvitesFmt, guild)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(invites).
+		Bind(&invites).
 		Send(c)
 
 	return invites, err
@@ -654,7 +654,7 @@ func (c *Client) GetGuildIntegrations(guild objects.Snowflake) ([]*objects.Integ
 		Path(fmt.Sprintf(IntegrationsBaseFmt, guild)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
-		Bind(integrations).
+		Bind(&integrations).
 		Send(c)
 
 	return integrations, err

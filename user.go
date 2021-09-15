@@ -30,7 +30,7 @@ func (c *Client) GetUser(user objects.Snowflake) (*objects.User, error) {
 		Path(fmt.Sprintf(UserFmt, user)).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
-		Bind(user).
+		Bind(u).
 		Send(c)
 
 	return u, err
