@@ -23,15 +23,16 @@ type (
 
 // App is the primary interactions server
 type App struct {
-	Router           *fasthttprouter.Router
-	server           *fasthttp.Server
-	extraProps       map[string]interface{}
-	propsLock        sync.RWMutex
-	logger           *logrus.Logger
-	restClient       *rest.Client
-	commandHandler   HandlerFunc
-	componentHandler HandlerFunc
-	pubKey           ed25519.PublicKey
+	Router              *fasthttprouter.Router
+	server              *fasthttp.Server
+	extraProps          map[string]interface{}
+	propsLock           sync.RWMutex
+	logger              *logrus.Logger
+	restClient          *rest.Client
+	commandHandler      HandlerFunc
+	componentHandler    HandlerFunc
+	autocompleteHandler HandlerFunc
+	pubKey              ed25519.PublicKey
 }
 
 // Create a new interactions server instance
@@ -86,6 +87,10 @@ func (a *App) CommandHandler(handler HandlerFunc) {
 // ComponentHandler sets the function to handle Component events.
 func (a *App) ComponentHandler(handler HandlerFunc) {
 	a.componentHandler = handler
+}
+
+func (a *App) AutocompleteHandler(handler HandlerFunc) {
+	a.autocompleteHandler = handler
 }
 
 func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
@@ -166,13 +171,15 @@ func (a *App) ProcessRequest(data []byte) (resp *objects.InteractionResponse, er
 		return
 	case objects.InteractionApplicationCommand:
 		resp = a.commandHandler(&req)
-	case objects.InteractionButton:
+	case objects.InteractionComponent:
 		resp = a.componentHandler(&req)
 		if resp == nil {
 			return &objects.InteractionResponse{
 				Type: objects.ResponseDeferredMessageUpdate,
 			}, nil
 		}
+	case objects.InteractionAutoComplete:
+		resp = a.autocompleteHandler(&req)
 	}
 
 	if resp == nil {
