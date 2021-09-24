@@ -3,6 +3,8 @@ github.com/Postcord/objects v0.0.13 h1:336JCCR4jNMT/oEoCDy16Q01myuwXipYIcWBDAPPf
 github.com/Postcord/objects v0.0.13/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/objects v0.0.14-0.20210924181248-4eb5033786e6 h1:YNdMdaf3XrLqzyHSAxo12R612izXPsOO8REKY9NIulU=
 github.com/Postcord/objects v0.0.14-0.20210924181248-4eb5033786e6/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
+github.com/Postcord/objects v0.0.14 h1:uYNK9pMS9mWSWvkO76QlosPSlLZ83x8dkRRiY03Adlw=
+github.com/Postcord/objects v0.0.14/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/rest v0.0.6 h1:/ZZP0fqpflgqM667X8A/0w6XbYtSiqRXRr8B6YwJlj0=
 github.com/Postcord/rest v0.0.6/go.mod h1:XMsUVweSuHXEjHL1tgTb10wIFV/hOVWUT8INbpTnIdM=
 github.com/andybalholm/brotli v1.0.2/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
