@@ -35,7 +35,8 @@ const (
 const (
 	InteractionRequestPing InteractionType = iota + 1
 	InteractionApplicationCommand
-	InteractionButton
+	InteractionComponent
+	InteractionAutoComplete
 )
 
 // Response types
@@ -47,6 +48,7 @@ const (
 	ResponseDeferredChannelMessageWithSource
 	ResponseDeferredMessageUpdate // buttons only
 	ResponseUpdateMessage
+	ResponseCommandAutocompleteResult
 )
 
 // Response flags
@@ -69,17 +71,18 @@ type ApplicationCommand struct {
 	Description       string                     `json:"description,omitempty"`
 	Options           []ApplicationCommandOption `json:"options"`
 	DefaultPermission bool                       `json:"default_permission"`
-	Type              *int                       `json:"type,omitempty"`
+	Type              *ApplicationCommandType    `json:"type,omitempty"`
 }
 
 type ApplicationCommandOption struct {
-	OptionType  ApplicationCommandOptionType     `json:"type"`
-	Name        string                           `json:"name"`
-	Description string                           `json:"description"`
-	Default     bool                             `json:"default"`
-	Required    bool                             `json:"required"`
-	Choices     []ApplicationCommandOptionChoice `json:"choices,omitempty"`
-	Options     []ApplicationCommandOption       `json:"options,omitempty"`
+	OptionType   ApplicationCommandOptionType     `json:"type"`
+	Name         string                           `json:"name"`
+	Description  string                           `json:"description"`
+	Default      bool                             `json:"default"`
+	Required     bool                             `json:"required"`
+	Choices      []ApplicationCommandOptionChoice `json:"choices,omitempty"`
+	Options      []ApplicationCommandOption       `json:"options,omitempty"`
+	Autocomplete bool                             `json:"autocomplete,omitempty"`
 }
 
 type ApplicationCommandOptionChoice struct {
@@ -101,15 +104,18 @@ type ApplicationCommandPermissions struct {
 }
 
 type ApplicationCommandInteractionDataOption struct {
-	Type    int                                        `json:"type"`
+	Type    ApplicationCommandOptionType               `json:"type"`
 	Name    string                                     `json:"name"`
 	Value   interface{}                                `json:"value,omitempty"`
+	Focused bool                                       `json:"focused,omitempty"`
 	Options []*ApplicationCommandInteractionDataOption `json:"options,omitempty"`
 }
 
 type ApplicationCommandInteractionData struct {
 	ID       Snowflake                                  `json:"id"`
 	Name     string                                     `json:"name"`
+	Type     ApplicationCommandType                     `json:"type"`
+	Version  Snowflake                                  `json:"version"`
 	Options  []*ApplicationCommandInteractionDataOption `json:"options"`
 	Resolved ApplicationCommandInteractionDataResolved  `json:"resolved"`
 	TargetID Snowflake                                  `json:"target_id"`
@@ -138,12 +144,13 @@ type Interaction struct {
 }
 
 type InteractionApplicationCommandCallbackData struct {
-	TTS             bool             `json:"tts,omitempty"`
-	Content         string           `json:"content"`
-	Embeds          []*Embed         `json:"embeds,omitempty"`
-	AllowedMentions *AllowedMentions `json:"allowed_mentions,omitempty"`
-	Flags           int              `json:"flags"`
-	Components      []*Component     `json:"components"`
+	TTS             bool                              `json:"tts,omitempty"`
+	Content         string                            `json:"content"`
+	Embeds          []*Embed                          `json:"embeds,omitempty"`
+	AllowedMentions *AllowedMentions                  `json:"allowed_mentions,omitempty"`
+	Flags           int                               `json:"flags"`
+	Components      []*Component                      `json:"components"`
+	Choices         []*ApplicationCommandOptionChoice `json:"choices"`
 }
 
 type InteractionResponse struct {
