@@ -150,7 +150,7 @@ type InteractionApplicationCommandCallbackData struct {
 	AllowedMentions *AllowedMentions                  `json:"allowed_mentions,omitempty"`
 	Flags           int                               `json:"flags"`
 	Components      []*Component                      `json:"components"`
-	Choices         []*ApplicationCommandOptionChoice `json:"choices"`
+	Choices         []*ApplicationCommandOptionChoice `json:"choices,omitempty"`
 }
 
 type InteractionResponse struct {
