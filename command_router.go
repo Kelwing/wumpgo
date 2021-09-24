@@ -468,13 +468,13 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 		// Create the command.
 		description := ""
 		defaultPermission := false
-		commandType := int(objects.CommandTypeChatInput)
+		commandType := objects.CommandTypeChatInput
 		switch x := v.(type) {
 		case *Command:
 			description = x.Description
 			defaultPermission = x.DefaultPermission
 			if x.commandType != 0 {
-				commandType = x.commandType
+				commandType = objects.ApplicationCommandType(x.commandType)
 			}
 		case *CommandGroup:
 			description = x.Description
@@ -483,10 +483,10 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 
 		if description == "" {
 			// If the description is mandatory, set it to a none provided message.
-			if commandType == int(objects.CommandTypeChatInput) {
+			if commandType == objects.CommandTypeChatInput {
 				description = "No description provided."
 			}
-		} else if commandType != int(objects.CommandTypeChatInput) {
+		} else if commandType != objects.CommandTypeChatInput {
 			// If no description is mandatory, make sure it is unset.
 			description = ""
 		}
