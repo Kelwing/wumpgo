@@ -16,6 +16,9 @@ type Command struct {
 	// Defines the parent.
 	parent *CommandGroup
 
+	// Defines any autocomplete options. Interface can be any of the ___AutoCompleteFunc's.
+	autocomplete map[string]interface{}
+
 	// Name is the commands name.
 	Name string `json:"name"`
 
@@ -64,13 +67,71 @@ type commandExecutionOptions struct {
 	options          []*objects.ApplicationCommandInteractionDataOption
 }
 
+// Maps out the options.
+func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption, exceptionHandler func(error) *objects.InteractionResponse) (*objects.InteractionResponse, map[string]interface{}) {
+	mappedOptions := map[string]interface{}{}
+	for _, v := range options {
+		// Find the option.
+		option := findOption(v.Name, c.Options)
+		if option == nil {
+			// Option was provided that was not in this command.
+			return exceptionHandler(NonExistentOption), nil
+		}
+
+		// Check the option and result match types.
+		if v.Type != option.OptionType {
+			if !autocomplete || v.Type != objects.TypeString {
+				return exceptionHandler(MismatchedOption), nil
+			}
+		}
+
+		// Check what the type is.
+		switch option.OptionType {
+		case objects.TypeChannel:
+			mappedOptions[option.Name] = &ResolvableChannel{
+				id:   v.Value.(string),
+				data: data,
+			}
+		case objects.TypeRole:
+			mappedOptions[option.Name] = &ResolvableRole{
+				id:   v.Value.(string),
+				data: data,
+			}
+		case objects.TypeUser:
+			mappedOptions[option.Name] = &ResolvableUser{
+				id:   v.Value.(string),
+				data: data,
+			}
+		case objects.TypeString:
+			mappedOptions[option.Name] = v.Value.(string)
+		case objects.TypeInteger:
+			float, ok := v.Value.(float64)
+			if ok {
+				mappedOptions[option.Name] = int(float)
+			} else {
+				mappedOptions[option.Name] = v.Value
+			}
+		case objects.TypeBoolean:
+			mappedOptions[option.Name] = v.Value.(bool)
+		case objects.TypeMentionable:
+			mappedOptions[option.Name] = &ResolvableMentionable{
+				id:   v.Value.(string),
+				data: data,
+			}
+		case objects.TypeDouble:
+			mappedOptions[option.Name] = v.Value
+		}
+	}
+	return nil, mappedOptions
+}
+
 // Execute the command.
 func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.List) *objects.InteractionResponse {
 	// Process the options.
-	mappedOptions := map[string]interface{}{}
-
+	var mappedOptions map[string]interface{}
 	if opts.data.TargetID != 0 {
 		// Add a special case for "/target". The slash is there as a keyword.
+		mappedOptions = map[string]interface{}{}
 		if _, ok := opts.data.Resolved.Messages[opts.data.TargetID]; ok {
 			mappedOptions["/target"] = &ResolvableMessage{
 				id:   strconv.FormatUint(uint64(opts.data.TargetID), 10),
@@ -83,50 +144,11 @@ func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.Lis
 			}
 		}
 	} else {
-		for _, v := range opts.options {
-			// Find the option.
-			option := findOption(v.Name, c.Options)
-			if option == nil {
-				// Option was provided that was not in this command.
-				return opts.exceptionHandler(NonExistentOption)
-			}
-
-			// Check the option and result match types.
-			if objects.ApplicationCommandOptionType(v.Type) != option.OptionType {
-				return opts.exceptionHandler(MismatchedOption)
-			}
-
-			// Check what the type is.
-			switch option.OptionType {
-			case objects.TypeChannel:
-				mappedOptions[option.Name] = &ResolvableChannel{
-					id:   v.Value.(string),
-					data: opts.data,
-				}
-			case objects.TypeRole:
-				mappedOptions[option.Name] = &ResolvableRole{
-					id:   v.Value.(string),
-					data: opts.data,
-				}
-			case objects.TypeUser:
-				mappedOptions[option.Name] = &ResolvableUser{
-					id:   v.Value.(string),
-					data: opts.data,
-				}
-			case objects.TypeString:
-				mappedOptions[option.Name] = v.Value.(string)
-			case objects.TypeInteger:
-				mappedOptions[option.Name] = int(v.Value.(float64))
-			case objects.TypeBoolean:
-				mappedOptions[option.Name] = v.Value.(bool)
-			case objects.TypeMentionable:
-				mappedOptions[option.Name] = &ResolvableMentionable{
-					id:   v.Value.(string),
-					data: opts.data,
-				}
-			case objects.TypeDouble:
-				mappedOptions[option.Name] = v.Value.(float64)
-			}
+		// Call the function to map options.
+		var response *objects.InteractionResponse
+		response, mappedOptions = c.mapOptions(false, opts.data, opts.options, opts.exceptionHandler)
+		if mappedOptions == nil {
+			return response
 		}
 	}
 

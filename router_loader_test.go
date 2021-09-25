@@ -163,7 +163,7 @@ func TestLoaderBuilder_CombinedRouter(t *testing.T) {
 }
 
 type fakeBuildHandlerAccepter struct {
-	componentHandler, commandHandler interactions.HandlerFunc
+	componentHandler, commandHandler, autocompleteHandler interactions.HandlerFunc
 }
 
 func (f *fakeBuildHandlerAccepter) ComponentHandler(handler interactions.HandlerFunc) {
@@ -172,6 +172,10 @@ func (f *fakeBuildHandlerAccepter) ComponentHandler(handler interactions.Handler
 
 func (f *fakeBuildHandlerAccepter) CommandHandler(handler interactions.HandlerFunc) {
 	f.commandHandler = handler
+}
+
+func (f *fakeBuildHandlerAccepter) AutocompleteHandler(handler interactions.HandlerFunc) {
+	f.autocompleteHandler = handler
 }
 
 func (fakeBuildHandlerAccepter) Rest() *rest.Client {
@@ -229,8 +233,10 @@ func TestLoaderBuilder_Build(t *testing.T) {
 			}
 			if tt.commands == nil {
 				assert.Nil(t, app.commandHandler)
+				assert.Nil(t, app.autocompleteHandler)
 			} else {
 				assert.NotNil(t, app.commandHandler)
+				assert.NotNil(t, app.autocompleteHandler)
 			}
 		})
 	}

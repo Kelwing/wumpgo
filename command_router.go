@@ -229,7 +229,7 @@ func (c *CommandGroup) execute(opts groupExecutionOptions, middlewareList *list.
 	}
 
 	// Do a switch on the type.
-	switch objects.ApplicationCommandOptionType(opts.nextLevel.Type) {
+	switch opts.nextLevel.Type {
 	case objects.TypeSubCommand:
 		// Expect a sub-command in the map and handle accordingly.
 		cmdIface, ok := c.Subcommands[opts.nextLevel.Name]
@@ -275,11 +275,158 @@ func (c *CommandGroup) execute(opts groupExecutionOptions, middlewareList *list.
 	}
 }
 
+// NoAutoCompleteFunc is thrown when Discord sends a focused argument without an autocomplete function.
+var NoAutoCompleteFunc = errors.New("discord sent auto-complete for argument without auto-complete function")
+
+// Used to define the autocomplete handler.
+func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, subcommands map[string]interface{}) interactions.HandlerFunc {
+	process := func(options []*objects.ApplicationCommandInteractionDataOption, cmd *Command, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse {
+		// Create the context.
+		_, mappedOptions := cmd.mapOptions(true, data, options, exceptionHandler)
+		if mappedOptions == nil {
+			return nil
+		}
+		ctx := &CommandRouterCtx{
+			errorHandler:          exceptionHandler,
+			Interaction:           interaction,
+			Command:               cmd,
+			Options:               mappedOptions,
+			RESTClient:            restClient,
+		}
+
+		// Find the focused argument.
+		for _, v := range options {
+			if v.Focused {
+				// Get the autocomplete function.
+				f := cmd.autocomplete[v.Name]
+				if f == nil {
+					exceptionHandler(NoAutoCompleteFunc)
+					return nil
+				}
+
+				// Get the options.
+				var resultOptions []*objects.ApplicationCommandOptionChoice
+				switch x := f.(type) {
+				case StringAutoCompleteFunc:
+					stringifiedOptions, err := x(ctx)
+					if err != nil {
+						exceptionHandler(err)
+						return nil
+					}
+					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(stringifiedOptions))
+					for i, v := range stringifiedOptions {
+						resultOptions[i] = &objects.ApplicationCommandOptionChoice{
+							Name:    v.Name,
+							Value:   v.Value,
+						}
+					}
+				case IntAutoCompleteFunc:
+					intOptions, err := x(ctx)
+					if err != nil {
+						exceptionHandler(err)
+						return nil
+					}
+					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(intOptions))
+					for i, v := range intOptions {
+						resultOptions[i] = &objects.ApplicationCommandOptionChoice{
+							Name:    v.Name,
+							Value:   v.Value,
+						}
+					}
+				case DoubleAutoCompleteFunc:
+					doubleOptions, err := x(ctx)
+					if err != nil {
+						exceptionHandler(err)
+						return nil
+					}
+					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(doubleOptions))
+					for i, v := range doubleOptions {
+						resultOptions[i] = &objects.ApplicationCommandOptionChoice{
+							Name:    v.Name,
+							Value:   v.Value,
+						}
+					}
+				default:
+					panic("postcord internal error - unknown autocomplete type")
+				}
+
+				// We have successfully got the result.
+				return &objects.InteractionResponse{
+					Type: objects.ResponseCommandAutocompleteResult,
+					Data: &objects.InteractionApplicationCommandCallbackData{
+						Choices: resultOptions,
+					},
+				}
+			}
+		}
+
+		// This is weird. There should always be a focused option.
+		return nil
+	}
+
+	isSub := func(type_ objects.ApplicationCommandOptionType) bool {
+		return type_ == objects.TypeSubCommand || type_ == objects.TypeSubCommandGroup
+	}
+
+	var handleOption func(cmdOrCat interface{}, options []*objects.ApplicationCommandInteractionDataOption, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse
+	handleOption = func(cmdOrCat interface{}, options []*objects.ApplicationCommandInteractionDataOption, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse {
+		switch x := cmdOrCat.(type) {
+		case *Command:
+			// Check the type of data isn't a subcommand.
+			if len(options) == 1 && isSub(options[0].Type) {
+				exceptionHandler(CommandIsNotSubcommand)
+				return nil
+			}
+
+			// Call the processor.
+			return process(options, x, data, interaction)
+		case *CommandGroup:
+			// Check the type of data is a subcommand.
+			if len(options) != 1 || !isSub(options[0].Type) {
+				exceptionHandler(CommandIsSubcommand)
+				return nil
+			}
+
+			// Handle traversing groups.
+			cmdOrCat, ok := x.Subcommands[options[0].Name]
+			if !ok {
+				exceptionHandler(CommandDoesNotExist)
+				return nil
+			}
+			return handleOption(cmdOrCat, options[0].Options, data, interaction)
+		default:
+			panic("postcord internal error - unknown command type")
+		}
+	}
+
+	return func(interaction *objects.Interaction) *objects.InteractionResponse {
+		// Parse the data JSON.
+		var data objects.ApplicationCommandInteractionData
+		if err := json.Unmarshal(interaction.Data, &data); err != nil {
+			return exceptionHandler(err)
+		}
+
+		// Get the command or category.
+		cmdOrCat, ok := subcommands[data.Name]
+		if !ok {
+			// No command.
+			return nil
+		}
+
+		// Handle the tree.
+		return handleOption(cmdOrCat, data.Options, &data, interaction)
+	}
+}
+
 // Used to build the component router by the parent.
-func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) interactions.HandlerFunc {
+func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) (interactions.HandlerFunc, interactions.HandlerFunc) {
 	baseAllowedMentions := globalAllowedMentions
 	if c.roots.AllowedMentions != nil {
 		baseAllowedMentions = c.roots.AllowedMentions
+	}
+	m := c.roots.Subcommands
+	if m == nil {
+		m = map[string]interface{}{}
 	}
 	return func(interaction *objects.Interaction) *objects.InteractionResponse {
 		// Handle middleware.
@@ -297,10 +444,6 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 		}
 
 		// Route the command.
-		m := c.roots.Subcommands
-		if m == nil {
-			m = map[string]interface{}{}
-		}
 		cmd, ok := m[data.Name]
 		if !ok {
 			// Not a command.
@@ -325,7 +468,7 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 
 			// Figure out if we now want the command handler or the sub-command handler.
 			option := data.Options[0]
-			switch objects.ApplicationCommandOptionType(option.Type) {
+			switch option.Type {
 			case objects.TypeSubCommandGroup:
 				groupIface, ok := x.Subcommands[option.Name]
 				if !ok {
@@ -381,7 +524,7 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 		default:
 			panic("postcord internal error - unknown root command type")
 		}
-	}
+	}, c.autocompleteHandler(restClient, exceptionHandler, m)
 }
 
 // Get the options for a command or category.

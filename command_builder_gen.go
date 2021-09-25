@@ -6,17 +6,197 @@ package router
 
 import "github.com/Postcord/objects"
 
+// StringAutoCompleteFunc is used to define the auto-complete function for StringChoice.
+// Note that the command context is a special case in that the response is not used.
+type StringAutoCompleteFunc = func(*CommandRouterCtx) ([]StringChoice, error)
+
+// StringChoiceBuilder is used to choose how this choice is handled.
+// This can be nil, or it can pass to one of the functions. The first function adds static choices to the router. The second option adds an autocomplete function.
+// Note that you cannot call both functions.
+type StringChoiceBuilder = func(addStaticOptions func([]StringChoice), addAutocomplete func(StringAutoCompleteFunc))
+
+// StringStaticChoicesBuilder is used to create a shorthand for adding choices.
+func StringStaticChoicesBuilder(choices []StringChoice) StringChoiceBuilder {
+	return func(addStaticOptions func([]StringChoice), _ func(StringAutoCompleteFunc)) {
+		addStaticOptions(choices)
+	}
+}
+
+// StringAutoCompleteFuncBuilder is used to create a shorthand for adding a auto-complete function.
+func StringAutoCompleteFuncBuilder(f StringAutoCompleteFunc) StringChoiceBuilder {
+	return func(_ func([]StringChoice), addAutocomplete func(StringAutoCompleteFunc)) {
+		addAutocomplete(f)
+	}
+}
+
+func (c *commandBuilder) StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) CommandBuilder {
+	var discordifiedChoices []objects.ApplicationCommandOptionChoice
+	var f StringAutoCompleteFunc
+	if choiceBuilder != nil {
+		choiceBuilder(func(choices []StringChoice) {
+			if f != nil {
+				panic("cannot set both function and choice slice")
+			}
+			discordifiedChoices = make([]objects.ApplicationCommandOptionChoice, len(choices))
+			for i, v := range choices {
+				discordifiedChoices[i] = objects.ApplicationCommandOptionChoice{Name: v.Name, Value: v.Value}
+			}
+		}, func(autoCompleteFunc StringAutoCompleteFunc) {
+			if discordifiedChoices != nil {
+				panic("cannot set both function and choice slice")
+			}
+			f = autoCompleteFunc
+		})
+	}
+
+	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
+		OptionType:   objects.TypeString,
+		Name:         name,
+		Description:  description,
+		Required:     required,
+		Choices:      discordifiedChoices,
+		Autocomplete: f != nil,
+	})
+	if f != nil {
+		if c.cmd.autocomplete == nil {
+			c.cmd.autocomplete = map[string]interface{}{}
+		}
+		c.cmd.autocomplete[name] = f
+	}
+	return c
+}
+
+// IntAutoCompleteFunc is used to define the auto-complete function for IntChoice.
+// Note that the command context is a special case in that the response is not used.
+type IntAutoCompleteFunc = func(*CommandRouterCtx) ([]IntChoice, error)
+
+// IntChoiceBuilder is used to choose how this choice is handled.
+// This can be nil, or it can pass to one of the functions. The first function adds static choices to the router. The second option adds an autocomplete function.
+// Note that you cannot call both functions.
+type IntChoiceBuilder = func(addStaticOptions func([]IntChoice), addAutocomplete func(IntAutoCompleteFunc))
+
+// IntStaticChoicesBuilder is used to create a shorthand for adding choices.
+func IntStaticChoicesBuilder(choices []IntChoice) IntChoiceBuilder {
+	return func(addStaticOptions func([]IntChoice), _ func(IntAutoCompleteFunc)) {
+		addStaticOptions(choices)
+	}
+}
+
+// IntAutoCompleteFuncBuilder is used to create a shorthand for adding a auto-complete function.
+func IntAutoCompleteFuncBuilder(f IntAutoCompleteFunc) IntChoiceBuilder {
+	return func(_ func([]IntChoice), addAutocomplete func(IntAutoCompleteFunc)) {
+		addAutocomplete(f)
+	}
+}
+
+func (c *commandBuilder) IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) CommandBuilder {
+	var discordifiedChoices []objects.ApplicationCommandOptionChoice
+	var f IntAutoCompleteFunc
+	if choiceBuilder != nil {
+		choiceBuilder(func(choices []IntChoice) {
+			if f != nil {
+				panic("cannot set both function and choice slice")
+			}
+			discordifiedChoices = make([]objects.ApplicationCommandOptionChoice, len(choices))
+			for i, v := range choices {
+				discordifiedChoices[i] = objects.ApplicationCommandOptionChoice{Name: v.Name, Value: v.Value}
+			}
+		}, func(autoCompleteFunc IntAutoCompleteFunc) {
+			if discordifiedChoices != nil {
+				panic("cannot set both function and choice slice")
+			}
+			f = autoCompleteFunc
+		})
+	}
+
+	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
+		OptionType:   objects.TypeInteger,
+		Name:         name,
+		Description:  description,
+		Required:     required,
+		Choices:      discordifiedChoices,
+		Autocomplete: f != nil,
+	})
+	if f != nil {
+		if c.cmd.autocomplete == nil {
+			c.cmd.autocomplete = map[string]interface{}{}
+		}
+		c.cmd.autocomplete[name] = f
+	}
+	return c
+}
+
+// DoubleAutoCompleteFunc is used to define the auto-complete function for DoubleChoice.
+// Note that the command context is a special case in that the response is not used.
+type DoubleAutoCompleteFunc = func(*CommandRouterCtx) ([]DoubleChoice, error)
+
+// DoubleChoiceBuilder is used to choose how this choice is handled.
+// This can be nil, or it can pass to one of the functions. The first function adds static choices to the router. The second option adds an autocomplete function.
+// Note that you cannot call both functions.
+type DoubleChoiceBuilder = func(addStaticOptions func([]DoubleChoice), addAutocomplete func(DoubleAutoCompleteFunc))
+
+// DoubleStaticChoicesBuilder is used to create a shorthand for adding choices.
+func DoubleStaticChoicesBuilder(choices []DoubleChoice) DoubleChoiceBuilder {
+	return func(addStaticOptions func([]DoubleChoice), _ func(DoubleAutoCompleteFunc)) {
+		addStaticOptions(choices)
+	}
+}
+
+// DoubleAutoCompleteFuncBuilder is used to create a shorthand for adding a auto-complete function.
+func DoubleAutoCompleteFuncBuilder(f DoubleAutoCompleteFunc) DoubleChoiceBuilder {
+	return func(_ func([]DoubleChoice), addAutocomplete func(DoubleAutoCompleteFunc)) {
+		addAutocomplete(f)
+	}
+}
+
+func (c *commandBuilder) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) CommandBuilder {
+	var discordifiedChoices []objects.ApplicationCommandOptionChoice
+	var f DoubleAutoCompleteFunc
+	if choiceBuilder != nil {
+		choiceBuilder(func(choices []DoubleChoice) {
+			if f != nil {
+				panic("cannot set both function and choice slice")
+			}
+			discordifiedChoices = make([]objects.ApplicationCommandOptionChoice, len(choices))
+			for i, v := range choices {
+				discordifiedChoices[i] = objects.ApplicationCommandOptionChoice{Name: v.Name, Value: v.Value}
+			}
+		}, func(autoCompleteFunc DoubleAutoCompleteFunc) {
+			if discordifiedChoices != nil {
+				panic("cannot set both function and choice slice")
+			}
+			f = autoCompleteFunc
+		})
+	}
+
+	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
+		OptionType:   objects.TypeDouble,
+		Name:         name,
+		Description:  description,
+		Required:     required,
+		Choices:      discordifiedChoices,
+		Autocomplete: f != nil,
+	})
+	if f != nil {
+		if c.cmd.autocomplete == nil {
+			c.cmd.autocomplete = map[string]interface{}{}
+		}
+		c.cmd.autocomplete[name] = f
+	}
+	return c
+}
+
 type textCommandBuilder struct {
 	*commandBuilder
 }
 
-func (c textCommandBuilder) StringOption(name, description string, required bool, choices []StringChoice) TextCommandBuilder {
-	c.commandBuilder.StringOption(name, description, required, choices)
+func (c textCommandBuilder) StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) TextCommandBuilder {
+	c.commandBuilder.StringOption(name, description, required, choiceBuilder)
 	return c
 }
 
-func (c textCommandBuilder) IntOption(name, description string, required bool, choices []IntChoice) TextCommandBuilder {
-	c.commandBuilder.IntOption(name, description, required, choices)
+func (c textCommandBuilder) IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) TextCommandBuilder {
+	c.commandBuilder.IntOption(name, description, required, choiceBuilder)
 	return c
 }
 
@@ -45,8 +225,8 @@ func (c textCommandBuilder) MentionableOption(name, description string, required
 	return c
 }
 
-func (c textCommandBuilder) DoubleOption(name, description string, required bool, choices []DoubleChoice) TextCommandBuilder {
-	c.commandBuilder.DoubleOption(name, description, required, choices)
+func (c textCommandBuilder) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) TextCommandBuilder {
+	c.commandBuilder.DoubleOption(name, description, required, choiceBuilder)
 	return c
 }
 
@@ -69,13 +249,13 @@ type subcommandBuilder struct {
 	*commandBuilder
 }
 
-func (c subcommandBuilder) StringOption(name, description string, required bool, choices []StringChoice) SubCommandBuilder {
-	c.commandBuilder.StringOption(name, description, required, choices)
+func (c subcommandBuilder) StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) SubCommandBuilder {
+	c.commandBuilder.StringOption(name, description, required, choiceBuilder)
 	return c
 }
 
-func (c subcommandBuilder) IntOption(name, description string, required bool, choices []IntChoice) SubCommandBuilder {
-	c.commandBuilder.IntOption(name, description, required, choices)
+func (c subcommandBuilder) IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) SubCommandBuilder {
+	c.commandBuilder.IntOption(name, description, required, choiceBuilder)
 	return c
 }
 
@@ -104,8 +284,8 @@ func (c subcommandBuilder) MentionableOption(name, description string, required 
 	return c
 }
 
-func (c subcommandBuilder) DoubleOption(name, description string, required bool, choices []DoubleChoice) SubCommandBuilder {
-	c.commandBuilder.DoubleOption(name, description, required, choices)
+func (c subcommandBuilder) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) SubCommandBuilder {
+	c.commandBuilder.DoubleOption(name, description, required, choiceBuilder)
 	return c
 }
 
@@ -160,11 +340,11 @@ func (c *commandBuilder) UserCommand() UserCommandBuilder {
 type commandOptions interface {
 	// StringOption is used to define an option of the type string. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 3 (STRING): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	StringOption(name, description string, required bool, choices []StringChoice) CommandBuilder
+	StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) CommandBuilder
 
 	// IntOption is used to define an option of the type int. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 4 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	IntOption(name, description string, required bool, choices []IntChoice) CommandBuilder
+	IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) CommandBuilder
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -188,17 +368,17 @@ type commandOptions interface {
 
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	DoubleOption(name, description string, required bool, choices []DoubleChoice) CommandBuilder
+	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) CommandBuilder
 }
 
 type subCommandOptions interface {
 	// StringOption is used to define an option of the type string. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 3 (STRING): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	StringOption(name, description string, required bool, choices []StringChoice) SubCommandBuilder
+	StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) SubCommandBuilder
 
 	// IntOption is used to define an option of the type int. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 4 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	IntOption(name, description string, required bool, choices []IntChoice) SubCommandBuilder
+	IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) SubCommandBuilder
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -222,17 +402,17 @@ type subCommandOptions interface {
 
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	DoubleOption(name, description string, required bool, choices []DoubleChoice) SubCommandBuilder
+	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) SubCommandBuilder
 }
 
 type textCommandOptions interface {
 	// StringOption is used to define an option of the type string. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 3 (STRING): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	StringOption(name, description string, required bool, choices []StringChoice) TextCommandBuilder
+	StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) TextCommandBuilder
 
 	// IntOption is used to define an option of the type int. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 4 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	IntOption(name, description string, required bool, choices []IntChoice) TextCommandBuilder
+	IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) TextCommandBuilder
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -256,5 +436,5 @@ type textCommandOptions interface {
 
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	DoubleOption(name, description string, required bool, choices []DoubleChoice) TextCommandBuilder
+	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) TextCommandBuilder
 }

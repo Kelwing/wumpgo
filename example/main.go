@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
 	"github.com/Postcord/router"
 	"os"
 	"strconv"
@@ -38,6 +37,33 @@ func main() {
 
 	// Create the command router.
 	commandRouter := &router.CommandRouter{}
+
+	// Defines a root level autocomplete.
+	commandRouter.NewCommandBuilder("autocomplete").Description("A root level autocomplete.").
+		DefaultPermission().
+		StringOption("option", "The option that will be autocompleted.", true,
+			router.StringAutoCompleteFuncBuilder(func(ctx *router.CommandRouterCtx) ([]router.StringChoice, error) {
+				return []router.StringChoice{
+					{
+						Name:  "d",
+						Value: "D",
+					},
+					{
+						Name:  "e",
+						Value: "E",
+					},
+					{
+						Name:  "f",
+						Value: "F",
+					},
+				}, nil
+			}),
+		).
+		Handler(func(ctx *router.CommandRouterCtx) error {
+			ctx.SetContent(ctx.Options["option"].(string))
+			return nil
+		}).
+		MustBuild()
 
 	// Defines a single command.
 	_, err := commandRouter.NewCommandBuilder("add").Description("A demo to show adding numbers.").
@@ -87,6 +113,33 @@ func main() {
 		panic(err)
 	}
 
+	// Defines a group level autocomplete.
+	group2.NewCommandBuilder("autocomplete").Description("A group level autocomplete.").
+		StringOption("option", "The option that will be autocompleted.", true,
+			router.StringAutoCompleteFuncBuilder(func(ctx *router.CommandRouterCtx) ([]router.StringChoice, error) {
+				return []router.StringChoice{
+					{
+						Name:  "a",
+						Value: "A",
+					},
+					{
+						Name:  "b",
+						Value: "B",
+					},
+					{
+						Name:  "c",
+						Value: "C",
+					},
+				}, nil
+			}),
+		).
+		Handler(func(ctx *router.CommandRouterCtx) error {
+			ctx.SetContent(ctx.Options["option"].(string))
+			return nil
+		}).
+		MustBuild()
+
+
 	// Add a user target command.
 	commandRouter.NewCommandBuilder("user-target").
 		UserCommand().
@@ -111,12 +164,6 @@ func main() {
 	app, err := interactions.New(&interactions.Config{
 		PublicKey: os.Getenv("PUBLIC_KEY"),
 		Token:     "Bot " + os.Getenv("TOKEN"),
-		RESTClient: rest.New(&rest.Config{
-			Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
-				Authorization: "Bot " + os.Getenv("TOKEN"),
-				UserAgent:     "DiscordBot (https://github.com/Postcord/router/example, 1)",
-			}),
-		}),
 	})
 	if err != nil {
 		panic(err)

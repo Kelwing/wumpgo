@@ -67,6 +67,7 @@ func (l *loaderBuilder) AllowedMentions(config *objects.AllowedMentions) LoaderB
 type HandlerAccepter interface {
 	ComponentHandler(handler interactions.HandlerFunc)
 	CommandHandler(handler interactions.HandlerFunc)
+	AutocompleteHandler(handler interactions.HandlerFunc)
 	Rest() *rest.Client
 }
 
@@ -84,8 +85,10 @@ func (l *loaderBuilder) Build(app HandlerAccepter) {
 	}
 
 	if l.commands != nil {
-		// Build and load the commands handler.
-		app.CommandHandler(l.commands.build(app.Rest(), cb, l.globalAllowedMentions))
+		// Build and load the commands/autocomplete handler.
+		commandHandler, autocompleteHandler := l.commands.build(app.Rest(), cb, l.globalAllowedMentions)
+		app.CommandHandler(commandHandler)
+		app.AutocompleteHandler(autocompleteHandler)
 	}
 }
 

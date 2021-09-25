@@ -19,17 +19,77 @@ import "github.com/Postcord/objects"
 
 `
 
+const choiceBuilder = `// {{ .TypeName }}AutoCompleteFunc is used to define the auto-complete function for {{ .ImportName }}.
+// Note that the command context is a special case in that the response is not used.
+type {{ .TypeName }}AutoCompleteFunc = func(*CommandRouterCtx) ([]{{ .ImportName }}, error)
+
+// {{ .TypeName }}ChoiceBuilder is used to choose how this choice is handled.
+// This can be nil, or it can pass to one of the functions. The first function adds static choices to the router. The second option adds an autocomplete function.
+// Note that you cannot call both functions.
+type {{ .TypeName }}ChoiceBuilder = func(addStaticOptions func([]{{ .ImportName }}), addAutocomplete func({{ .TypeName }}AutoCompleteFunc))
+
+// {{ .TypeName }}StaticChoicesBuilder is used to create a shorthand for adding choices.
+func {{ .TypeName }}StaticChoicesBuilder(choices []{{ .ImportName }}) {{ .TypeName }}ChoiceBuilder {
+	return func(addStaticOptions func([]{{ .ImportName }}), _ func({{ .TypeName }}AutoCompleteFunc)) {
+		addStaticOptions(choices)
+	}
+}
+
+// {{ .TypeName }}AutoCompleteFuncBuilder is used to create a shorthand for adding a auto-complete function.
+func {{ .TypeName }}AutoCompleteFuncBuilder(f {{ .TypeName }}AutoCompleteFunc) {{ .TypeName }}ChoiceBuilder {
+	return func(_ func([]{{ .ImportName }}), addAutocomplete func({{ .TypeName }}AutoCompleteFunc)) {
+		addAutocomplete(f)
+	}
+}
+
+func (c *commandBuilder) {{ .TypeName }}Option(name, description string, required bool, choiceBuilder {{ .TypeName }}ChoiceBuilder) CommandBuilder {
+	var discordifiedChoices []objects.ApplicationCommandOptionChoice
+	var f {{ .TypeName }}AutoCompleteFunc
+	if choiceBuilder != nil {
+		choiceBuilder(func(choices []{{ .TypeName }}Choice) {
+			if f != nil {
+				panic("cannot set both function and choice slice")
+			}
+			discordifiedChoices = make([]objects.ApplicationCommandOptionChoice, len(choices))
+			for i, v := range choices {
+				discordifiedChoices[i] = objects.ApplicationCommandOptionChoice{Name: v.Name, Value: v.Value}
+			}
+		}, func(autoCompleteFunc {{ .TypeName }}AutoCompleteFunc) {
+			if discordifiedChoices != nil {
+				panic("cannot set both function and choice slice")
+			}
+			f = autoCompleteFunc
+		})
+	}
+
+	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
+		OptionType:   objects.Type{{ .TypeName }}{{ if eq .TypeName "Int" }}eger{{ end }},
+		Name:         name,
+		Description:  description,
+		Required:     required,
+		Choices:      discordifiedChoices,
+		Autocomplete: f != nil,
+	})
+	if f != nil {
+		if c.cmd.autocomplete == nil {
+			c.cmd.autocomplete = map[string]interface{}{}
+		}
+		c.cmd.autocomplete[name] = f
+	}
+	return c
+}`
+
 const builderShared = `type {{ .Struct }} struct {
 	*commandBuilder
 }{{ if .AddOptions }}
 
-func (c {{ .Struct }}) StringOption(name, description string, required bool, choices []StringChoice) {{ .BuilderType }}Builder {
-	c.commandBuilder.StringOption(name, description, required, choices)
+func (c {{ .Struct }}) StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) {{ .BuilderType }}Builder {
+	c.commandBuilder.StringOption(name, description, required, choiceBuilder)
 	return c
 }
 
-func (c {{ .Struct }}) IntOption(name, description string, required bool, choices []IntChoice) {{ .BuilderType }}Builder {
-	c.commandBuilder.IntOption(name, description, required, choices)
+func (c {{ .Struct }}) IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) {{ .BuilderType }}Builder {
+	c.commandBuilder.IntOption(name, description, required, choiceBuilder)
 	return c
 }
 
@@ -58,8 +118,8 @@ func (c {{ .Struct }}) MentionableOption(name, description string, required bool
 	return c
 }
 
-func (c {{ .Struct }}) DoubleOption(name, description string, required bool, choices []DoubleChoice) {{ .BuilderType }}Builder {
-	c.commandBuilder.DoubleOption(name, description, required, choices)
+func (c {{ .Struct }}) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) {{ .BuilderType }}Builder {
+	c.commandBuilder.DoubleOption(name, description, required, choiceBuilder)
 	return c
 }{{ end }}
 
@@ -81,11 +141,11 @@ func (c *commandBuilder) {{ .BuilderType }}() {{ .BuilderType }}Builder {
 const optionInterface = `type {{ .OutputInterface }} interface {
 	// StringOption is used to define an option of the type string. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 3 (STRING): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	StringOption(name, description string, required bool, choices []StringChoice) {{ .InterfaceName }}
+	StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) {{ .InterfaceName }}
 
 	// IntOption is used to define an option of the type int. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 4 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	IntOption(name, description string, required bool, choices []IntChoice) {{ .InterfaceName }}
+	IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) {{ .InterfaceName }}
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -109,8 +169,26 @@ const optionInterface = `type {{ .OutputInterface }} interface {
 
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	DoubleOption(name, description string, required bool, choices []DoubleChoice) {{ .InterfaceName }}
+	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) {{ .InterfaceName }}
 }`
+
+var choiceTypes = []struct {
+	TypeName   string
+	ImportName string
+}{
+	{
+		TypeName:   "String",
+		ImportName: "StringChoice",
+	},
+	{
+		TypeName:   "Int",
+		ImportName: "IntChoice",
+	},
+	{
+		TypeName:   "Double",
+		ImportName: "DoubleChoice",
+	},
+}
 
 var builderTypes = []struct {
 	Struct      string
@@ -155,8 +233,19 @@ var interfaceTypes = []struct {
 
 func main() {
 	file := start
-	parts := make([]string, len(builderTypes)+len(interfaceTypes))
-	t, err := template.New("_").Parse(builderShared)
+	parts := make([]string, len(choiceTypes)+len(builderTypes)+len(interfaceTypes))
+	t, err := template.New("_").Parse(choiceBuilder)
+	if err != nil {
+		panic(err)
+	}
+	for i, v := range choiceTypes {
+		buf := &bytes.Buffer{}
+		if err := t.Execute(buf, v); err != nil {
+			panic(err)
+		}
+		parts[i] = buf.String()
+	}
+	t, err = template.New("_").Parse(builderShared)
 	if err != nil {
 		panic(err)
 	}
@@ -165,7 +254,7 @@ func main() {
 		if err := t.Execute(buf, v); err != nil {
 			panic(err)
 		}
-		parts[i] = buf.String()
+		parts[i+len(choiceTypes)] = buf.String()
 	}
 	t, err = template.New("_").Parse(optionInterface)
 	if err != nil {
@@ -176,7 +265,7 @@ func main() {
 		if err := t.Execute(buf, v); err != nil {
 			panic(err)
 		}
-		parts[i+len(builderTypes)] = buf.String()
+		parts[i+len(choiceTypes)+len(builderTypes)] = buf.String()
 	}
 	file += strings.Join(parts, "\n\n") + "\n"
 	if err := ioutil.WriteFile("command_builder_gen.go", []byte(file), 0666); err != nil {
