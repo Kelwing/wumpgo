@@ -2,10 +2,12 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/Postcord/interactions v0.0.15 h1:X4NdFvr4U4a2pzMJxDNVIchAbg7kV1XYEwchbZ9j7OQ=
 github.com/Postcord/interactions v0.0.15/go.mod h1:ZPgfkFkhQmhbnXFKAxEUlIhAgrMJabNbjoSbCJ9IpPg=
 github.com/Postcord/objects v0.0.13/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
-github.com/Postcord/objects v0.0.14 h1:uYNK9pMS9mWSWvkO76QlosPSlLZ83x8dkRRiY03Adlw=
 github.com/Postcord/objects v0.0.14/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
-github.com/Postcord/rest v0.0.6 h1:/ZZP0fqpflgqM667X8A/0w6XbYtSiqRXRr8B6YwJlj0=
+github.com/Postcord/objects v0.0.15 h1:Ax6v7fuTzy0Qek+B+KiadsVXTfk2hSPHmMdkaMHFPzM=
+github.com/Postcord/objects v0.0.15/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/rest v0.0.6/go.mod h1:XMsUVweSuHXEjHL1tgTb10wIFV/hOVWUT8INbpTnIdM=
+github.com/Postcord/rest v0.0.7 h1:28CXp3iApRaTpH5Xu+Zw+7fW3IMJnjX8A8jOjGhvkQw=
+github.com/Postcord/rest v0.0.7/go.mod h1:4d6ScS6p542t3DNbpeviucSAcRYZDbhU0CnQKlv+uzc=
 github.com/andybalholm/brotli v1.0.2/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
 github.com/andybalholm/brotli v1.0.3 h1:fpcw+r1N1h0Poc1F/pHbW40cUm/lMEQslZtCkBQ0UnM=
 github.com/andybalholm/brotli v1.0.3/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=

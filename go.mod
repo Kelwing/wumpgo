@@ -4,8 +4,8 @@ go 1.16
 
 require (
 	github.com/Postcord/interactions v0.0.15
-	github.com/Postcord/objects v0.0.14
-	github.com/Postcord/rest v0.0.6
+	github.com/Postcord/objects v0.0.15
+	github.com/Postcord/rest v0.0.7
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasthttp v1.30.0 // indirect
