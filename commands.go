@@ -240,7 +240,7 @@ func (c *Client) EditApplicationCommandPermissions(app, guild, cmd objects.Snowf
 		Method(http.MethodPut).
 		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app, guild, cmd)).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
+		Expect(http.StatusNoContent, http.StatusOK).
 		Body(data).
 		Bind(&perms).
 		Send(c)
