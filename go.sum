@@ -1,5 +1,7 @@
 github.com/Postcord/objects v0.0.16 h1:rPIPg+gKw1TxPkvY/7iBRH89+Ei5o3M/Da+sKdUF9+A=
 github.com/Postcord/objects v0.0.16/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
+github.com/Postcord/objects v0.0.17 h1:S2Smapxv9da1hccKgTblXmVHGtuP1slXEZsrhVFivas=
+github.com/Postcord/objects v0.0.17/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
