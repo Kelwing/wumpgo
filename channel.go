@@ -217,13 +217,14 @@ func (c *Client) GetChannelInvites(channel objects.Snowflake) ([]*objects.Invite
 }
 
 type CreateInviteParams struct {
-	MaxAge         int64             `json:"max_age,omitempty"`
-	MaxUses        int64             `json:"max_uses,omitempty"`
-	Temporary      bool              `json:"temporary,,omitempty"`
-	Unique         bool              `json:"unique,omitempty"`
-	TargetUser     objects.Snowflake `json:"target_user,omitempty"`
-	TargetUserType objects.Snowflake `json:"target_user_type,omitempty"`
-	Reason         string            `json:"-"`
+	MaxAge            int64                    `json:"max_age,omitempty"`
+	MaxUses           int64                    `json:"max_uses,omitempty"`
+	Temporary         bool                     `json:"temporary,,omitempty"`
+	Unique            bool                     `json:"unique,omitempty"`
+	TargetUser        objects.Snowflake        `json:"target_user_id,omitempty"`
+	TargetType        objects.InviteTargetType `json:"target_type,omitempty"`
+	TargetApplication objects.Snowflake        `json:"target_application_id,omitempty"`
+	Reason            string                   `json:"-"`
 }
 
 func (c *Client) CreateChannelInvite(channel objects.Snowflake, params *CreateInviteParams) (*objects.Invite, error) {
