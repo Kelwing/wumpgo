@@ -29,17 +29,17 @@ func (c *Client) GetChannel(id objects.Snowflake) (*objects.Channel, error) {
 }
 
 type ModifyChannelParams struct {
-	Name                 *string                       `json:"name,omitempty"`
-	Type                 *objects.ChannelType          `json:"type,omitempty"`
-	Position             int64                         `json:"position,omitempty"`
-	Topic                string                        `json:"topic,omitempty"`
-	NSFW                 bool                          `json:"nsfw,omitempty"`
-	RateLimitPerUser     int64                         `json:"rate_limit_per_user,omitempty"`
-	Bitrate              int64                         `json:"bitrate,omitempty"`
-	UserLimit            int64                         `json:"user_limit,omitempty"`
-	PermissionOverwrites []objects.PermissionOverwrite `json:"permission_overwrites,omitempty"`
-	Parent               objects.Snowflake             `json:"parent_id,omitempty"`
-	Reason               string                        `json:"-"`
+	Name                 *string                        `json:"name,omitempty"`
+	Type                 *objects.ChannelType           `json:"type,omitempty"`
+	Position             *int64                         `json:"position,omitempty"`
+	Topic                *string                        `json:"topic,omitempty"`
+	NSFW                 *bool                          `json:"nsfw,omitempty"`
+	RateLimitPerUser     *int64                         `json:"rate_limit_per_user,omitempty"`
+	Bitrate              *int64                         `json:"bitrate,omitempty"`
+	UserLimit            *int64                         `json:"user_limit,omitempty"`
+	PermissionOverwrites *[]objects.PermissionOverwrite `json:"permission_overwrites,omitempty"`
+	Parent               *objects.Snowflake             `json:"parent_id,omitempty"`
+	Reason               string                         `json:"-"`
 }
 
 func (c *Client) ModifyChannel(id objects.Snowflake, params *ModifyChannelParams) (*objects.Channel, error) {
