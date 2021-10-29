@@ -1,12 +1,5 @@
 package objects
 
-type InviteTargetType int
-
-const (
-	InviteTargetType_STREAM InviteTargetType = iota + 1
-	InviteTargetType_EMBEDDED_APPLICATION
-)
-
 type (
 	Ready struct {
 		Version     int          `json:"v"`

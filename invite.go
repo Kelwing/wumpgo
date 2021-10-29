@@ -1,10 +1,11 @@
 package objects
 
 // https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
-type InviteTargetUser uint
+type InviteTargetType int
 
 const (
-	TargetUserStream InviteTargetUser = 1
+	InviteTargetType_STREAM InviteTargetType = iota + 1
+	InviteTargetType_EMBEDDED_APPLICATION
 )
 
 // Invite represents a code that when used, adds a user to a guild or group DM channel.
@@ -25,9 +26,11 @@ type Invite struct {
 	// the target user for this invite
 	TargetUser *User `json:"target_user,omitempty"`
 
-	// the type of user target for this invite
-	// https://discord.com/developers/docs/resources/invite#invite-object-example-invite-object
-	TargetUserType InviteTargetUser `json:"target_user_type,omitempty"`
+	// The target type for this invite
+	TargetType InviteTargetType `json:"target_type,omitempty"`
+
+	// The application the invite is targeting
+	TargetApplication *Application `json:"target_application,omitempty"`
 
 	// approximate count of online members (only present when target_user is set)
 	ApproximatePresenceCount int `json:"approximate_presence_count,omitempty"`
