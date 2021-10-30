@@ -287,11 +287,11 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 			return nil
 		}
 		ctx := &CommandRouterCtx{
-			errorHandler:          exceptionHandler,
-			Interaction:           interaction,
-			Command:               cmd,
-			Options:               mappedOptions,
-			RESTClient:            restClient,
+			errorHandler: exceptionHandler,
+			Interaction:  interaction,
+			Command:      cmd,
+			Options:      mappedOptions,
+			RESTClient:   restClient,
 		}
 
 		// Find the focused argument.
@@ -316,8 +316,8 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(stringifiedOptions))
 					for i, v := range stringifiedOptions {
 						resultOptions[i] = &objects.ApplicationCommandOptionChoice{
-							Name:    v.Name,
-							Value:   v.Value,
+							Name:  v.Name,
+							Value: v.Value,
 						}
 					}
 				case IntAutoCompleteFunc:
@@ -329,8 +329,8 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(intOptions))
 					for i, v := range intOptions {
 						resultOptions[i] = &objects.ApplicationCommandOptionChoice{
-							Name:    v.Name,
-							Value:   v.Value,
+							Name:  v.Name,
+							Value: v.Value,
 						}
 					}
 				case DoubleAutoCompleteFunc:
@@ -342,8 +342,8 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(doubleOptions))
 					for i, v := range doubleOptions {
 						resultOptions[i] = &objects.ApplicationCommandOptionChoice{
-							Name:    v.Name,
-							Value:   v.Value,
+							Name:  v.Name,
+							Value: v.Value,
 						}
 					}
 				default:
