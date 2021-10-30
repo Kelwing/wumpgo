@@ -158,7 +158,7 @@ func (a *App) HTTPHandler() http.Handler {
 		a.logger.WithField("addr", r.RemoteAddr).Debug("new request")
 		jr := json.NewEncoder(w)
 		signature := r.Header.Get("X-Signature-Ed25519")
-		body, err := ioutil.ReadAll(r.Body)
+		bodyBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to read request body: ", err)
 			_ = jr.Encode(objects.InteractionResponse{
@@ -170,13 +170,13 @@ func (a *App) HTTPHandler() http.Handler {
 			})
 			return
 		}
-		body = append([]byte(r.Header.Get("X-Signature-Timestamp")), body...)
+		body := append([]byte(r.Header.Get("X-Signature-Timestamp")), bodyBytes...)
 		if !verifyMessage(body, signature, a.pubKey) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		resp, err := a.ProcessRequest(body)
+		resp, err := a.ProcessRequest(bodyBytes)
 		if err != nil {
 			a.logger.WithError(err).Error("failed to process request: ", err)
 			_ = jr.Encode(objects.InteractionResponse{
