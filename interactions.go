@@ -6,7 +6,9 @@ import (
 	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"sync"
 
 	"github.com/Postcord/objects"
@@ -149,6 +151,49 @@ func (a *App) LambdaHandler(ctx context.Context, req events.APIGatewayProxyReque
 			"Content-Type": "application/json",
 		},
 	}, nil
+}
+
+func (a *App) HTTPHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		a.logger.WithField("addr", r.RemoteAddr).Debug("new request")
+		jr := json.NewEncoder(w)
+		signature := r.Header.Get("X-Signature-Ed25519")
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			a.logger.WithError(err).Error("failed to read request body: ", err)
+			_ = jr.Encode(objects.InteractionResponse{
+				Type: objects.ResponseChannelMessageWithSource,
+				Data: &objects.InteractionApplicationCommandCallbackData{
+					Content: "An unknown error occurred",
+					Flags:   objects.ResponseFlagEphemeral,
+				},
+			})
+			return
+		}
+		body = append([]byte(r.Header.Get("X-Signature-Timestamp")), body...)
+		if !verifyMessage(body, signature, a.pubKey) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		resp, err := a.ProcessRequest(body)
+		if err != nil {
+			a.logger.WithError(err).Error("failed to process request: ", err)
+			_ = jr.Encode(objects.InteractionResponse{
+				Type: objects.ResponseChannelMessageWithSource,
+				Data: &objects.InteractionApplicationCommandCallbackData{
+					Content: "An unknown error occurred",
+					Flags:   objects.ResponseFlagEphemeral,
+				},
+			})
+			return
+		}
+
+		err = jr.Encode(resp)
+		if err != nil {
+			log.Println("failed to write response: ", err)
+		}
+	})
 }
 
 // ProcessRequest is used internally to process a validated request.
