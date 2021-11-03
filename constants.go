@@ -107,4 +107,8 @@ const (
 	// Permissions
 	GuildApplicationCommandsPermissionsFmt = GuildApplicationsFmt + "/permissions"
 	GuildApplicationCommandPermissionsFmt  = GuildApplicationsFmt + "/%d/permissions"
+
+	// Gateway
+	GatewayFmt    = BaseURL + "/gateway"
+	GatewayBotFmt = GatewayFmt + "/bot"
 )

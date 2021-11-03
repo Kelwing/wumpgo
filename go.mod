@@ -3,7 +3,7 @@ module github.com/Postcord/rest
 go 1.14
 
 require (
-	github.com/Postcord/objects v0.0.17
+	github.com/Postcord/objects v0.0.18
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-redsync/redsync/v4 v4.4.2
 	github.com/google/go-querystring v1.1.0
