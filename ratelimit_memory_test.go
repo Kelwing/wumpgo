@@ -26,7 +26,9 @@ func TestGetSleepTime(t *testing.T) {
 	}
 
 	bucket := memoryBucket{}
-	rateLimiter.updateBucket(&bucket, &resp)
+	if err := rateLimiter.updateBucket(&bucket, &resp); err != nil {
+		t.Fail()
+	}
 	expectedDelay := time.Second * time.Duration(waitSeconds)
 	if delay := rateLimiter.getSleepTime(&bucket); delay < (expectedDelay-time.Second) || delay > (expectedDelay+time.Second) {
 		t.Errorf("Expected delay of %v, got %v", expectedDelay, delay)
