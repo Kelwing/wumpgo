@@ -40,7 +40,7 @@ type MemoryRatelimiter struct {
 func (m *MemoryRatelimiter) getSleepTime(bucket *memoryBucket) time.Duration {
 	now := time.Now()
 	if bucket.remaining < 1 && now.Before(bucket.resetTime) {
-		return now.Sub(bucket.resetTime)
+		return time.Until(bucket.resetTime)
 	}
 	globalReset := atomic.LoadInt64(m.global)
 	globalTime := time.Unix(0, globalReset)
@@ -113,7 +113,7 @@ func (m *MemoryRatelimiter) updateBucket(bucket *memoryBucket, resp *DiscordResp
 			return err
 		}
 
-		resetAt := time.Now().Add(time.Duration(parsedAfter) * time.Millisecond)
+		resetAt := time.Now().Add(time.Duration(parsedAfter) * time.Second)
 
 		if global != "" {
 			atomic.StoreInt64(m.global, resetAt.UnixNano())
