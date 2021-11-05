@@ -26,7 +26,7 @@ type (
 // App is the primary interactions server
 type App struct {
 	Router              *fasthttprouter.Router
-	server              *fasthttp.Server
+	Server              *fasthttp.Server
 	extraProps          map[string]interface{}
 	propsLock           sync.RWMutex
 	logger              *logrus.Logger
@@ -46,7 +46,7 @@ func New(config *Config) (*App, error) {
 
 	router := fasthttprouter.New()
 	a := &App{
-		server: &fasthttp.Server{
+		Server: &fasthttp.Server{
 			Handler: router.Handler,
 			Name:    "Postcord",
 		},
@@ -252,7 +252,7 @@ func (a *App) Set(key string, obj interface{}) {
 // Run runs the App with a built-in fasthttp web server.  It takes a port as its only argument.
 func (a *App) Run(port int) error {
 	a.logger.Info("listening on port ", port)
-	return a.server.ListenAndServe(fmt.Sprintf(":%d", port))
+	return a.Server.ListenAndServe(fmt.Sprintf(":%d", port))
 }
 
 // Rest exposes the internal Rest client so you can make calls to the Discord API
