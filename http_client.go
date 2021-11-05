@@ -9,10 +9,12 @@ import (
 	"testing"
 )
 
+type Doer interface {
+	Do(r *http.Request) (*http.Response, error)
+}
+
 type DefaultHTTPClient struct {
-	doer interface {
-		Do(r *http.Request) (*http.Response, error)
-	}
+	doer          Doer
 	userAgent     string
 	authorization string
 }

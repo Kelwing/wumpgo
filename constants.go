@@ -2,7 +2,7 @@ package rest
 
 const (
 	// Discord API Base URL
-	BaseURL = "https://discord.com/api/v8"
+	BaseURL = "https://discord.com/api/v9"
 
 	XAuditLogReasonHeader = "X-Audit-Log-Reason"
 

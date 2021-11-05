@@ -2,7 +2,10 @@ package rest
 
 import (
 	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/rs/zerolog"
 )
 
 type HTTPClient interface {
@@ -14,6 +17,8 @@ type Config struct {
 	UserAgent     string
 	Ratelimiter   Ratelimiter
 	Cache         Cache
+	Proxy         func(*http.Request) (*url.URL, error)
+	Logger        *zerolog.Logger
 }
 
 type Client struct {
@@ -137,12 +142,18 @@ func (r *request) Send(c *Client) error {
 }
 
 func New(config *Config) *Client {
+	var client Doer
+	if config.Proxy != nil {
+		client = NewProxyClient(config.Proxy)
+	} else {
+		client = &http.Client{
+			Timeout: time.Second * 5,
+		}
+	}
 	return &Client{
 		rateLimiter: config.Ratelimiter,
 		httpClient: &DefaultHTTPClient{
-			doer: &http.Client{
-				Timeout: time.Second * 5,
-			},
+			doer:          client,
 			userAgent:     config.UserAgent,
 			authorization: config.Authorization,
 		},
