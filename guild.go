@@ -178,7 +178,7 @@ func (c *Client) CreateGuildChannel(id objects.Snowflake, params *ChannelCreateP
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
+		Expect(http.StatusOK, http.StatusCreated).
 		Bind(channel).
 		Send(c)
 
