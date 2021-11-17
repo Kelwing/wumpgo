@@ -9,6 +9,7 @@ import (
 type ErrorREST struct {
 	Message string
 	Status  int
+	Body    json.RawMessage
 }
 
 func (r *ErrorREST) Error() string {
@@ -28,8 +29,9 @@ func (r *DiscordResponse) JSON(v interface{}) error {
 func (r *DiscordResponse) ExpectsStatus(statusCode int) error {
 	if r.StatusCode != statusCode {
 		return &ErrorREST{
-			Message: fmt.Sprintf("expected %d, got %d: %s", statusCode, r.StatusCode, r.Body),
+			Message: fmt.Sprintf("expected %d, got %d", statusCode, r.StatusCode),
 			Status:  r.StatusCode,
+			Body:    r.Body,
 		}
 	}
 	return nil
@@ -43,7 +45,8 @@ func (r *DiscordResponse) ExpectAnyStatus(statusCodes ...int) error {
 	}
 
 	return &ErrorREST{
-		Message: fmt.Sprintf("expected one of %d, got %d: %s", statusCodes, r.StatusCode, r.Body),
+		Message: fmt.Sprintf("expected one of %d, got %d", statusCodes, r.StatusCode),
 		Status:  r.StatusCode,
+		Body:    r.Body,
 	}
 }
