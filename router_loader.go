@@ -71,6 +71,13 @@ type HandlerAccepter interface {
 	Rest() *rest.Client
 }
 
+// Defines the various bits passed through from the loader.
+type loaderPassthrough struct {
+	rest *rest.Client
+	errHandler func(error) *objects.InteractionResponse
+	globalAllowedMentions *objects.AllowedMentions
+}
+
 func (l *loaderBuilder) Build(app HandlerAccepter) {
 	cb := l.errHandler
 	if cb == nil {
@@ -80,13 +87,13 @@ func (l *loaderBuilder) Build(app HandlerAccepter) {
 
 	if l.components != nil {
 		// Build and load the components handler.
-		handler := l.components.build(app.Rest(), cb, l.globalAllowedMentions)
+		handler := l.components.build(loaderPassthrough{app.Rest(), cb, l.globalAllowedMentions})
 		app.ComponentHandler(handler)
 	}
 
 	if l.commands != nil {
 		// Build and load the commands/autocomplete handler.
-		commandHandler, autocompleteHandler := l.commands.build(app.Rest(), cb, l.globalAllowedMentions)
+		commandHandler, autocompleteHandler := l.commands.build(loaderPassthrough{app.Rest(), cb, l.globalAllowedMentions})
 		app.CommandHandler(commandHandler)
 		app.AutocompleteHandler(autocompleteHandler)
 	}

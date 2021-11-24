@@ -299,7 +299,7 @@ func TestComponentRouter_build(t *testing.T) {
 			if tt.init != nil {
 				tt.init(t, r)
 			}
-			builtFunc := r.build(dummyRestClient, setError, tt.globalAllowedMentions)
+			builtFunc := r.build(loaderPassthrough{dummyRestClient, setError, tt.globalAllowedMentions})
 			resp := builtFunc(tt.interaction)
 
 			// Verify the error.

@@ -202,96 +202,23 @@ var CommandIsNotSubcommand = errors.New("expected *Command, found *CommandGroup"
 // CommandDoesNotExist is thrown when the command specified does not exist.
 var CommandDoesNotExist = errors.New("the command does not exist")
 
-// GroupDoesNotExist is thrown when the group specified does not exist.
-var GroupDoesNotExist = errors.New("the group does not exist")
-
-type groupExecutionOptions struct {
-	restClient       *rest.Client
-	exceptionHandler func(error) *objects.InteractionResponse
-	allowedMentions  *objects.AllowedMentions
-	interaction      *objects.Interaction
-	data             *objects.ApplicationCommandInteractionData
-	nextLevel        *objects.ApplicationCommandInteractionDataOption
-}
-
-// Execute the group.
-func (c *CommandGroup) execute(opts groupExecutionOptions, middlewareList *list.List) *objects.InteractionResponse {
-	if len(opts.data.Options) != 1 {
-		// data.Options must be 1 here. A valid response will just contain the next node down the tree.
-		return opts.exceptionHandler(CommandIsNotSubcommand)
-	}
-
-	// Inject our middleware.
-	if c.Middleware != nil {
-		for _, v := range c.Middleware {
-			middlewareList.PushBack(v)
-		}
-	}
-
-	// Do a switch on the type.
-	switch opts.nextLevel.Type {
-	case objects.TypeSubCommand:
-		// Expect a sub-command in the map and handle accordingly.
-		cmdIface, ok := c.Subcommands[opts.nextLevel.Name]
-		if !ok {
-			// The command does not exist.
-			return opts.exceptionHandler(CommandDoesNotExist)
-		}
-		cmd, ok := cmdIface.(*Command)
-		if !ok {
-			// Not a command.
-			return opts.exceptionHandler(CommandIsSubcommand)
-		}
-		if c.AllowedMentions != nil {
-			opts.allowedMentions = c.AllowedMentions
-		}
-		return cmd.execute(commandExecutionOptions{
-			restClient:       opts.restClient,
-			exceptionHandler: opts.exceptionHandler,
-			allowedMentions:  opts.allowedMentions,
-			interaction:      opts.interaction,
-			data:             opts.data,
-			options:          opts.nextLevel.Options,
-		}, middlewareList)
-	case objects.TypeSubCommandGroup:
-		// Expect a group in the map and handle accordingly.
-		cmdIface, ok := c.Subcommands[opts.nextLevel.Name]
-		if !ok {
-			// The group does not exist.
-			return opts.exceptionHandler(GroupDoesNotExist)
-		}
-		group, ok := cmdIface.(*CommandGroup)
-		if !ok {
-			// Not a group.
-			return opts.exceptionHandler(CommandIsSubcommand)
-		}
-		if c.AllowedMentions != nil {
-			opts.allowedMentions = c.AllowedMentions
-		}
-		return group.execute(opts, middlewareList)
-	default:
-		// This is just a random argument.
-		return opts.exceptionHandler(CommandIsNotSubcommand)
-	}
-}
-
 // NoAutoCompleteFunc is thrown when Discord sends a focused argument without an autocomplete function.
 var NoAutoCompleteFunc = errors.New("discord sent auto-complete for argument without auto-complete function")
 
 // Used to define the autocomplete handler.
-func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, subcommands map[string]interface{}) interactions.HandlerFunc {
+func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommands map[string]interface{}) interactions.HandlerFunc {
 	process := func(options []*objects.ApplicationCommandInteractionDataOption, cmd *Command, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse {
 		// Create the context.
-		_, mappedOptions := cmd.mapOptions(true, data, options, exceptionHandler)
+		_, mappedOptions := cmd.mapOptions(true, data, options, loader.errHandler)
 		if mappedOptions == nil {
 			return nil
 		}
 		ctx := &CommandRouterCtx{
-			errorHandler: exceptionHandler,
+			errorHandler: loader.errHandler,
 			Interaction:  interaction,
 			Command:      cmd,
 			Options:      mappedOptions,
-			RESTClient:   restClient,
+			RESTClient:   loader.rest,
 		}
 
 		// Find the focused argument.
@@ -300,7 +227,7 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 				// Get the autocomplete function.
 				f := cmd.autocomplete[v.Name]
 				if f == nil {
-					exceptionHandler(NoAutoCompleteFunc)
+					loader.errHandler(NoAutoCompleteFunc)
 					return nil
 				}
 
@@ -310,7 +237,7 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 				case StringAutoCompleteFunc:
 					stringifiedOptions, err := x(ctx)
 					if err != nil {
-						exceptionHandler(err)
+						loader.errHandler(err)
 						return nil
 					}
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(stringifiedOptions))
@@ -323,7 +250,7 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 				case IntAutoCompleteFunc:
 					intOptions, err := x(ctx)
 					if err != nil {
-						exceptionHandler(err)
+						loader.errHandler(err)
 						return nil
 					}
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(intOptions))
@@ -336,7 +263,7 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 				case DoubleAutoCompleteFunc:
 					doubleOptions, err := x(ctx)
 					if err != nil {
-						exceptionHandler(err)
+						loader.errHandler(err)
 						return nil
 					}
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(doubleOptions))
@@ -374,7 +301,7 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 		case *Command:
 			// Check the type of data isn't a subcommand.
 			if len(options) == 1 && isSub(options[0].Type) {
-				exceptionHandler(CommandIsNotSubcommand)
+				loader.errHandler(CommandIsNotSubcommand)
 				return nil
 			}
 
@@ -383,14 +310,14 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 		case *CommandGroup:
 			// Check the type of data is a subcommand.
 			if len(options) != 1 || !isSub(options[0].Type) {
-				exceptionHandler(CommandIsSubcommand)
+				loader.errHandler(CommandIsSubcommand)
 				return nil
 			}
 
 			// Handle traversing groups.
 			cmdOrCat, ok := x.Subcommands[options[0].Name]
 			if !ok {
-				exceptionHandler(CommandDoesNotExist)
+				loader.errHandler(CommandDoesNotExist)
 				return nil
 			}
 			return handleOption(cmdOrCat, options[0].Options, data, interaction)
@@ -403,7 +330,7 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 		// Parse the data JSON.
 		var data objects.ApplicationCommandInteractionData
 		if err := json.Unmarshal(interaction.Data, &data); err != nil {
-			return exceptionHandler(err)
+			return loader.errHandler(err)
 		}
 
 		// Get the command or category.
@@ -418,16 +345,15 @@ func (c *CommandRouter) autocompleteHandler(restClient *rest.Client, exceptionHa
 	}
 }
 
-// Used to build the component router by the parent.
-func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) (interactions.HandlerFunc, interactions.HandlerFunc) {
-	baseAllowedMentions := globalAllowedMentions
+// Used to define the command handler.
+func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.HandlerFunc {
+	// Get the allowed mentions configuration.
+	baseAllowedMentions := loader.globalAllowedMentions
 	if c.roots.AllowedMentions != nil {
 		baseAllowedMentions = c.roots.AllowedMentions
 	}
-	m := c.roots.Subcommands
-	if m == nil {
-		m = map[string]interface{}{}
-	}
+
+	// Process the response.
 	return func(interaction *objects.Interaction) *objects.InteractionResponse {
 		// Handle middleware.
 		middlewareList := list.New()
@@ -438,93 +364,99 @@ func (c *CommandRouter) build(restClient *rest.Client, exceptionHandler func(err
 		}
 
 		// Parse the data JSON.
-		var data objects.ApplicationCommandInteractionData
-		if err := json.Unmarshal(interaction.Data, &data); err != nil {
-			return exceptionHandler(err)
+		var rootData objects.ApplicationCommandInteractionData
+		if err := json.Unmarshal(interaction.Data, &rootData); err != nil {
+			return loader.errHandler(err)
 		}
 
-		// Route the command.
-		cmd, ok := m[data.Name]
-		if !ok {
-			// Not a command.
-			return nil
+		// Defines the items changed whilst traversing the tree.
+		options := rootData.Options
+		allowedMentions := baseAllowedMentions
+		data := reflect.Indirect(reflect.ValueOf(rootData))
+
+		// Get the map of (sub-)commands.
+		m := c.roots.Subcommands
+		if m == nil {
+			m = map[string]interface{}{}
 		}
-		switch x := cmd.(type) {
-		case *Command:
-			// Just go ahead and call execute. That will handle the option checking anyway.
-			return x.execute(commandExecutionOptions{
-				restClient:       restClient,
-				exceptionHandler: exceptionHandler,
-				allowedMentions:  baseAllowedMentions,
-				interaction:      interaction,
-				data:             &data,
-				options:          data.Options,
-			}, middlewareList)
-		case *CommandGroup:
-			if len(data.Options) != 1 {
-				// data.Options must be 1 here. A valid response will just contain the next node down the tree.
-				return exceptionHandler(CommandIsNotSubcommand)
+
+		// Find the route.
+		for {
+			// Get the item from the map.
+			cmdOrCat, ok := m[data.FieldByName("Name").String()]
+			if !ok {
+				// No command.
+				return nil
 			}
 
-			// Figure out if we now want the command handler or the sub-command handler.
-			option := data.Options[0]
-			switch option.Type {
-			case objects.TypeSubCommandGroup:
-				groupIface, ok := x.Subcommands[option.Name]
-				if !ok {
-					// The group does not exist.
-					return exceptionHandler(GroupDoesNotExist)
+			// Check the type of the item.
+			switch x := cmdOrCat.(type) {
+			case *Command:
+				// In this case, we should go ahead and execute.
+				return x.execute(commandExecutionOptions{
+					restClient:       loader.rest,
+					exceptionHandler: loader.errHandler,
+					allowedMentions:  allowedMentions,
+					interaction:      interaction,
+					data:             &rootData,
+					options:          options,
+				}, middlewareList)
+			case *CommandGroup:
+				// How we handle this depends on what we are expecting.
+				typeIface := data.FieldByName("Type").Interface()
+				switch type_ := typeIface.(type) {
+				case objects.ApplicationCommandOptionType:
+					// Check the type of the option to make sure it is a command.
+					if type_ != objects.TypeSubCommandGroup {
+						// If the type is anything other than a subcommand group, that does not match with this being a group.
+						return loader.errHandler(CommandIsNotSubcommand)
+					}
+				case objects.ApplicationCommandType:
+					// If this is the case, we are in the root. Look ahead to see if we are a group or a command.
+					if len(options) != 1 || (options[0].Type != objects.TypeSubCommand && options[0].Type != objects.TypeSubCommandGroup) {
+						// We are not a group. We know this because a root command acting as a group can only have one
+						// option which is either another group or a subcommand.
+						return loader.errHandler(CommandIsNotSubcommand)
+					}
+				default:
+					// This should never happen.
+					panic("postcord internal error - unknown command Type field type")
 				}
-				group, ok := groupIface.(*CommandGroup)
-				if !ok {
-					// Not a group.
-					return exceptionHandler(CommandIsNotSubcommand)
+
+				// Handle allowed mentions.
+				if x.AllowedMentions != nil {
+					allowedMentions = x.AllowedMentions
 				}
+
+				// Handle middleware.
 				if x.Middleware != nil {
 					for _, v := range x.Middleware {
 						middlewareList.PushBack(v)
 					}
 				}
-				return group.execute(groupExecutionOptions{
-					restClient:       restClient,
-					exceptionHandler: exceptionHandler,
-					allowedMentions:  baseAllowedMentions,
-					interaction:      interaction,
-					data:             &data,
-					nextLevel:        option.Options[0],
-				}, middlewareList)
-			case objects.TypeSubCommand:
-				cmdIface, ok := x.Subcommands[option.Name]
-				if !ok {
-					// The command does not exist.
-					return exceptionHandler(CommandDoesNotExist)
-				}
-				cmd, ok := cmdIface.(*Command)
-				if !ok {
-					// Not a command.
-					return exceptionHandler(CommandIsSubcommand)
-				}
-				if x.Middleware != nil {
-					for _, v := range x.Middleware {
-						middlewareList.PushBack(v)
-					}
-				}
-				return cmd.execute(commandExecutionOptions{
-					restClient:       restClient,
-					exceptionHandler: exceptionHandler,
-					allowedMentions:  baseAllowedMentions,
-					interaction:      interaction,
-					data:             &data,
-					options:          option.Options,
-				}, middlewareList)
+
+				// Set the map to the subcommands from this group.
+				m = x.Subcommands
+
+				// Get the next data and setup for the next iteration.
+				nextData := options[0]
+				options = nextData.Options
+				data = reflect.Indirect(reflect.ValueOf(nextData))
 			default:
-				// Not a command.
-				return exceptionHandler(CommandDoesNotExist)
+				// This should never actually happen. We need to know right away if it does.
+				panic("postcord internal error - unknown root command type")
 			}
-		default:
-			panic("postcord internal error - unknown root command type")
 		}
-	}, c.autocompleteHandler(restClient, exceptionHandler, m)
+	}
+}
+
+// Used to build the command router by the parent.
+func (c *CommandRouter) build(loader loaderPassthrough) (interactions.HandlerFunc, interactions.HandlerFunc) {
+	m := c.roots.Subcommands
+	if m == nil {
+		m = map[string]interface{}{}
+	}
+	return c.commandHandler(loader), c.autocompleteHandler(loader, m)
 }
 
 // Get the options for a command or category.
