@@ -345,6 +345,35 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommand
 	}
 }
 
+type dataWrapper interface {
+	type_() interface{}
+	name() string
+}
+
+type rootDataWrapper struct {
+	root *objects.ApplicationCommandInteractionData
+}
+
+func (r rootDataWrapper) type_() interface{} {
+	return r.root.Type
+}
+
+func (r rootDataWrapper) name() string {
+	return r.root.Name
+}
+
+type optionDataWrapper struct {
+	option *objects.ApplicationCommandInteractionDataOption
+}
+
+func (r optionDataWrapper) type_() interface{} {
+	return r.option.Type
+}
+
+func (r optionDataWrapper) name() string {
+	return r.option.Name
+}
+
 // Used to define the command handler.
 func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.HandlerFunc {
 	// Get the allowed mentions configuration.
@@ -372,7 +401,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 		// Defines the items changed whilst traversing the tree.
 		options := rootData.Options
 		allowedMentions := baseAllowedMentions
-		data := reflect.Indirect(reflect.ValueOf(rootData))
+		var data dataWrapper = rootDataWrapper{&rootData}
 
 		// Get the map of (sub-)commands.
 		m := c.roots.Subcommands
@@ -383,7 +412,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 		// Find the route.
 		for {
 			// Get the item from the map.
-			cmdOrCat, ok := m[data.FieldByName("Name").String()]
+			cmdOrCat, ok := m[data.name()]
 			if !ok {
 				// No command.
 				return nil
@@ -403,7 +432,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 				}, middlewareList)
 			case *CommandGroup:
 				// How we handle this depends on what we are expecting.
-				typeIface := data.FieldByName("Type").Interface()
+				typeIface := data.type_()
 				switch type_ := typeIface.(type) {
 				case objects.ApplicationCommandOptionType:
 					// Check the type of the option to make sure it is a command.
@@ -441,7 +470,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 				// Get the next data and setup for the next iteration.
 				nextData := options[0]
 				options = nextData.Options
-				data = reflect.Indirect(reflect.ValueOf(nextData))
+				data = optionDataWrapper{nextData}
 			default:
 				// This should never actually happen. We need to know right away if it does.
 				panic("postcord internal error - unknown root command type")
