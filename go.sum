@@ -61,6 +61,10 @@ github.com/hashicorp/go-multierror v1.1.0/go.mod h1:spPvp8C1qA32ftKqdAHm4hHTbPw+
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
+github.com/jimeh/envctl v0.1.0 h1:KTv3D+pi5M4/PgFVE/W8ssWqiZP3pDJ8Cga50L+1avo=
+github.com/jimeh/envctl v0.1.0/go.mod h1:aM27ffBbO1yUBKUzgJGCUorS4z+wyh+qhQe1ruxXZZo=
+github.com/jimeh/go-golden v0.1.0 h1:j8kfajjYhUV2MDodc84eqcszEG/R9EKsE4UHpBJ7oeY=
+github.com/jimeh/go-golden v0.1.0/go.mod h1:Mu9RS/aNVNzhDOW0+p3R5yx5HvUEF34PcTmRW1jwwZY=
 github.com/klauspost/compress v1.13.4/go.mod h1:8dP1Hq4DHOhN9w426knH3Rhby4rFm6D8eO+e+Dq5Gzg=
 github.com/klauspost/compress v1.13.5/go.mod h1:/3/Vjq9QcHkK5uEr5lBEmyoZ1iFhe47etQ6QUkpK6sk=
 github.com/klauspost/compress v1.13.6 h1:P76CopJELS0TiO2mebmnzgWaajssP/EszplttgQxcgc=

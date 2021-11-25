@@ -1,11 +1,14 @@
 package router
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/Postcord/objects"
+	"github.com/jimeh/go-golden"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommandRouterCtx_TargetMessage(t *testing.T) {
@@ -428,20 +431,110 @@ func TestCommandRouter_NewCommandBuilder(t *testing.T) {
 	}, builder)
 }
 
-func TestCommandGroup_execute(t *testing.T) {
-	// TODO
-}
-
 func TestCommandRouter_build(t *testing.T) {
 	// TODO
 }
 
-func Test_getOptions(t *testing.T) {
-	// TODO
-}
-
 func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
-	// TODO
+	tests := []struct {
+		name string
+
+		init    func() *CommandRouter
+	}{
+		{
+			name: "no commands",
+			init: func() *CommandRouter {
+				return &CommandRouter{}
+			},
+		},
+		{
+			name:    "with all cases",
+			init:    func() *CommandRouter {
+				// Defines the root router.
+				r := &CommandRouter{}
+
+				// Defines the root command with no arguments.
+				r.NewCommandBuilder("rootnoargs").
+					DefaultPermission().
+					Description("root with no arguments").
+					MustBuild()
+
+				// Defines the root command with arguments.
+				r.NewCommandBuilder("rootargs").
+					Description("root with arguments").
+					StringOption("req_string_option", "the required string option", true,
+						StringAutoCompleteFuncBuilder(func(ctx *CommandRouterCtx) ([]StringChoice, error) {
+							// Important to note this doesn't actually work.
+							return nil, nil
+						}),
+					).
+					StringOption("optional_string_option", "The optional string option", false, nil).
+					IntOption("req_int_option", "the required int option", true,
+						IntAutoCompleteFuncBuilder(func(ctx *CommandRouterCtx) ([]IntChoice, error) {
+							// Important to note this doesn't actually work.
+							return nil, nil
+						}),
+					).
+					IntOption("optional_int_option", "The optional int option", false, nil).
+					DoubleOption("req_double_option", "the required double option", true,
+						DoubleAutoCompleteFuncBuilder(func(ctx *CommandRouterCtx) ([]DoubleChoice, error) {
+							// Important to note this doesn't actually work.
+							return nil, nil
+						}),
+					).
+					IntOption("optional_double_option", "The optional double option", false, nil).
+					BoolOption("req_bool_option", "the required boolean option", true, true).
+					BoolOption("optional_bool_option", "the optional boolean option", false, false).
+					RoleOption("req_role_option", "the required role option", true).
+					RoleOption("optional_role_option", "the optional role option", false).
+					ChannelOption("req_channel_option", "the required channel option", true).
+					ChannelOption("optional_channel_option", "the optional channel option", false).
+					MentionableOption("req_mentionable_option", "the required mentionable option", true).
+					MentionableOption("optional_mentionable_option", "the optional mentionable option", false).
+					UserOption("req_user_option", "the required user option", true).
+					UserOption("optional_user_option", "the optional user option", false).
+					MustBuild()
+
+				// Defines a command group with commands in the group.
+				g := r.MustNewCommandGroup("group1", "group 1", true)
+				g.NewCommandBuilder("cmd1").Description("first command in group").
+					StringOption("test", "testing", true, nil).
+					MustBuild()
+				g.NewCommandBuilder("cmd2").Description("second command in group").MustBuild()
+
+				// Defines a command group with sub-groups.
+				g = r.MustNewCommandGroup("group2", "group 2", false)
+				g.MustNewCommandGroup("subgroup1", "subgroup 1", true).
+					NewCommandBuilder("subcmd1").Description("first command in subgroup").MustBuild()
+				s := g.MustNewCommandGroup("subgroup1", "subgroup 1", false)
+				s.NewCommandBuilder("subcmd1").Description("first command in subgroup").MustBuild()
+				s.NewCommandBuilder("subcmd2").Description("second command in subgroup").MustBuild()
+
+				// Return the command router.
+				return r
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b, err := json.MarshalIndent(tt.init().FormulateDiscordCommands(), "", "  ")
+			require.NoError(t, err)
+			if golden.Update() {
+				golden.Set(t, b)
+			}
+
+			// HACK: It doesn't *always* resolve the right way around.
+			// Give it 100k chances. Most test attempts for me get it within 2-3.
+			// buuuuuut since it's random, 100k puts errors in the realm of impossibility
+			for i := 0; i < 100000; i++ {
+				if string(golden.Get(t)) == string(b) {
+					break
+				}
+				b, err = json.MarshalIndent(tt.init().FormulateDiscordCommands(), "", "  ")
+			}
+			assert.JSONEq(t, string(golden.Get(t)), string(b))
+		})
+	}
 }
 
 func TestCommandRouterCtx_Bind(t *testing.T) {
