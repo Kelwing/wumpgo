@@ -4,7 +4,11 @@ package router
 
 //go:generate go run generate_response_builder.go
 
-import "github.com/Postcord/objects"
+import (
+	"fmt"
+
+	"github.com/Postcord/objects"
+)
 
 // SetEmbed is used to set the embed, overwriting any previously.
 func (c *ComponentRouterCtx) SetEmbed(embed *objects.Embed) *ComponentRouterCtx {
@@ -45,6 +49,12 @@ func (c *ComponentRouterCtx) ClearComponents() *ComponentRouterCtx {
 // SetContent is used to set the content of a response.
 func (c *ComponentRouterCtx) SetContent(content string) *ComponentRouterCtx {
 	c.ResponseData().Content = content
+	return c
+}
+
+// SetContentF is used to set the content of a response using fmt.Sprintf.
+func (c *ComponentRouterCtx) SetContentF(content string, args ...interface{}) *ComponentRouterCtx {
+	c.ResponseData().Content = fmt.Sprintf(content, args...)
 	return c
 }
 
@@ -139,6 +149,12 @@ func (c *CommandRouterCtx) ClearComponents() *CommandRouterCtx {
 // SetContent is used to set the content of a response.
 func (c *CommandRouterCtx) SetContent(content string) *CommandRouterCtx {
 	c.ResponseData().Content = content
+	return c
+}
+
+// SetContentF is used to set the content of a response using fmt.Sprintf.
+func (c *CommandRouterCtx) SetContentF(content string, args ...interface{}) *CommandRouterCtx {
+	c.ResponseData().Content = fmt.Sprintf(content, args...)
 	return c
 }
 

@@ -15,7 +15,11 @@ package router
 
 //go:generate go run generate_response_builder.go
 
-import "github.com/Postcord/objects"
+import (
+	"fmt"
+
+	"github.com/Postcord/objects"
+)
 
 `
 
@@ -58,6 +62,12 @@ func (c *{{ .Type }}) ClearComponents() *{{ .Type }} {
 // SetContent is used to set the content of a response.
 func (c *{{ .Type }}) SetContent(content string) *{{ .Type }} {
 	c.ResponseData().Content = content
+	return c
+}
+
+// SetContentF is used to set the content of a response using fmt.Sprintf.
+func (c *{{ .Type }}) SetContentF(content string, args ...interface{}) *{{ .Type }} {
+	c.ResponseData().Content = fmt.Sprintf(content, args...)
 	return c
 }
 
