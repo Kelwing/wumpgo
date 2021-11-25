@@ -65,8 +65,8 @@ func (c *{{ .Type }}) SetContent(content string) *{{ .Type }} {
 	return c
 }
 
-// SetContentF is used to set the content of a response using fmt.Sprintf.
-func (c *{{ .Type }}) SetContentF(content string, args ...interface{}) *{{ .Type }} {
+// SetContentf is used to set the content of a response using fmt.Sprintf.
+func (c *{{ .Type }}) SetContentf(content string, args ...interface{}) *{{ .Type }} {
 	c.ResponseData().Content = fmt.Sprintf(content, args...)
 	return c
 }

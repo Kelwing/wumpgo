@@ -52,8 +52,8 @@ func (c *ComponentRouterCtx) SetContent(content string) *ComponentRouterCtx {
 	return c
 }
 
-// SetContentF is used to set the content of a response using fmt.Sprintf.
-func (c *ComponentRouterCtx) SetContentF(content string, args ...interface{}) *ComponentRouterCtx {
+// SetContentf is used to set the content of a response using fmt.Sprintf.
+func (c *ComponentRouterCtx) SetContentf(content string, args ...interface{}) *ComponentRouterCtx {
 	c.ResponseData().Content = fmt.Sprintf(content, args...)
 	return c
 }
@@ -152,8 +152,8 @@ func (c *CommandRouterCtx) SetContent(content string) *CommandRouterCtx {
 	return c
 }
 
-// SetContentF is used to set the content of a response using fmt.Sprintf.
-func (c *CommandRouterCtx) SetContentF(content string, args ...interface{}) *CommandRouterCtx {
+// SetContentf is used to set the content of a response using fmt.Sprintf.
+func (c *CommandRouterCtx) SetContentf(content string, args ...interface{}) *CommandRouterCtx {
 	c.ResponseData().Content = fmt.Sprintf(content, args...)
 	return c
 }
