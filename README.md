@@ -36,7 +36,7 @@ func main() {
 	app.CommandHandler(testHandler)
 
 	log.Println("test-bot is now running")
-	app.Run(1323)
+	http.ListenAndServe(":8080", app.HTTPHandler())
 }
 
 func testHandler(ctx *objects.Interaction) *objects.InteractionResponse {
