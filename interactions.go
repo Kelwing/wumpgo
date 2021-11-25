@@ -1,22 +1,21 @@
 package interactions
 
 import (
-	"bytes"
-	"context"
 	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sync"
 
+	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
+	"github.com/rs/zerolog/log"
+
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
 	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttprouter"
+	"github.com/valyala/fasthttp/fasthttpadaptor"
 )
 
 type (
@@ -25,11 +24,9 @@ type (
 
 // App is the primary interactions server
 type App struct {
-	Router              *fasthttprouter.Router
-	server              *fasthttp.Server
 	extraProps          map[string]interface{}
 	propsLock           sync.RWMutex
-	logger              *logrus.Logger
+	logger              zerolog.Logger
 	restClient          *rest.Client
 	commandHandler      HandlerFunc
 	componentHandler    HandlerFunc
@@ -44,24 +41,16 @@ func New(config *Config) (*App, error) {
 		return nil, err
 	}
 
-	router := fasthttprouter.New()
 	a := &App{
-		server: &fasthttp.Server{
-			Handler: router.Handler,
-			Name:    "Postcord",
-		},
 		extraProps: make(map[string]interface{}),
-		Router:     router,
 		pubKey:     pubKey,
 	}
 
 	if config.Logger == nil {
-		a.logger = logrus.StandardLogger()
+		a.logger = log.Logger
 	} else {
-		a.logger = config.Logger
+		a.logger = *config.Logger
 	}
-
-	router.POST("/", verifyMiddleware(a.requestHandler, pubKey))
 
 	var restClient *rest.Client
 	if config.RESTClient == nil {
@@ -95,72 +84,23 @@ func (a *App) AutocompleteHandler(handler HandlerFunc) {
 	a.autocompleteHandler = handler
 }
 
-func (a *App) requestHandler(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-	a.logger.WithField("addr", ctx.RemoteIP()).Debug("new request")
-	resp, err := a.ProcessRequest(ctx.Request.Body())
-	if err != nil {
-		a.logger.WithError(err).Error("failed to process request: ", err)
-		_ = writeJSON(ctx, fasthttp.StatusOK, objects.InteractionResponse{
-			Type: objects.ResponseChannelMessageWithSource,
-			Data: &objects.InteractionApplicationCommandCallbackData{
-				Content: "An unknown error occurred",
-				Flags:   objects.ResponseFlagEphemeral,
-			},
-		})
-		return
-	}
-
-	err = writeJSON(ctx, fasthttp.StatusOK, resp)
-	if err != nil {
-		log.Println("failed to write response: ", err)
-	}
+// FastHTTPHandler exposes a fasthttp handler to process incoming interactions
+func (a *App) FastHTTPHandler() fasthttp.RequestHandler {
+	return fasthttpadaptor.NewFastHTTPHandler(a.HTTPHandler())
 }
 
-func (a *App) LambdaHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	signature := req.Headers["X-Signature-Ed25519"]
-	body := req.Body
-	body = req.Headers["X-Signature-Timestamp"] + body
-	if !verifyMessage([]byte(body), string(signature), a.pubKey) {
-		return events.APIGatewayProxyResponse{
-			StatusCode: fasthttp.StatusUnauthorized,
-		}, nil
-	}
-	resp, err := a.ProcessRequest([]byte(req.Body))
-	if err != nil {
-		a.logger.WithError(err).Error("failed to process request: ", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "An unknown error occurred",
-		}, nil
-	}
-	var buf bytes.Buffer
-	respData, err := json.Marshal(resp)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Internal server error",
-		}, err
-	}
-	json.HTMLEscape(&buf, respData)
-
-	return events.APIGatewayProxyResponse{
-		StatusCode:      200,
-		IsBase64Encoded: false,
-		Body:            buf.String(),
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
-	}, nil
+// LambdaHandler exposes an AWS APi Gateway Lambda handler to process incoming interactions
+func (a *App) LambdaHandler() LambdaHandler {
+	return handlerfunc.New(a.HTTPHandler()).ProxyWithContext
 }
 
-func (a *App) HTTPHandler() http.Handler {
+// HTTPHandler exposes a net/http handler to process incoming interactions
+func (a *App) HTTPHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		a.logger.WithField("addr", r.RemoteAddr).Debug("new request")
 		jr := json.NewEncoder(w)
 		signature := r.Header.Get("X-Signature-Ed25519")
 		bodyBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			a.logger.WithError(err).Error("failed to read request body: ", err)
 			_ = jr.Encode(objects.InteractionResponse{
 				Type: objects.ResponseChannelMessageWithSource,
 				Data: &objects.InteractionApplicationCommandCallbackData{
@@ -178,7 +118,6 @@ func (a *App) HTTPHandler() http.Handler {
 
 		resp, err := a.ProcessRequest(bodyBytes)
 		if err != nil {
-			a.logger.WithError(err).Error("failed to process request: ", err)
 			_ = jr.Encode(objects.InteractionResponse{
 				Type: objects.ResponseChannelMessageWithSource,
 				Data: &objects.InteractionApplicationCommandCallbackData{
@@ -191,7 +130,7 @@ func (a *App) HTTPHandler() http.Handler {
 
 		err = jr.Encode(resp)
 		if err != nil {
-			log.Println("failed to write response: ", err)
+			a.logger.Error().Err(err).Msg("failed to write response")
 		}
 	})
 }
@@ -203,28 +142,34 @@ func (a *App) ProcessRequest(data []byte) (resp *objects.InteractionResponse, er
 	var req objects.Interaction
 	err = json.Unmarshal(data, &req)
 	if err != nil {
-		a.logger.WithError(err).Error("failed to decode request body")
+		a.logger.Error().Err(err).Msg("failed to unmarshal request")
 		err = fmt.Errorf("failed to decode request body")
 		return
 	}
 
-	a.logger.Info("received event of type ", req.Type)
+	a.logger.Info().Int("type", int(req.Type)).Msg("received request")
 
 	switch req.Type {
 	case objects.InteractionRequestPing:
 		resp = &objects.InteractionResponse{Type: objects.ResponsePong}
 		return
 	case objects.InteractionApplicationCommand:
-		resp = a.commandHandler(&req)
+		if a.commandHandler != nil {
+			resp = a.commandHandler(&req)
+		}
 	case objects.InteractionComponent:
-		resp = a.componentHandler(&req)
-		if resp == nil {
-			return &objects.InteractionResponse{
-				Type: objects.ResponseDeferredMessageUpdate,
-			}, nil
+		if a.componentHandler != nil {
+			resp = a.componentHandler(&req)
+			if resp == nil {
+				return &objects.InteractionResponse{
+					Type: objects.ResponseDeferredMessageUpdate,
+				}, nil
+			}
 		}
 	case objects.InteractionAutoComplete:
-		resp = a.autocompleteHandler(&req)
+		if a.autocompleteHandler != nil {
+			resp = a.autocompleteHandler(&req)
+		}
 	}
 
 	if resp == nil {
@@ -247,12 +192,6 @@ func (a *App) Set(key string, obj interface{}) {
 	a.propsLock.Lock()
 	defer a.propsLock.Unlock()
 	a.extraProps[key] = obj
-}
-
-// Run runs the App with a built-in fasthttp web server.  It takes a port as its only argument.
-func (a *App) Run(port int) error {
-	a.logger.Info("listening on port ", port)
-	return a.server.ListenAndServe(fmt.Sprintf(":%d", port))
 }
 
 // Rest exposes the internal Rest client so you can make calls to the Discord API
