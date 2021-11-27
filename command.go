@@ -188,7 +188,7 @@ func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.Lis
 		}
 	} else {
 		// Wrap the end command function in a middleware function and push it.
-		middlewareWrapper := func(ctx MiddlewareCtx) error {
+		var middlewareWrapper MiddlewareFunc = func(ctx MiddlewareCtx) error {
 			return handler(ctx.CommandRouterCtx)
 		}
 		middlewareList.PushBack(middlewareWrapper)

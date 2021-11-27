@@ -7,4 +7,9 @@ generate:
 test:
 	go test .
 
-.PHONY: golden-update generate test
+cov-html:
+	go test -coverprofile=cov.prof
+	go tool cover -html=cov.prof -o cov.html
+	rm cov.prof
+
+.PHONY: golden-update generate test cov-html

@@ -2,13 +2,13 @@ package router
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"testing"
-
 	"github.com/Postcord/objects"
 	"github.com/jimeh/go-golden"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestCommandRouterCtx_TargetMessage(t *testing.T) {
@@ -431,8 +431,478 @@ func TestCommandRouter_NewCommandBuilder(t *testing.T) {
 	}, builder)
 }
 
+// Returns the mock command runner. This is used to check everything in the context is as expected.
+// Note we do not test responses here since that is done in context tests.
+func mockCommandFunction(t *testing.T, expectedCmd *Command,
+	expectedInteraction *objects.Interaction, paramsCheck func(*testing.T, map[string]interface{}),
+	wantsErr string) func(ctx *CommandRouterCtx) error {
+	// Return the generated command.
+	return func(ctx *CommandRouterCtx) error {
+		// Mark this as a helper function.
+		t.Helper()
+
+		// Check the passed through items are what was expected.
+		assert.Equal(t, expectedCmd, ctx.Command)
+		assert.Same(t, expectedInteraction, ctx.Interaction)
+		assert.Same(t, dummyRestClient, ctx.RESTClient)
+
+		// Check the 2 expected middlewares were ran.
+		assert.Equal(t, ctx.Options["middleware1"], "middleware1")
+		assert.Equal(t, ctx.Options["middleware2"], 2)
+
+		// Check the params.
+		paramsCheck(t, ctx.Options)
+
+		// Check if we are supposed to return an error.
+		if wantsErr != "" {
+			return errors.New(wantsErr)
+		}
+
+		// Return no errors.
+		ctx.SetContent("hello world")
+		return nil
+	}
+}
+
+func middleware1(ctx MiddlewareCtx) error {
+	ctx.Options["middleware1"] = "random shit to test order"
+	return ctx.Next()
+}
+
+func middleware2(ctx MiddlewareCtx) error {
+	ctx.Options["middleware1"] = "middleware1"
+	ctx.Options["middleware2"] = 2
+	return ctx.Next()
+}
+
+var mockFullCommandRouter = CommandRouter{}
+
+func init() {
+	mockFullCommandRouter.Use(middleware1)
+	mockFullCommandRouter.Use(middleware2)
+}
+
+var (
+	root1 = mockFullCommandRouter.NewCommandBuilder("root1").MustBuild()
+
+	root2 = mockFullCommandRouter.NewCommandBuilder("root2").
+		StringOption("string", "strings", true, nil).
+		IntOption("int", "ints", true, nil).MustBuild()
+
+	root3 = mockFullCommandRouter.MustNewCommandGroup("root3", "", true)
+
+	sub1 = root3.NewCommandBuilder("sub1").MustBuild()
+
+	sub2 = root3.NewCommandBuilder("sub2").
+		StringOption("string", "strings", true, nil).
+		IntOption("int", "ints", true, nil).MustBuild()
+
+	root4 = mockFullCommandRouter.MustNewCommandGroup("root4", "", true)
+
+	sub3 = root4.MustNewCommandGroup("sub3", "", true)
+
+	subsub1 = sub3.NewCommandBuilder("subsub1").MustBuild()
+
+	subsub2 = sub3.NewCommandBuilder("subsub2").
+		StringOption("string", "strings", true, nil).
+		IntOption("int", "ints", true, nil).MustBuild()
+)
+
+func mockInteraction(data interface{}) *objects.Interaction {
+	b, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+	return &objects.Interaction{
+		ID:            1234,
+		ApplicationID: 5678,
+		Type:          69,
+		Data:          b,
+		GuildID:       1234,
+		ChannelID:     5678,
+		Member:        &objects.GuildMember{Nick: "jeff", User: &objects.User{ID: 123}},
+		User:          &objects.User{ID: 123},
+		Token:         "abcd",
+		Message:       &objects.Message{
+			ID:                9101112,
+			ChannelID:         3210,
+			GuildID:           4567,
+			Author:            &objects.User{ID: 123},
+			Member:            &objects.GuildMember{Nick: "jeff", User: &objects.User{ID: 123}},
+			Content:           "hello world",
+			Components:        []*objects.Component{{Type: 69}},
+		},
+		Version: 1,
+	}
+}
+
+var helloWorldResponse = &objects.InteractionResponse{
+	Type: 4,
+	Data: &objects.InteractionApplicationCommandCallbackData{
+		TTS:     false,
+		Content: "hello world",
+	},
+}
+
 func TestCommandRouter_build(t *testing.T) {
-	// TODO
+	tests := []struct {
+		name string
+
+		cmd                   *Command
+		globalAllowedMentions *objects.AllowedMentions
+
+		cmdInteraction          *objects.Interaction
+		autocompleteInteraction *objects.Interaction
+
+		paramsCheck  func(*testing.T, map[string]interface{})
+		throwsCmdErr string
+
+		wantsCmdErr          string
+		wantsAutocompleteErr string
+		cmdResponse          *objects.InteractionResponse
+		autocompleteResponse *objects.InteractionResponse
+	}{
+		// Command routing tests
+
+		{
+			name:           "root with no params",
+			cmd:            root1,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root1",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  nil,
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			cmdResponse: helloWorldResponse,
+		},
+		{
+			name:           "root with params",
+			cmd:            root2,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root2",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeString,
+						Name:    "string",
+						Value:   "hello",
+						Focused: false,
+						Options: nil,
+					},
+					{
+						Type:    objects.TypeInteger,
+						Name:    "int",
+						Value:   69,
+						Focused: false,
+						Options: nil,
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			paramsCheck: func(t *testing.T, m map[string]interface{}) {
+				t.Helper()
+				assert.Equal(t, "hello", m["string"])
+				assert.Equal(t, 69, m["int"])
+			},
+			cmdResponse: helloWorldResponse,
+		},
+		{
+			name:           "sub-command with no params",
+			cmd:            sub1,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root3",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommand,
+						Name:    "sub1",
+						Options: []*objects.ApplicationCommandInteractionDataOption{},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			cmdResponse: helloWorldResponse,
+		},
+		{
+			name:           "sub-command with params",
+			cmd:            sub2,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root3",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommand,
+						Name:    "sub2",
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeString,
+								Name:    "string",
+								Value:   "hello",
+								Focused: false,
+								Options: nil,
+							},
+							{
+								Type:    objects.TypeInteger,
+								Name:    "int",
+								Value:   69,
+								Focused: false,
+								Options: nil,
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			paramsCheck: func(t *testing.T, m map[string]interface{}) {
+				t.Helper()
+				assert.Equal(t, "hello", m["string"])
+				assert.Equal(t, 69, m["int"])
+			},
+			cmdResponse: helloWorldResponse,
+		},
+		{
+			name:           "sub-sub-command with no params",
+			cmd:            subsub1,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type: objects.TypeSubCommand,
+								Name: "subsub1",
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			cmdResponse: helloWorldResponse,
+		},
+		{
+			name:           "sub-sub-command with params",
+			cmd:            subsub2,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "subsub2",
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "string",
+										Value:   "hello",
+										Focused: false,
+										Options: nil,
+									},
+									{
+										Type:    objects.TypeInteger,
+										Name:    "int",
+										Value:   69,
+										Focused: false,
+										Options: nil,
+									},
+								},
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			paramsCheck: func(t *testing.T, m map[string]interface{}) {
+				t.Helper()
+				assert.Equal(t, "hello", m["string"])
+				assert.Equal(t, 69, m["int"])
+			},
+			cmdResponse: helloWorldResponse,
+		},
+
+		// Command errors
+
+		{
+			name:           "root not found",
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "nonexistent",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  nil,
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				TargetID: 1234,
+			}),
+		},
+		{
+			name:           "root throws error",
+			cmd:            root1,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root1",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  nil,
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			throwsCmdErr: "cat broke wire",
+			wantsCmdErr:  "cat broke wire",
+		},
+		{
+			name:           "sub-command not found",
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root3",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommand,
+						Name:    "nonexistentsub",
+						Options: []*objects.ApplicationCommandInteractionDataOption{},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+		},
+		{
+			name:           "sub-command throws error",
+			cmd:            sub1,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root3",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommand,
+						Name:    "sub1",
+						Options: []*objects.ApplicationCommandInteractionDataOption{},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			throwsCmdErr: "cat broke wire",
+			wantsCmdErr:  "cat broke wire",
+		},
+		{
+			name:           "sub-sub-command not found",
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type: objects.TypeSubCommand,
+								Name: "nonexistentsub",
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+		},
+		{
+			name:           "sub-sub-command throws error",
+			cmd:            subsub1,
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type: objects.TypeSubCommand,
+								Name: "subsub1",
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			throwsCmdErr: "cat broke wire",
+			wantsCmdErr:  "cat broke wire",
+		},
+
+		// TODO: Figure out the autocomplete tests.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set the handler for the command if it exists.
+			if tt.paramsCheck == nil {
+				tt.paramsCheck = func(t *testing.T, m map[string]interface{}) {}
+			}
+			if tt.cmd != nil {
+				tt.cmd.Function = mockCommandFunction(t, tt.cmd, tt.cmdInteraction, tt.paramsCheck, tt.throwsCmdErr)
+			}
+
+			// Set the error handler to figure out if we got an error.
+			var errResult error
+			errHandler := func(err error) *objects.InteractionResponse {
+				errResult = err
+				return &objects.InteractionResponse{Type: 69}
+			}
+
+			// Build the router.
+			cmdHandler, autoCompleteHandler := mockFullCommandRouter.build(loaderPassthrough{
+				rest:                  dummyRestClient,
+				errHandler:            errHandler,
+				globalAllowedMentions: tt.globalAllowedMentions,
+			})
+
+			// Run the command handler if applicable.
+			if tt.cmdInteraction != nil {
+				resp := cmdHandler(tt.cmdInteraction)
+				if tt.wantsCmdErr == "" {
+					assert.NoError(t, errResult)
+					assert.Equal(t, tt.cmdResponse, resp)
+				} else {
+					assert.EqualError(t, errResult, tt.wantsCmdErr)
+					assert.Equal(t, &objects.InteractionResponse{Type: 69}, resp)
+				}
+				errResult = nil
+			}
+
+			// Run the auto-complete handler if applicable.
+			if tt.autocompleteInteraction != nil {
+				resp := autoCompleteHandler(tt.autocompleteInteraction)
+				if tt.wantsAutocompleteErr == "" {
+					assert.NoError(t, errResult)
+					assert.Equal(t, tt.autocompleteResponse, resp)
+				} else {
+					assert.EqualError(t, errResult, tt.wantsAutocompleteErr)
+					assert.Equal(t, &objects.InteractionResponse{Type: 69}, resp)
+				}
+			}
+		})
+	}
 }
 
 func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
