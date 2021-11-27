@@ -1128,6 +1128,172 @@ func TestCommandRouter_build(t *testing.T) {
 			cmdResponse:          helloWorldResponse,
 			autocompleteResponse: autoCompleteResponse,
 		},
+		{
+			name:           "sub-sub-command auto-complete with no params",
+			cmd:            "subsub1",
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Focused: false,
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "subsub1",
+								Focused: false,
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "autocompletetest",
+										Value:   "123",
+										Focused: false,
+									},
+								},
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Focused: false,
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "subsub1",
+								Focused: false,
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "autocompletetest",
+										Value:   "123",
+										Focused: true,
+									},
+								},
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			paramsCheck: func(t *testing.T, m map[string]interface{}) {
+				t.Helper()
+				assert.Equal(t, "123", m["autocompletetest"])
+			},
+			cmdResponse:          helloWorldResponse,
+			autocompleteResponse: autoCompleteResponse,
+		},
+		{
+			name:           "sub-sub-command auto-complete with params",
+			cmd:            "subsub2",
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Focused: false,
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "subsub2",
+								Focused: false,
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "autocompletetest",
+										Value:   "123",
+										Focused: false,
+										Options: nil,
+									},
+									{
+										Type:    objects.TypeString,
+										Name:    "string",
+										Value:   "hello",
+										Focused: false,
+										Options: nil,
+									},
+									{
+										Type:    objects.TypeInteger,
+										Name:    "int",
+										Value:   69,
+										Focused: false,
+										Options: nil,
+									},
+								},
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Focused: false,
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "subsub2",
+								Focused: false,
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "autocompletetest",
+										Value:   "123",
+										Focused: true,
+										Options: nil,
+									},
+									{
+										Type:    objects.TypeString,
+										Name:    "string",
+										Value:   "hello",
+										Focused: false,
+										Options: nil,
+									},
+									{
+										Type:    objects.TypeInteger,
+										Name:    "int",
+										Value:   69,
+										Focused: false,
+										Options: nil,
+									},
+								},
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			paramsCheck: func(t *testing.T, m map[string]interface{}) {
+				t.Helper()
+				assert.Equal(t, "123", m["autocompletetest"])
+			},
+			cmdResponse:          helloWorldResponse,
+			autocompleteResponse: autoCompleteResponse,
+		},
 
 		// Auto-complete errors
 
@@ -1219,6 +1385,72 @@ func TestCommandRouter_build(t *testing.T) {
 								Value:   "123",
 								Focused: true,
 								Options: nil,
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			throwsAutocompleteErr: "cat broke wire",
+			wantsAutocompleteErr:  "cat broke wire",
+		},
+		{
+			name:                    "sub-sub-command auto-complete not found",
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Focused: false,
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "abc",
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "autocompletetest",
+										Value:   "123",
+										Focused: true,
+									},
+								},
+							},
+						},
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			wantsAutocompleteErr: "the command does not exist",
+		},
+		{
+			name:                    "sub-sub-command auto-complete throws error",
+			cmd:                     "subsub1",
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root4",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommandGroup,
+						Name:    "sub3",
+						Focused: false,
+						Options: []*objects.ApplicationCommandInteractionDataOption{
+							{
+								Type:    objects.TypeSubCommand,
+								Name:    "subsub1",
+								Options: []*objects.ApplicationCommandInteractionDataOption{
+									{
+										Type:    objects.TypeString,
+										Name:    "autocompletetest",
+										Value:   "123",
+										Focused: true,
+									},
+								},
 							},
 						},
 					},
