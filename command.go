@@ -126,7 +126,7 @@ func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommand
 }
 
 // Execute the command.
-func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.List) *objects.InteractionResponse {
+func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.List) (resp *objects.InteractionResponse) {
 	// Process the options.
 	var mappedOptions map[string]interface{}
 	if opts.data.TargetID != 0 {
@@ -160,8 +160,7 @@ func (c *Command) execute(opts commandExecutionOptions, middlewareList *list.Lis
 	// Attempt to catch errors from here.
 	defer func() {
 		if errGeneric := recover(); errGeneric != nil {
-			// Shouldn't try and return from defer.
-			opts.exceptionHandler(ungenericError(errGeneric))
+			resp = opts.exceptionHandler(ungenericError(errGeneric))
 		}
 	}()
 
