@@ -5,8 +5,13 @@ import (
 	"testing"
 )
 
-func callBuilderFunction(t *testing.T, builder interface{}, funcName string, args ...interface{}) {
+func callBuilderFunction(t *testing.T, builder interface{}, funcName string, args ...interface{}) (err error) {
 	t.Helper()
+	defer func() {
+		if r := recover(); r != nil {
+			err = ungenericError(r)
+		}
+	}()
 	r := reflect.ValueOf(builder).MethodByName(funcName)
 	if r.IsZero() {
 		t.Fatal("function does not exist")
@@ -25,4 +30,5 @@ func callBuilderFunction(t *testing.T, builder interface{}, funcName string, arg
 	if res[0].Interface() != builder {
 		t.Fatal("the argument returned was not the builder")
 	}
+	return
 }

@@ -303,25 +303,25 @@ func Test_responseBuilder_editComponent(t *testing.T) {
 
 func TestComponentRouterCtx_SetEmbed(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "SetEmbed", &objects.Embed{Title: "a"})
+	assert.NoError(t, callBuilderFunction(t, x, "SetEmbed", &objects.Embed{Title: "a"}))
 	assert.Equal(t, x.responseBuilder.ResponseData().Embeds, []*objects.Embed{{Title: "a"}})
 }
 
 func TestCommandRouterCtx_SetEmbed(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "SetEmbed", &objects.Embed{Title: "a"})
+	assert.NoError(t, callBuilderFunction(t, x, "SetEmbed", &objects.Embed{Title: "a"}))
 	assert.Equal(t, x.responseBuilder.ResponseData().Embeds, []*objects.Embed{{Title: "a"}})
 }
 
 func TestComponentRouterCtx_AddEmbed(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "AddEmbed", &objects.Embed{Title: "a"})
+	assert.NoError(t, callBuilderFunction(t, x, "AddEmbed", &objects.Embed{Title: "a"}))
 	assert.Equal(t, x.responseBuilder.ResponseData().Embeds, []*objects.Embed{{Title: "a"}})
 }
 
 func TestCommandRouterCtx_AddEmbed(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "AddEmbed", &objects.Embed{Title: "a"})
+	assert.NoError(t, callBuilderFunction(t, x, "AddEmbed", &objects.Embed{Title: "a"}))
 	assert.Equal(t, x.responseBuilder.ResponseData().Embeds, []*objects.Embed{{Title: "a"}})
 }
 
@@ -332,15 +332,15 @@ var multipleComponentRowsRaw = []*objects.Component{
 
 func TestComponentRouterCtx_AddComponentRow(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}})
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "b"}})
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}}))
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "b"}}))
 	assert.Equal(t, x.responseBuilder.ResponseData().Components, multipleComponentRowsRaw)
 }
 
 func TestCommandRouterCtx_AddComponentRow(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}})
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "b"}})
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}}))
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "b"}}))
 	assert.Equal(t, x.responseBuilder.ResponseData().Components, multipleComponentRowsRaw)
 }
 
@@ -351,100 +351,100 @@ var multipleComponentRows = [][]*objects.Component{
 
 func TestComponentRouterCtx_SetComponentRows(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "c"}})
-	callBuilderFunction(t, x, "SetComponentRows", multipleComponentRows)
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "c"}}))
+	assert.NoError(t, callBuilderFunction(t, x, "SetComponentRows", multipleComponentRows))
 	assert.Equal(t, x.responseBuilder.ResponseData().Components, multipleComponentRowsRaw)
 }
 
 func TestCommandRouterCtx_SetComponentRows(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "c"}})
-	callBuilderFunction(t, x, "SetComponentRows", multipleComponentRows)
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "c"}}))
+	assert.NoError(t, callBuilderFunction(t, x, "SetComponentRows", multipleComponentRows))
 	assert.Equal(t, x.responseBuilder.ResponseData().Components, multipleComponentRowsRaw)
 }
 
 func TestCommandRouterCtx_ClearComponents(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}})
-	callBuilderFunction(t, x, "ClearComponents")
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}}))
+	assert.NoError(t, callBuilderFunction(t, x, "ClearComponents"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Components, []*objects.Component{})
 }
 
 func TestComponentRouterCtx_ClearComponents(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}})
-	callBuilderFunction(t, x, "ClearComponents")
+	assert.NoError(t, callBuilderFunction(t, x, "AddComponentRow", []*objects.Component{{Label: "a"}}))
+	assert.NoError(t, callBuilderFunction(t, x, "ClearComponents"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Components, []*objects.Component{})
 }
 
 func TestCommandRouterCtx_SetContent(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "SetContent", "a")
+	assert.NoError(t, callBuilderFunction(t, x, "SetContent", "a"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Content, "a")
 }
 
 func TestComponentRouterCtx_SetContent(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "SetContent", "a")
+	assert.NoError(t, callBuilderFunction(t, x, "SetContent", "a"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Content, "a")
 }
 
 func TestCommandRouterCtx_SetContentf(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "SetContentf", "hello %s", "world")
+	assert.NoError(t, callBuilderFunction(t, x, "SetContentf", "hello %s", "world"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Content, "hello world")
 }
 
 func TestComponentRouterCtx_SetContentf(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "SetContentf", "hello %s", "world")
+	assert.NoError(t, callBuilderFunction(t, x, "SetContentf", "hello %s", "world"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Content, "hello world")
 }
 
 func TestCommandRouterCtx_SetAllowedMentions(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "SetAllowedMentions", &objects.AllowedMentions{Parse: []string{"a"}})
+	assert.NoError(t, callBuilderFunction(t, x, "SetAllowedMentions", &objects.AllowedMentions{Parse: []string{"a"}}))
 	assert.Equal(t, x.responseBuilder.ResponseData().AllowedMentions, &objects.AllowedMentions{Parse: []string{"a"}})
 }
 
 func TestComponentRouterCtx_SetAllowedMentions(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "SetAllowedMentions", &objects.AllowedMentions{Parse: []string{"a"}})
+	assert.NoError(t, callBuilderFunction(t, x, "SetAllowedMentions", &objects.AllowedMentions{Parse: []string{"a"}}))
 	assert.Equal(t, x.responseBuilder.ResponseData().AllowedMentions, &objects.AllowedMentions{Parse: []string{"a"}})
 }
 
 func TestCommandRouterCtx_SetTTS(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "SetTTS", true)
+	assert.NoError(t, callBuilderFunction(t, x, "SetTTS", true))
 	assert.Equal(t, x.responseBuilder.ResponseData().TTS, true)
 }
 
 func TestComponentRouterCtx_SetTTS(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "SetTTS", true)
+	assert.NoError(t, callBuilderFunction(t, x, "SetTTS", true))
 	assert.Equal(t, x.responseBuilder.ResponseData().TTS, true)
 }
 
 func TestCommandRouterCtx_Ephemeral(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "Ephemeral")
+	assert.NoError(t, callBuilderFunction(t, x, "Ephemeral"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Flags, 64)
 }
 
 func TestComponentRouterCtx_Ephemeral(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "Ephemeral")
+	assert.NoError(t, callBuilderFunction(t, x, "Ephemeral"))
 	assert.Equal(t, x.responseBuilder.ResponseData().Flags, 64)
 }
 
 func TestCommandRouterCtx_ChannelMessageWithSource(t *testing.T) {
 	x := &CommandRouterCtx{}
-	callBuilderFunction(t, x, "ChannelMessageWithSource")
+	assert.NoError(t, callBuilderFunction(t, x, "ChannelMessageWithSource"))
 	assert.Equal(t, x.respType, objects.ResponseChannelMessageWithSource)
 }
 
 func TestComponentRouterCtx_ChannelMessageWithSource(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	callBuilderFunction(t, x, "ChannelMessageWithSource")
+	assert.NoError(t, callBuilderFunction(t, x, "ChannelMessageWithSource"))
 	assert.Equal(t, x.respType, objects.ResponseChannelMessageWithSource)
 }
