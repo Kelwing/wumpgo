@@ -1710,5 +1710,17 @@ func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
 }
 
 func TestCommandRouterCtx_Bind(t *testing.T) {
-	// TODO
+	type x struct {
+		Text string `discord:"text"`
+		Num  int    `discord:"num"`
+	}
+	var items x
+
+	ctx := &CommandRouterCtx{Options: map[string]interface{}{
+		"text": "hello",
+		"num":  123,
+	}}
+	assert.NoError(t, ctx.Bind(&items))
+	assert.Equal(t, "hello", items.Text)
+	assert.Equal(t, 123, items.Num)
 }
