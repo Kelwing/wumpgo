@@ -389,6 +389,18 @@ func TestComponentRouterCtx_SetContent(t *testing.T) {
 	assert.Equal(t, x.responseBuilder.ResponseData().Content, "a")
 }
 
+func TestCommandRouterCtx_SetContentf(t *testing.T) {
+	x := &CommandRouterCtx{}
+	callBuilderFunction(t, x, "SetContentf", "hello %s", "world")
+	assert.Equal(t, x.responseBuilder.ResponseData().Content, "hello world")
+}
+
+func TestComponentRouterCtx_SetContentf(t *testing.T) {
+	x := &ComponentRouterCtx{}
+	callBuilderFunction(t, x, "SetContentf", "hello %s", "world")
+	assert.Equal(t, x.responseBuilder.ResponseData().Content, "hello world")
+}
+
 func TestCommandRouterCtx_SetAllowedMentions(t *testing.T) {
 	x := &CommandRouterCtx{}
 	callBuilderFunction(t, x, "SetAllowedMentions", &objects.AllowedMentions{Parse: []string{"a"}})

@@ -503,13 +503,14 @@ func middleware2(ctx MiddlewareCtx) error {
 	return ctx.Next()
 }
 
-func makeMockFullCommandRouter() (*CommandRouter, map[string]*Command) {
+func makeMockFullCommandRouter(injectAllowedMentions *objects.AllowedMentions) (*CommandRouter, map[string]*Command) {
 	r := &CommandRouter{}
 
 	r.Use(middleware1)
 	r.Use(middleware2)
 
 	root3 := r.MustNewCommandGroup("root3", "", true)
+	root3.AllowedMentions = injectAllowedMentions
 	root4 := r.MustNewCommandGroup("root4", "", true)
 	sub3 := root4.MustNewCommandGroup("sub3", "", true)
 
@@ -583,7 +584,8 @@ func TestCommandRouter_build(t *testing.T) {
 		name string
 
 		cmd                   string
-		globalAllowedMentions *objects.AllowedMentions // TODO: Test this!
+		globalAllowedMentions *objects.AllowedMentions
+		groupAllowedMentions  *objects.AllowedMentions
 
 		cmdInteraction          *objects.Interaction
 		autocompleteInteraction *objects.Interaction
@@ -597,6 +599,72 @@ func TestCommandRouter_build(t *testing.T) {
 		cmdResponse          *objects.InteractionResponse
 		autocompleteResponse *objects.InteractionResponse
 	}{
+		// Mentions configuration test
+
+		{
+			name: "global allowed mentions",
+			cmd:  "root1",
+			globalAllowedMentions: &objects.AllowedMentions{
+				Parse:       []string{"a", "b", "c"},
+				RepliedUser: true,
+			},
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root1",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  nil,
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			cmdResponse: &objects.InteractionResponse{
+				Type: 4,
+				Data: &objects.InteractionApplicationCommandCallbackData{
+					TTS:     false,
+					Content: "hello world",
+					AllowedMentions: &objects.AllowedMentions{
+						Parse:       []string{"a", "b", "c"},
+						RepliedUser: true,
+					},
+				},
+			},
+		},
+		{
+			name: "group allowed mentions",
+			cmd:  "sub1",
+			globalAllowedMentions: &objects.AllowedMentions{
+				Parse:       []string{"a", "b", "c"},
+				RepliedUser: true,
+			},
+			groupAllowedMentions: &objects.AllowedMentions{
+				Parse:       []string{"d", "e", "f"},
+				RepliedUser: true,
+			},
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+				ID:       1234,
+				Name:     "root3",
+				Type:     objects.CommandTypeChatInput,
+				Version:  1,
+				Options:  []*objects.ApplicationCommandInteractionDataOption{
+					{
+						Type:    objects.TypeSubCommand,
+						Name:    "sub1",
+					},
+				},
+				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+			}),
+			cmdResponse: &objects.InteractionResponse{
+				Type: 4,
+				Data: &objects.InteractionApplicationCommandCallbackData{
+					TTS:     false,
+					Content: "hello world",
+					AllowedMentions: &objects.AllowedMentions{
+						Parse:       []string{"d", "e", "f"},
+						RepliedUser: true,
+					},
+				},
+			},
+		},
+
 		// Command routing tests
 
 		{
@@ -1464,7 +1532,7 @@ func TestCommandRouter_build(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Make the router.
-			r, cmds := makeMockFullCommandRouter()
+			r, cmds := makeMockFullCommandRouter(tt.groupAllowedMentions)
 
 			// Get the command.
 			var cmd *Command
@@ -1543,7 +1611,7 @@ func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
 	tests := []struct {
 		name string
 
-		init    func() *CommandRouter
+		init func() *CommandRouter
 	}{
 		{
 			name: "no commands",
