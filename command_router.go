@@ -114,9 +114,6 @@ func (c *CommandGroup) Use(f MiddlewareFunc) {
 // GroupNestedTooDeep is thrown when the sub-command group would be nested too deep.
 var GroupNestedTooDeep = errors.New("sub-command group would be nested too deep")
 
-// Tag name for option parsing
-const tagName = "discord"
-
 // NewCommandGroup is used to create a sub-command group.
 func (c *CommandGroup) NewCommandGroup(name, description string, defaultPermission bool) (*CommandGroup, error) {
 	nextLevel := c.level + 1
@@ -609,27 +606,103 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 	return cmds
 }
 
+// Tag name for option parsing
+const selectorTagName = "discord"
+
 // Bind allows you to bind the option values to a struct for easy access
 func (c *CommandRouterCtx) Bind(data interface{}) error {
-	v := reflect.ValueOf(data).Elem()
-	if !v.CanAddr() {
-		return fmt.Errorf("cannot assign to the item passed, item must be a pointer in order to assign")
+	structType := reflect.TypeOf(data)
+	if structType.Kind() != reflect.Ptr {
+		return errors.New("data must be a pointer")
 	}
 
-	for i := 0; i < v.NumField(); i++ {
-		typeField := v.Type().Field(i)
-		tag := typeField.Tag
-		optionName := tag.Get(tagName)
-		if optionName != "" {
-			if option, ok := c.Options[optionName]; ok {
-				f := v.Field(i)
-				optionVal := reflect.ValueOf(option)
-				if f.Type() == optionVal.Type() {
-					f.Set(optionVal)
-				} else {
-					return fmt.Errorf("cannot assign %v to %v", optionVal.Type(), f.Type())
-				}
+	elem := structType.Elem()
+	if elem.Kind() != reflect.Struct {
+		return errors.New("value of data pointer must be a struct")
+	}
+
+	v := reflect.ValueOf(data).Elem()
+
+	for i := 0; i < elem.NumField(); i++ {
+		field := elem.Field(i)
+		if field.Tag == "" {
+			continue
+		}
+
+		tagValue := field.Tag.Get(selectorTagName)
+		if tagValue == "" {
+			continue
+		}
+
+		kind := field.Type.Kind()
+
+		option, ok := c.Options[tagValue]
+		if !ok {
+			continue
+		}
+		optionVal := reflect.ValueOf(option)
+
+		i := -1
+		for j, v := range c.Command.Options {
+			if v.Name == tagValue {
+				i = j
+				break
 			}
+		}
+
+		if !(i < len(c.Command.Options) && c.Command.Options[i].Name == tagValue) {
+			continue
+		}
+
+		fieldPointer := v.FieldByName(field.Name)
+		if !fieldPointer.CanSet() {
+			continue
+		}
+
+		switch c.Command.Options[i].OptionType {
+		case objects.TypeString:
+			if kind != reflect.String {
+				return fmt.Errorf("option %s is a StringOption, but the struct type is not a string", tagValue)
+			}
+			fmt.Printf("setting %s to %s\n", field.Name, optionVal.String())
+			fieldPointer.Set(optionVal)
+		case objects.TypeInteger:
+			if kind != reflect.Int && kind != reflect.Int64 {
+				return fmt.Errorf("option %s is a IntegerOption, but the struct type is not an integer", tagValue)
+			}
+			fmt.Printf("setting %s to %d\n", field.Name, optionVal.Int())
+			fieldPointer.Set(optionVal)
+		case objects.TypeDouble:
+			if kind != reflect.Float64 {
+				return fmt.Errorf("option %s is a DoubleOption, but the struct type is not a float64", tagValue)
+			}
+			fmt.Printf("setting %s to %f\n", field.Name, optionVal.Float())
+			fieldPointer.Set(optionVal)
+		case objects.TypeBoolean:
+			if kind != reflect.Bool {
+				return fmt.Errorf("option %s is a BoolOption, but the struct type is not a bool", tagValue)
+			}
+			fmt.Printf("setting %s to %t\n", field.Name, optionVal.Bool())
+			fieldPointer.Set(optionVal)
+		case objects.TypeChannel, objects.TypeRole, objects.TypeUser, objects.TypeMentionable:
+			if kind != reflect.Ptr {
+				return fmt.Errorf("option %s is a Resolvable type, but the struct type is not a pointer to a Resolvable", tagValue)
+			}
+
+			resElem := optionVal.Elem()
+			if resElem.Kind() != reflect.Struct {
+				return fmt.Errorf("option %s is a Resolvable type, but the struct type is not a pointer to a Resolvable", tagValue)
+			}
+
+			resField := resElem.FieldByName("id")
+			if resField.IsZero() {
+				return fmt.Errorf("option %s is a Resolvable type, but the struct type is not a pointer to a Resolvable", tagValue)
+			}
+
+			fmt.Printf("setting %s to %s\n", field.Name, optionVal.String())
+			fieldPointer.Set(optionVal)
+		default:
+			return fmt.Errorf("option %s has an incompatible type", tagValue)
 		}
 	}
 
