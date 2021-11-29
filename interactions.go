@@ -156,6 +156,8 @@ func (a *App) ProcessRequest(data []byte) (resp *objects.InteractionResponse, er
 	case objects.InteractionApplicationCommand:
 		if a.commandHandler != nil {
 			resp = a.commandHandler(&req)
+		} else {
+			log.Warn().Msg("no command handler set")
 		}
 	case objects.InteractionComponent:
 		if a.componentHandler != nil {
@@ -165,15 +167,21 @@ func (a *App) ProcessRequest(data []byte) (resp *objects.InteractionResponse, er
 					Type: objects.ResponseDeferredMessageUpdate,
 				}, nil
 			}
+		} else {
+			log.Warn().Msg("no component handler set")
 		}
 	case objects.InteractionAutoComplete:
 		if a.autocompleteHandler != nil {
 			resp = a.autocompleteHandler(&req)
+		} else {
+			log.Warn().Msg("no autocomplete handler set")
 		}
 	}
 
 	if resp == nil {
 		err = fmt.Errorf("nil response")
+	} else {
+		log.Debug().Int("type", int(resp.Type)).Msg("sending response")
 	}
 
 	return
