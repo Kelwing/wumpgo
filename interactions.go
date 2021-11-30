@@ -128,6 +128,8 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 			return
 		}
 
+		w.Header().Add("Content-Type", "application/json")
+
 		err = jr.Encode(resp)
 		if err != nil {
 			a.logger.Error().Err(err).Msg("failed to write response")
