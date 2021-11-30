@@ -98,6 +98,7 @@ func (a *App) LambdaHandler() LambdaHandler {
 func (a *App) HTTPHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jr := json.NewEncoder(w)
+		w.Header().Set("Content-Type", "application/json")
 		signature := r.Header.Get("X-Signature-Ed25519")
 		bodyBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -127,8 +128,6 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 			})
 			return
 		}
-
-		w.Header().Add("Content-Type", "application/json")
 
 		err = jr.Encode(resp)
 		if err != nil {
