@@ -53,12 +53,6 @@ const (
 	ResponseModal
 )
 
-// Response flags
-const (
-	ResponseFlagNormal    = 0
-	ResponseFlagEphemeral = 1 << 6
-)
-
 type ApplicationCommandPermissionType int
 
 const (
@@ -160,10 +154,10 @@ type Interaction struct {
 
 type InteractionApplicationCommandCallbackData struct {
 	TTS             bool                              `json:"tts,omitempty"`
-	Content         string                            `json:"content"`
+	Content         string                            `json:"content,omitempty"`
 	Embeds          []*Embed                          `json:"embeds,omitempty"`
 	AllowedMentions *AllowedMentions                  `json:"allowed_mentions,omitempty"`
-	Flags           int                               `json:"flags"`
+	Flags           MessageFlag                       `json:"flags,omitempty"`
 	Components      []*Component                      `json:"components"`
 	Choices         []*ApplicationCommandOptionChoice `json:"choices,omitempty"`
 	// Data for modal response
