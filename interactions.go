@@ -31,6 +31,7 @@ type App struct {
 	commandHandler      HandlerFunc
 	componentHandler    HandlerFunc
 	autocompleteHandler HandlerFunc
+	modalHandler        HandlerFunc
 	pubKey              ed25519.PublicKey
 }
 
@@ -82,6 +83,10 @@ func (a *App) ComponentHandler(handler HandlerFunc) {
 
 func (a *App) AutocompleteHandler(handler HandlerFunc) {
 	a.autocompleteHandler = handler
+}
+
+func (a *App) ModalHandler(handler HandlerFunc) {
+	a.modalHandler = handler
 }
 
 // FastHTTPHandler exposes a fasthttp handler to process incoming interactions
@@ -177,6 +182,15 @@ func (a *App) ProcessRequest(data []byte) (resp *objects.InteractionResponse, er
 		} else {
 			log.Warn().Msg("no autocomplete handler set")
 		}
+	case objects.InteractionModalSubmit:
+		if a.modalHandler != nil {
+			resp = a.modalHandler(&req)
+		} else {
+			log.Warn().Msg("no modal handler set")
+		}
+	default:
+		log.Warn().Int("type", int(req.Type)).Msg("unknown interaction type")
+		err = fmt.Errorf("unknown interaction type: %d", req.Type)
 	}
 
 	if resp == nil {

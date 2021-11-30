@@ -6,6 +6,8 @@ github.com/CloudyKit/jet/v3 v3.0.0/go.mod h1:HKQPgSJmdK8hdoAbKUUWajkHyHo4RaU5rMd
 github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKzY=
 github.com/Postcord/objects v0.0.17 h1:S2Smapxv9da1hccKgTblXmVHGtuP1slXEZsrhVFivas=
 github.com/Postcord/objects v0.0.17/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
+github.com/Postcord/objects v0.0.19-0.20211130071300-c65106e046ec h1:4OI82AXX0JZfqLSvKZgeSFC1jewKgHP7oNb5NfqLHfU=
+github.com/Postcord/objects v0.0.19-0.20211130071300-c65106e046ec/go.mod h1:DdFNHjas9Xby/YNGwr5XWuD+8kyNvGmtozW4LiF3QF8=
 github.com/Postcord/rest v0.0.9 h1:20FKlFuFSeuwhQjL7jysxEhu8TeTGQNobzqG5423XMY=
 github.com/Postcord/rest v0.0.9/go.mod h1:4ZFtHyQxMqqdE8kw/b1tiv0MrshAs0ikFmA8CDM6h7k=
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398/go.mod h1:a1uqRtAwp2Xwc6WNPJEufxJ7fx3npB4UV/JOLmbu5I0=
