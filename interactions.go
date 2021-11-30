@@ -193,8 +193,15 @@ type ApplicationComponentInteractionData struct {
 }
 
 type ApplicationModalInteractionData struct {
-	CustomID   string       `json:"custom_id"`
-	Components []*Component `json:"components"`
+	CustomID   string                          `json:"custom_id"`
+	Components []*InteractionResponseComponent `json:"components"`
+}
+
+type InteractionResponseComponent struct {
+	Type       ComponentType                   `json:"type"`
+	CustomID   string                          `json:"custom_id"`
+	Value      string                          `json:"value"`
+	Components []*InteractionResponseComponent `json:"components,omitempty"`
 }
 
 type ButtonStyle int
