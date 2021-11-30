@@ -111,7 +111,7 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 				Type: objects.ResponseChannelMessageWithSource,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					Content: "An unknown error occurred",
-					Flags:   objects.ResponseFlagEphemeral,
+					Flags:   objects.MsgFlagEphemeral,
 				},
 			})
 			return
@@ -128,7 +128,7 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 				Type: objects.ResponseChannelMessageWithSource,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					Content: "An unknown error occurred",
-					Flags:   objects.ResponseFlagEphemeral,
+					Flags:   objects.MsgFlagEphemeral,
 				},
 			})
 			return
