@@ -21,7 +21,7 @@ const (
 	TypeChannel
 	TypeRole
 	TypeMentionable
-	TypeDouble
+	TypeNumber
 )
 
 // ApplicationCommand types
@@ -37,6 +37,7 @@ const (
 	InteractionApplicationCommand
 	InteractionComponent
 	InteractionAutoComplete
+	InteractionModalSubmit
 )
 
 // Response types
@@ -49,6 +50,7 @@ const (
 	ResponseDeferredMessageUpdate // buttons only
 	ResponseUpdateMessage
 	ResponseCommandAutocompleteResult
+	ResponseModal
 )
 
 // Response flags
@@ -65,23 +67,36 @@ const (
 )
 
 type ApplicationCommand struct {
-	ID                Snowflake                  `json:"id,omitempty"`
-	ApplicationID     Snowflake                  `json:"application_id,omitempty"`
-	Name              string                     `json:"name"`
-	Description       string                     `json:"description,omitempty"`
-	Options           []ApplicationCommandOption `json:"options"`
-	DefaultPermission bool                       `json:"default_permission"`
-	Type              *ApplicationCommandType    `json:"type,omitempty"`
+	// ID is the unique id of the command
+	ID Snowflake `json:"id,omitempty"`
+	// Type is	the type of command, defaults 1 if not set
+	Type *ApplicationCommandType `json:"type,omitempty"`
+	// Application ID is the unique id of the parent application
+	ApplicationID Snowflake `json:"application_id,omitempty"`
+	// GuildID guild id of the command, if not global
+	GuildID *Snowflake `json:"guild_id,omitempty"`
+	// Name is a 1-32 character name
+	Name string `json:"name"`
+	// Description is a 1-100 character description for CHAT_INPUT commands, empty string for USER and MESSAGE commands
+	Description string `json:"description,omitempty"`
+	// Options are the parameters for the command, max 25, only valid for CHAT_INPUT commands
+	Options []ApplicationCommandOption `json:"options"`
+	// DefaultPermission is whether the command is enabled by default when the app is added to a guild
+	DefaultPermission bool `json:"default_permission"`
+	// Version is an autoincrementing version identifier updated during substantial record changes
+	Version Snowflake `json:"version,omitempty"`
 }
 
 type ApplicationCommandOption struct {
 	OptionType   ApplicationCommandOptionType     `json:"type"`
 	Name         string                           `json:"name"`
 	Description  string                           `json:"description"`
-	Default      bool                             `json:"default"`
-	Required     bool                             `json:"required"`
+	Required     bool                             `json:"required,omitempty"`
 	Choices      []ApplicationCommandOptionChoice `json:"choices,omitempty"`
 	Options      []ApplicationCommandOption       `json:"options,omitempty"`
+	ChannelTypes []ChannelType                    `json:"channel_types,omitempty"`
+	MinValue     json.Number                      `json:"min_value,omitempty"`
+	MaxValue     json.Number                      `json:"max_value,omitempty"`
 	Autocomplete bool                             `json:"autocomplete,omitempty"`
 }
 
@@ -151,6 +166,9 @@ type InteractionApplicationCommandCallbackData struct {
 	Flags           int                               `json:"flags"`
 	Components      []*Component                      `json:"components"`
 	Choices         []*ApplicationCommandOptionChoice `json:"choices,omitempty"`
+	// Data for modal response
+	CustomID string `json:"custom_id,omitempty"`
+	Title    string `json:"title,omitempty"`
 }
 
 type InteractionResponse struct {
@@ -164,12 +182,19 @@ const (
 	ComponentTypeActionRow = iota + 1
 	ComponentTypeButton
 	ComponentTypeSelectMenu
+	// ComponentTypeInputText is only usable in modals
+	ComponentTypeInputText
 )
 
 type ApplicationComponentInteractionData struct {
 	CustomID      string        `json:"custom_id"`
 	ComponentType ComponentType `json:"component_type"`
 	Values        []string      `json:"values,omitempty"`
+}
+
+type ApplicationModalInteractionData struct {
+	CustomID   string       `json:"custom_id"`
+	Components []*Component `json:"components"`
 }
 
 type ButtonStyle int
@@ -181,3 +206,12 @@ const (
 	ButtonStyleDanger
 	ButtonStyleLink
 )
+
+type TextStyle int
+
+const (
+	TextStyleShort = iota + 1
+	TextStyleParagraph
+)
+
+type Style int

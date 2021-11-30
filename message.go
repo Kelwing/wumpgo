@@ -145,7 +145,7 @@ type Component struct {
 	Type        ComponentType `json:"type"`
 	Components  []*Component  `json:"components,omitempty"`
 	Label       string        `json:"label,omitempty"`
-	Style       ButtonStyle   `json:"style,omitempty"`
+	Style       Style         `json:"style,omitempty"`
 	Emoji       *Emoji        `json:"emoji,omitempty"`
 	CustomID    string        `json:"custom_id,omitempty"`
 	URL         string        `json:"url,omitempty"`
@@ -154,6 +154,8 @@ type Component struct {
 	// Must be a pointer, discord assumes omitted value = 1
 	MinValues *int             `json:"min_values,omitempty"`
 	MaxValues *int             `json:"max_values,omitempty"`
+	MinLength *int             `json:"min_length,omitempty"`
+	MaxLength *int             `json:"max_length,omitempty"`
 	Options   []*SelectOptions `json:"options,omitempty"`
 }
 
