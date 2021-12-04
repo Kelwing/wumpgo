@@ -5,20 +5,20 @@
 package router
 
 import (
+	"github.com/Postcord/objects"
+	"github.com/Postcord/rest"
 	"strings"
 	"testing"
-
-	"github.com/Postcord/objects"
 )
 
 // Used as a workaround since we can't compare functions or their addresses
 var fakeHandlerValue string
 
-func fakeHandler(val string) contextCallback {
-	return func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse {
+func fakeHandler(val string) *routeContext {
+	return &routeContext{func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 		fakeHandlerValue = val
 		return nil
-	}
+	}, val}
 }
 
 type testRequests []struct {
@@ -40,7 +40,7 @@ func checkRequests(t *testing.T, tree *node, requests testRequests) {
 		} else if request.nilHandler {
 			t.Errorf("handle mismatch for route '%s': Expected nil handle", request.path)
 		} else {
-			handler(nil, nil, nil)
+			handler.cb(nil, nil, nil, nil, nil)
 			if fakeHandlerValue != request.route {
 				t.Errorf("handle mismatch for route '%s': Wrong handle (%s != %s)", request.path, fakeHandlerValue, request.route)
 			}

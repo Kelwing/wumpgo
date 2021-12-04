@@ -33,7 +33,7 @@ func (r *responseBuilder) ResponseData() *objects.InteractionApplicationCommandC
 var NoCommandResponse = errors.New("expected data for command response")
 
 // Builds the response.
-func (r *responseBuilder) buildResponse(component bool, errorHandler func(error) *objects.InteractionResponse, globalAllowedMentions *objects.AllowedMentions) *objects.InteractionResponse {
+func (r *responseBuilder) buildResponse(component bool, errorHandler ErrorHandler, globalAllowedMentions *objects.AllowedMentions) *objects.InteractionResponse {
 	// Get the content and do not try and create it.
 	r.dataPtrLock.Lock()
 	data := r.dataPtr

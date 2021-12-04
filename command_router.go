@@ -15,7 +15,7 @@ import (
 // CommandRouterCtx is used to define the commands context from the router.
 type CommandRouterCtx struct {
 	// Defines the error handler.
-	errorHandler func(error) *objects.InteractionResponse
+	errorHandler ErrorHandler
 
 	// Defines the global allowed mentions configuration.
 	globalAllowedMentions *objects.AllowedMentions
@@ -37,7 +37,7 @@ type CommandRouterCtx struct {
 	Options map[string]interface{} `json:"options"`
 
 	// RESTClient is used to define the REST client.
-	RESTClient *rest.Client `json:"rest_client"`
+	RESTClient rest.RESTClient `json:"rest_client"`
 }
 
 // TargetMessage is used to try and get the target message. If this was not targeted at a message, returns nil.
@@ -203,22 +203,111 @@ var CommandDoesNotExist = errors.New("the command does not exist")
 var NoAutoCompleteFunc = errors.New("discord sent auto-complete for argument without auto-complete function")
 
 // Used to define the autocomplete handler.
-func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommands map[string]interface{}) interactions.HandlerFunc {
-	process := func(options []*objects.ApplicationCommandInteractionDataOption, cmd *Command, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse {
-		// Create the context.
-		_, mappedOptions := cmd.mapOptions(true, data, options, loader.errHandler)
+func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough) interactions.HandlerFunc {
+	return func(interaction *objects.Interaction) *objects.InteractionResponse {
+		// Parse the data JSON.
+		var rootData objects.ApplicationCommandInteractionData
+		if err := json.Unmarshal(interaction.Data, &rootData); err != nil {
+			return loader.errHandler(err)
+		}
+
+		// Wrap the data to let us traverse the tree easier.
+		var data dataWrapper = rootDataWrapper{&rootData}
+		options := rootData.Options
+
+		// Get the map of (sub-)commands.
+		m := c.roots.Subcommands
+		if m == nil {
+			m = map[string]interface{}{}
+		}
+
+		// Handle the traversal.
+		var cmd *Command
+		route := []string{"testframes", "autocompletes"}
+	cmdFor:
+		for {
+			// Add to the route.
+			route = append(route, data.name())
+
+			// Get the item from the map.
+			cmdOrCat, ok := m[data.name()]
+			if !ok {
+				// No command.
+				if _, ok = data.(rootDataWrapper); !ok {
+					// Backwards compatibility.
+					loader.errHandler(CommandDoesNotExist)
+				}
+				return nil
+			}
+
+			// Check the type of the item.
+			switch x := cmdOrCat.(type) {
+			case *Command:
+				// Set the object and break.
+				cmd = x
+				break cmdFor
+			case *CommandGroup:
+				// How we handle this depends on what we are expecting.
+				typeIface := data.type_()
+				switch type_ := typeIface.(type) {
+				case objects.ApplicationCommandOptionType:
+					// Check the type of the option to make sure it is a command.
+					if type_ != objects.TypeSubCommandGroup {
+						// If the type is anything other than a subcommand group, that does not match with this being a group.
+						return loader.errHandler(CommandIsNotSubcommand)
+					}
+				case objects.ApplicationCommandType:
+					// If this is the case, we are in the root. Look ahead to see if we are a group or a command.
+					if len(options) != 1 || (options[0].Type != objects.TypeSubCommand && options[0].Type != objects.TypeSubCommandGroup) {
+						// We are not a group. We know this because a root command acting as a group can only have one
+						// option which is either another group or a subcommand.
+						return loader.errHandler(CommandIsNotSubcommand)
+					}
+				default:
+					// This should never happen.
+					panic("postcord internal error - unknown command Type field type")
+				}
+
+				// Set the map to the subcommands from this group.
+				m = x.Subcommands
+
+				// Get the next data and setup for the next iteration.
+				nextData := options[0]
+				options = nextData.Options
+				data = optionDataWrapper{nextData}
+			}
+		}
+
+		// Create the rest tape if this is wanted.
+		r := loader.rest
+		tape := tape{}
+		var returnedErr string
+		errHandler := loader.errHandler
+		if loader.generateFrames {
+			r = &restTape{
+				tape: &tape,
+				rest: r,
+			}
+			errHandler = func(err error) *objects.InteractionResponse {
+				returnedErr = err.Error()
+				return loader.errHandler(err)
+			}
+		}
+
+		// Create the command context.
+		_, mappedOptions := cmd.mapOptions(true, &rootData, options, errHandler)
 		if mappedOptions == nil {
 			return nil
 		}
 		ctx := &CommandRouterCtx{
-			errorHandler: loader.errHandler,
+			errorHandler: errHandler,
 			Interaction:  interaction,
 			Command:      cmd,
 			Options:      mappedOptions,
-			RESTClient:   loader.rest,
+			RESTClient:   r,
 		}
 
-		// Find the focused argument.
+		// Now we have the command, we can process the autocomplete.
 		for _, v := range options {
 			if v.Focused {
 				// Get the autocomplete function.
@@ -228,13 +317,25 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommand
 					return nil
 				}
 
+				// Defer writing the rest tape.
+				var resp *objects.InteractionResponse
+				defer func() {
+					// Not a resource leak. GoLand thinks it is because it is in a for loop, but it always returns.
+
+					if loader.generateFrames {
+						// Now we have all the data, we can generate the frame.
+						fr := frame{interaction, tape, returnedErr, resp}
+						go fr.write(route...)
+					}
+				}()
+
 				// Get the options.
 				var resultOptions []*objects.ApplicationCommandOptionChoice
 				switch x := f.(type) {
 				case StringAutoCompleteFunc:
 					stringifiedOptions, err := x(ctx)
 					if err != nil {
-						loader.errHandler(err)
+						errHandler(err)
 						return nil
 					}
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(stringifiedOptions))
@@ -247,7 +348,7 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommand
 				case IntAutoCompleteFunc:
 					intOptions, err := x(ctx)
 					if err != nil {
-						loader.errHandler(err)
+						errHandler(err)
 						return nil
 					}
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(intOptions))
@@ -260,7 +361,7 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommand
 				case DoubleAutoCompleteFunc:
 					doubleOptions, err := x(ctx)
 					if err != nil {
-						loader.errHandler(err)
+						errHandler(err)
 						return nil
 					}
 					resultOptions = make([]*objects.ApplicationCommandOptionChoice, len(doubleOptions))
@@ -275,70 +376,18 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough, subcommand
 				}
 
 				// We have successfully got the result.
-				return &objects.InteractionResponse{
+				resp = &objects.InteractionResponse{
 					Type: objects.ResponseCommandAutocompleteResult,
 					Data: &objects.InteractionApplicationCommandCallbackData{
 						Choices: resultOptions,
 					},
 				}
+				return resp
 			}
 		}
 
-		// This is weird. There should always be a focused option.
+		// None focused. This should never happen.
 		return nil
-	}
-
-	isSub := func(type_ objects.ApplicationCommandOptionType) bool {
-		return type_ == objects.TypeSubCommand || type_ == objects.TypeSubCommandGroup
-	}
-
-	var handleOption func(cmdOrCat interface{}, options []*objects.ApplicationCommandInteractionDataOption, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse
-	handleOption = func(cmdOrCat interface{}, options []*objects.ApplicationCommandInteractionDataOption, data *objects.ApplicationCommandInteractionData, interaction *objects.Interaction) *objects.InteractionResponse {
-		switch x := cmdOrCat.(type) {
-		case *Command:
-			// Check the type of data isn't a subcommand.
-			if len(options) == 1 && isSub(options[0].Type) {
-				loader.errHandler(CommandIsNotSubcommand)
-				return nil
-			}
-
-			// Call the processor.
-			return process(options, x, data, interaction)
-		case *CommandGroup:
-			// Check the type of data is a subcommand.
-			if len(options) != 1 || !isSub(options[0].Type) {
-				loader.errHandler(CommandIsSubcommand)
-				return nil
-			}
-
-			// Handle traversing groups.
-			cmdOrCat, ok := x.Subcommands[options[0].Name]
-			if !ok {
-				loader.errHandler(CommandDoesNotExist)
-				return nil
-			}
-			return handleOption(cmdOrCat, options[0].Options, data, interaction)
-		default:
-			panic("postcord internal error - unknown command type")
-		}
-	}
-
-	return func(interaction *objects.Interaction) *objects.InteractionResponse {
-		// Parse the data JSON.
-		var data objects.ApplicationCommandInteractionData
-		if err := json.Unmarshal(interaction.Data, &data); err != nil {
-			return loader.errHandler(err)
-		}
-
-		// Get the command or category.
-		cmdOrCat, ok := subcommands[data.Name]
-		if !ok {
-			// No command.
-			return nil
-		}
-
-		// Handle the tree.
-		return handleOption(cmdOrCat, data.Options, &data, interaction)
 	}
 }
 
@@ -406,8 +455,28 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 			m = map[string]interface{}{}
 		}
 
+		// Create the rest tape if this is wanted.
+		r := loader.rest
+		tape := tape{}
+		var returnedErr string
+		errHandler := loader.errHandler
+		if loader.generateFrames {
+			r = &restTape{
+				tape: &tape,
+				rest: r,
+			}
+			errHandler = func(err error) *objects.InteractionResponse {
+				returnedErr = err.Error()
+				return loader.errHandler(err)
+			}
+		}
+
 		// Find the route.
+		route := []string{"testframes", "commands"}
 		for {
+			// Add to the route.
+			route = append(route, data.name())
+
 			// Get the item from the map.
 			cmdOrCat, ok := m[data.name()]
 			if !ok {
@@ -419,14 +488,20 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 			switch x := cmdOrCat.(type) {
 			case *Command:
 				// In this case, we should go ahead and execute.
-				return x.execute(commandExecutionOptions{
-					restClient:       loader.rest,
-					exceptionHandler: loader.errHandler,
+				resp := x.execute(commandExecutionOptions{
+					restClient:       r,
+					exceptionHandler: errHandler,
 					allowedMentions:  allowedMentions,
 					interaction:      interaction,
 					data:             &rootData,
 					options:          options,
 				}, middlewareList)
+				if loader.generateFrames {
+					// Now we have all the data, we can generate the frame.
+					f := frame{interaction, tape, returnedErr, resp}
+					go f.write(route...)
+				}
+				return resp
 			case *CommandGroup:
 				// How we handle this depends on what we are expecting.
 				typeIface := data.type_()
@@ -478,11 +553,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 
 // Used to build the command router by the parent.
 func (c *CommandRouter) build(loader loaderPassthrough) (interactions.HandlerFunc, interactions.HandlerFunc) {
-	m := c.roots.Subcommands
-	if m == nil {
-		m = map[string]interface{}{}
-	}
-	return c.commandHandler(loader), c.autocompleteHandler(loader, m)
+	return c.commandHandler(loader), c.autocompleteHandler(loader)
 }
 
 // Get the options for a command or category.

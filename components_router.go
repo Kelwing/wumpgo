@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
@@ -18,7 +19,7 @@ type ComponentRouter struct {
 // ComponentRouterCtx is used to define a components router context.
 type ComponentRouterCtx struct {
 	// Defines the error handler.
-	errorHandler func(error) *objects.InteractionResponse
+	errorHandler ErrorHandler
 
 	// Defines the global allowed mentions configuration.
 	globalAllowedMentions *objects.AllowedMentions
@@ -36,7 +37,7 @@ type ComponentRouterCtx struct {
 	Params map[string]string `json:"params"`
 
 	// RESTClient is used to define the REST client.
-	RESTClient *rest.Client `json:"rest_client"`
+	RESTClient rest.RESTClient `json:"rest_client"`
 }
 
 // DeferredMessageUpdate sets the response type to DeferredMessageUpdate
@@ -85,7 +86,13 @@ var NotSelectionMenu = errors.New("the data returned is not that of a selection 
 var NotButton = errors.New("the data returned is not that of a button")
 
 // Adds the argument context to the handler.
-type contextCallback func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse
+type contextCallback func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse
+
+// Defines the data for the context for the route.
+type routeContext struct {
+	cb contextCallback
+	r  string
+}
 
 // Used to ungeneric an error.
 func ungenericError(errGeneric interface{}) error {
@@ -106,29 +113,29 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 	// Build the router tree.
 	c.prep()
 	root := new(node)
-	root.addRoute("/_postcord/void/:number", func(ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse {
-		// The point of this route is to just return the default handler.
-		rctx := &ComponentRouterCtx{
-			errorHandler:          loader.errHandler,
-			globalAllowedMentions: loader.globalAllowedMentions,
-			Interaction:           ctx,
-			Params:                params,
-			RESTClient:            loader.rest,
-		}
-		return rctx.buildResponse(true, loader.errHandler, loader.globalAllowedMentions)
+	root.addRoute("/_postcord/void/:number", &routeContext{
+		cb: func(ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
+			// The point of this route is to just return the default handler.
+			rctx := &ComponentRouterCtx{
+				globalAllowedMentions: loader.globalAllowedMentions,
+				Interaction:           ctx,
+			}
+			return rctx.buildResponse(true, nil, loader.globalAllowedMentions)
+		},
+		r: "/_postcord/void/:number",
 	})
 	for k, v := range c.routes {
 		var cb contextCallback
 		switch x := v.(type) {
 		case ButtonFunc:
-			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse {
+			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 				if data.ComponentType != objects.ComponentTypeButton {
 					return loader.errHandler(NotButton)
 				}
 				defer func() {
 					if errGeneric := recover(); errGeneric != nil {
 						// Shouldn't try and return from defer.
-						loader.errHandler(ungenericError(errGeneric))
+						errHandler(ungenericError(errGeneric))
 					}
 				}()
 				rctx := &ComponentRouterCtx{
@@ -136,15 +143,15 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 					globalAllowedMentions: loader.globalAllowedMentions,
 					Interaction:           ctx,
 					Params:                params,
-					RESTClient:            loader.rest,
+					RESTClient:            rest,
 				}
 				if err := x(rctx); err != nil {
-					return loader.errHandler(err)
+					return errHandler(err)
 				}
 				return rctx.buildResponse(true, loader.errHandler, loader.globalAllowedMentions)
 			}
 		case SelectMenuFunc:
-			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string) *objects.InteractionResponse {
+			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 				values := data.Values
 				if values == nil {
 					// This is a blank result from Discord.
@@ -156,7 +163,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 				defer func() {
 					if errGeneric := recover(); errGeneric != nil {
 						// Shouldn't try and return from defer.
-						loader.errHandler(ungenericError(errGeneric))
+						errHandler(ungenericError(errGeneric))
 					}
 				}()
 				rctx := &ComponentRouterCtx{
@@ -164,21 +171,38 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 					errorHandler:          loader.errHandler,
 					Interaction:           ctx,
 					Params:                params,
-					RESTClient:            loader.rest,
+					RESTClient:            rest,
 				}
 				if err := x(rctx, values); err != nil {
-					return loader.errHandler(err)
+					return errHandler(err)
 				}
 				return rctx.buildResponse(true, loader.errHandler, loader.globalAllowedMentions)
 			}
 		default:
 			panic("postcord internal error - invalid interaction type")
 		}
-		root.addRoute(k, cb)
+		root.addRoute(k, &routeContext{cb, k})
 	}
 
 	// Return the router.
 	return func(ctx *objects.Interaction) *objects.InteractionResponse {
+		// Create the rest tape if this is wanted.
+		r := loader.rest
+		tape := tape{}
+		var returnedErr string
+		errHandler := loader.errHandler
+		if loader.generateFrames {
+			r = &restTape{
+				tape: &tape,
+				rest: r,
+			}
+			errHandler = func(err error) *objects.InteractionResponse {
+				returnedErr = err.Error()
+				return loader.errHandler(err)
+			}
+		}
+
+		// Run the command.
 		params := map[string]string{}
 		var data objects.ApplicationComponentInteractionData
 		if err := json.Unmarshal(ctx.Data, &data); err != nil {
@@ -188,6 +212,12 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 		if route == nil {
 			return nil
 		}
-		return route(ctx, &data, params)
+		resp := route.cb(ctx, &data, params, r, errHandler)
+		if loader.generateFrames {
+			// Now we have all the data, we can generate the frame.
+			fr := frame{ctx, tape, returnedErr, resp}
+			go fr.write("testframes", "components", strings.ReplaceAll(route.r, "/", "_"))
+		}
+		return resp
 	}
 }

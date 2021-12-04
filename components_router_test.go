@@ -94,7 +94,7 @@ func TestComponentRouter_build(t *testing.T) {
 	tests := []struct {
 		name string
 
-		restClient *rest.Client
+		restClient rest.RESTClient
 		globalAllowedMentions *objects.AllowedMentions
 		init func(t *testing.T, r *ComponentRouter)
 
@@ -299,7 +299,7 @@ func TestComponentRouter_build(t *testing.T) {
 			if tt.init != nil {
 				tt.init(t, r)
 			}
-			builtFunc := r.build(loaderPassthrough{dummyRestClient, setError, tt.globalAllowedMentions})
+			builtFunc := r.build(loaderPassthrough{dummyRestClient, setError, tt.globalAllowedMentions, false}) // TODO: test frames!
 			resp := builtFunc(tt.interaction)
 
 			// Verify the error.

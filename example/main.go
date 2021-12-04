@@ -9,7 +9,16 @@ import (
 	"strconv"
 )
 
-func main() {
+func builder() (*router.CommandRouter, *interactions.App, router.LoaderBuilder) {
+	// Create the interactions app.
+	app, err := interactions.New(&interactions.Config{
+		PublicKey: os.Getenv("PUBLIC_KEY"),
+		Token:     "Bot " + os.Getenv("TOKEN"),
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	// Create the response embed and component.
 	createResponse := func(amount uint64) (*objects.Embed, []*objects.Component) {
 		return &objects.Embed{Description: "The value of this is " + strconv.FormatUint(amount, 10)}, []*objects.Component{
@@ -66,7 +75,7 @@ func main() {
 		MustBuild()
 
 	// Defines a single command.
-	_, err := commandRouter.NewCommandBuilder("add").Description("A demo to show adding numbers.").
+	_, err = commandRouter.NewCommandBuilder("add").Description("A demo to show adding numbers.").
 		Handler(func(ctx *router.CommandRouterCtx) error {
 			embed, row := createResponse(0)
 			ctx.Ephemeral().SetEmbed(embed).AddComponentRow(row)
@@ -74,6 +83,23 @@ func main() {
 		}).
 		DefaultPermission().
 		Build()
+	if err != nil {
+		panic(err)
+	}
+
+	// Defines a REST command.
+	commandRouter.NewCommandBuilder("rest").Description("A command to hit the fuck out of rest.").
+		Handler(func(ctx *router.CommandRouterCtx) error {
+			_, _ = ctx.RESTClient.GetChannel(1)
+			_, err := ctx.RESTClient.GetCurrentUser()
+			if err != nil {
+				return err
+			}
+			ctx.SetContent("Hello World!")
+			return nil
+		}).
+		DefaultPermission().
+		MustBuild()
 	if err != nil {
 		panic(err)
 	}
@@ -139,7 +165,6 @@ func main() {
 		}).
 		MustBuild()
 
-
 	// Add a user target command.
 	commandRouter.NewCommandBuilder("user-target").
 		UserCommand().
@@ -160,18 +185,14 @@ func main() {
 		}).
 		MustBuild()
 
-	// Create the interactions app.
-	app, err := interactions.New(&interactions.Config{
-		PublicKey: os.Getenv("PUBLIC_KEY"),
-		Token:     "Bot " + os.Getenv("TOKEN"),
-	})
-	if err != nil {
-		panic(err)
-	}
+	return commandRouter, app, router.RouterLoader().ComponentRouter(componentRouter).CommandRouter(commandRouter).Build(app)
+}
 
+func main() {
 	// Dump the Discord commands if specified.
+	commandBuilder, app, _ := builder()
 	if os.Getenv("DUMP") == "1" {
-		commands := commandRouter.FormulateDiscordCommands()
+		commands := commandBuilder.FormulateDiscordCommands()
 		me, err := app.Rest().GetCurrentUser()
 		if err != nil {
 			panic(err)
@@ -183,11 +204,8 @@ func main() {
 		return
 	}
 
-	// Create the router builder.
-	router.RouterLoader().ComponentRouter(componentRouter).CommandRouter(commandRouter).Build(app)
-
 	// Create the interactions router.
-	if err = app.Run(8000); err != nil {
+	if err := app.Run(8000); err != nil {
 		panic(err)
 	}
 }

@@ -61,7 +61,7 @@ So we went ahead and created both our routers. Awesome! But we need to get these
 
 - `ComponentRouter(*ComponentRouter) LoaderBuilder`: Adds the component router specified into the loader.
 - `CommandRouter(*CommandRouter) LoaderBuilder`: Adds the commands router specified into the loader.
-- `ErrorHandler(func(error) *objects.InteractionResponse) LoaderBuilder`: See [error handling](#error-handling).
+- `ErrorHandler(ErrorHandler) LoaderBuilder`: See [error handling](#error-handling).
 - `AllowedMentions(*objects.AllowedMentions) LoaderBuilder`: See [allowed mentions](#allowed-mentions).
 
 At the end of this, just call `Build` with your interactions application (you probably want a `*interactions.App` from Postcord/interactions). This will automatically inject the routers into your application and build them with the appropriate allowed mentions configuration.

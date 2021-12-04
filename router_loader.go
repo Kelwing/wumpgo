@@ -2,18 +2,23 @@ package router
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
 )
 
+// ErrorHandler defines the error handler function used within Postcord.
+type ErrorHandler = func(error) *objects.InteractionResponse
+
 // Defines the builder.
 type loaderBuilder struct {
 	globalAllowedMentions *objects.AllowedMentions
 	components            *ComponentRouter
 	commands              *CommandRouter
-	errHandler            func(error) *objects.InteractionResponse
+	errHandler            ErrorHandler
+	app                   HandlerAccepter
 }
 
 func (l *loaderBuilder) ComponentRouter(router *ComponentRouter) LoaderBuilder {
@@ -21,7 +26,7 @@ func (l *loaderBuilder) ComponentRouter(router *ComponentRouter) LoaderBuilder {
 	return l
 }
 
-func (l *loaderBuilder) ErrorHandler(cb func(error) *objects.InteractionResponse) LoaderBuilder {
+func (l *loaderBuilder) ErrorHandler(cb ErrorHandler) LoaderBuilder {
 	l.errHandler = cb
 	return l
 }
@@ -73,30 +78,44 @@ type HandlerAccepter interface {
 
 // Defines the various bits passed through from the loader.
 type loaderPassthrough struct {
-	rest *rest.Client
-	errHandler func(error) *objects.InteractionResponse
+	rest                  rest.RESTClient
+	errHandler            ErrorHandler
 	globalAllowedMentions *objects.AllowedMentions
+	generateFrames        bool
 }
 
-func (l *loaderBuilder) Build(app HandlerAccepter) {
+func (l *loaderBuilder) Build(app HandlerAccepter) LoaderBuilder {
+	l.app = app
 	cb := l.errHandler
 	if cb == nil {
 		// Defines a generic error handler if the user hasn't made their own.
 		cb = genericErrorHandler
 	}
 
+	generateFrames := os.Getenv("POSTCORD_GENERATE_FRAMES") == "1"
+
 	if l.components != nil {
 		// Build and load the components handler.
-		handler := l.components.build(loaderPassthrough{app.Rest(), cb, l.globalAllowedMentions})
+		handler := l.components.build(loaderPassthrough{app.Rest(), cb, l.globalAllowedMentions, generateFrames})
 		app.ComponentHandler(handler)
 	}
 
 	if l.commands != nil {
 		// Build and load the commands/autocomplete handler.
-		commandHandler, autocompleteHandler := l.commands.build(loaderPassthrough{app.Rest(), cb, l.globalAllowedMentions})
+		commandHandler, autocompleteHandler := l.commands.build(loaderPassthrough{app.Rest(), cb, l.globalAllowedMentions, generateFrames})
 		app.CommandHandler(commandHandler)
 		app.AutocompleteHandler(autocompleteHandler)
 	}
+
+	return l
+}
+
+func (l *loaderBuilder) CurrentChain() (*ComponentRouter, *CommandRouter, ErrorHandler, rest.RESTClient, *objects.AllowedMentions) {
+	var restClient rest.RESTClient
+	if l.app != nil {
+		restClient = l.app.Rest()
+	}
+	return l.components, l.commands, l.errHandler, restClient, l.globalAllowedMentions
 }
 
 // LoaderBuilder is the interface for a router loader builder.
@@ -111,13 +130,17 @@ type LoaderBuilder interface {
 	CombinedRouter(router *CombinedRouter) LoaderBuilder
 
 	// ErrorHandler is used to add an error handler to the load process.
-	ErrorHandler(func(error) *objects.InteractionResponse) LoaderBuilder
+	ErrorHandler(ErrorHandler) LoaderBuilder
 
 	// AllowedMentions allows you to set a global allowed mentions configuration.
 	AllowedMentions(*objects.AllowedMentions) LoaderBuilder
 
 	// Build is used to execute the build.
-	Build(app HandlerAccepter)
+	Build(app HandlerAccepter) LoaderBuilder
+
+	// CurrentChain is used to get the current chain of items. Note that for obvious reasons, this is not chainable.
+	// Used internally by Postcord for our testing mechanism.
+	CurrentChain() (componentRouter *ComponentRouter, commandRouter *CommandRouter, errHandler ErrorHandler, restClient rest.RESTClient, allowedMentions *objects.AllowedMentions)
 }
 
 // RouterLoader is used to create a new router loader builder.

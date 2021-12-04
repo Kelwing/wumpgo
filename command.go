@@ -59,8 +59,8 @@ var MismatchedOption = errors.New("mismatched interaction option")
 
 // Defines the options for command execution.
 type commandExecutionOptions struct {
-	restClient       *rest.Client
-	exceptionHandler func(error) *objects.InteractionResponse
+	restClient       rest.RESTClient
+	exceptionHandler ErrorHandler
 	allowedMentions  *objects.AllowedMentions
 	interaction      *objects.Interaction
 	data             *objects.ApplicationCommandInteractionData
@@ -68,7 +68,7 @@ type commandExecutionOptions struct {
 }
 
 // Maps out the options.
-func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption, exceptionHandler func(error) *objects.InteractionResponse) (*objects.InteractionResponse, map[string]interface{}) {
+func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption, exceptionHandler ErrorHandler) (*objects.InteractionResponse, map[string]interface{}) {
 	mappedOptions := map[string]interface{}{}
 	for _, v := range options {
 		// Find the option.

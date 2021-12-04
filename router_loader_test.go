@@ -47,7 +47,7 @@ func TestLoaderBuilder_ErrorHandler(t *testing.T) {
 	tests := []struct {
 		name string
 
-		handler func(error) *objects.InteractionResponse
+		handler ErrorHandler
 	}{
 		{
 			name: "value",
@@ -189,7 +189,7 @@ func TestLoaderBuilder_Build(t *testing.T) {
 		allowedMentions *objects.AllowedMentions
 		components      *ComponentRouter
 		commands        *CommandRouter
-		errHandler      func(error) *objects.InteractionResponse
+		errHandler      ErrorHandler
 	}{
 		{
 			name: "all nil",

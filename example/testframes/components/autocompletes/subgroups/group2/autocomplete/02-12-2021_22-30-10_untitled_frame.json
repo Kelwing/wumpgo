@@ -1,0 +1,80 @@
+{
+  "request": {
+    "id": "916094056097021972",
+    "application_id": "859956972375769088",
+    "type": 4,
+    "data": {
+      "id": "915467812556910656",
+      "name": "subgroups",
+      "options": [
+        {
+          "name": "group2",
+          "options": [
+            {
+              "name": "autocomplete",
+              "options": [
+                {
+                  "focused": true,
+                  "name": "option",
+                  "type": 3,
+                  "value": ""
+                }
+              ],
+              "type": 1
+            }
+          ],
+          "type": 2
+        }
+      ],
+      "type": 1
+    },
+    "guild_id": "346358734663974933",
+    "channel_id": "909551745003323453",
+    "member": {
+      "user": {
+        "id": "280610586159611905",
+        "username": "JustSomeDev",
+        "discriminator": "0001",
+        "avatar": "a7ba3d48168882bab069943970ac4592",
+        "accent_color": 0,
+        "flags": 0,
+        "public_flags": 131648
+      },
+      "roles": [
+        "363047135261753345",
+        "384020007471808541",
+        "429296513865220097"
+      ],
+      "joined_at": "2017-08-13T18:25:57Z",
+      "premium_since": "",
+      "deaf": false,
+      "mute": false
+    },
+    "user": null,
+    "token": "aW50ZXJhY3Rpb246OTE2MDk0MDU2MDk3MDIxOTcyOkFQa2tsUHpXSjRIUmJrN2JLOFhtQkdGbVg1TGNBcFRydmh0TVkxaTV6UVVZdHhYRnE3bFZYYm9UakZhNlgwd3RQejkwd3BodmI5N0g5ZFdhTUlhUzgyWGZiNkVuc1Y4OWhna2ZKeXNCcnFYY2JoZVRRMlowRFVEUHlXVThRb1lH",
+    "version": 1
+  },
+  "rest_requests": [],
+  "response": {
+    "type": 8,
+    "data": {
+      "content": "",
+      "flags": 0,
+      "components": null,
+      "choices": [
+        {
+          "name": "a",
+          "value": "A"
+        },
+        {
+          "name": "b",
+          "value": "B"
+        },
+        {
+          "name": "c",
+          "value": "C"
+        }
+      ]
+    }
+  }
+}

@@ -4,8 +4,8 @@ go 1.16
 
 require (
 	github.com/Postcord/interactions v0.0.17
-	github.com/Postcord/objects v0.0.17
-	github.com/Postcord/rest v0.0.9
+	github.com/Postcord/objects v0.0.18
+	github.com/Postcord/rest v0.0.13-0.20211129202545-5da06d04b3ab
 	github.com/aws/aws-lambda-go v1.27.0 // indirect
 	github.com/jimeh/go-golden v0.1.0
 	github.com/klauspost/compress v1.13.6 // indirect
