@@ -38,18 +38,18 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 	tests := []struct {
 		name string
 
-		respType objects.ResponseType
-		data *objects.InteractionApplicationCommandCallbackData
-		component bool
+		respType              objects.ResponseType
+		data                  *objects.InteractionApplicationCommandCallbackData
+		component             bool
 		globalAllowedMentions *objects.AllowedMentions
 
-		wantErr   string
+		wantErr      string
 		wantResponse *objects.InteractionResponse
 	}{
 		{
-			name:                  "no command response",
-			component:             false,
-			wantErr:               "expected data for command response",
+			name:      "no command response",
+			component: false,
+			wantErr:   "expected data for command response",
 		},
 		{
 			name:                  "no component response",
@@ -60,9 +60,9 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 		{
 			name:                  "default command data",
 			component:             false,
-			data:				   &objects.InteractionApplicationCommandCallbackData{},
+			data:                  &objects.InteractionApplicationCommandCallbackData{},
 			globalAllowedMentions: &objects.AllowedMentions{},
-			wantResponse:          &objects.InteractionResponse{
+			wantResponse: &objects.InteractionResponse{
 				Type: objects.ResponseChannelMessageWithSource,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					AllowedMentions: &objects.AllowedMentions{},
@@ -72,9 +72,9 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 		{
 			name:                  "default component data",
 			component:             true,
-			data:				   &objects.InteractionApplicationCommandCallbackData{},
+			data:                  &objects.InteractionApplicationCommandCallbackData{},
 			globalAllowedMentions: &objects.AllowedMentions{},
-			wantResponse:          &objects.InteractionResponse{
+			wantResponse: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					AllowedMentions: &objects.AllowedMentions{},
@@ -82,32 +82,32 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 			},
 		},
 		{
-			name:                  "override command type guess",
-			component:             false,
-			respType:			   69,
-			data:				   &objects.InteractionApplicationCommandCallbackData{},
-			wantResponse:          &objects.InteractionResponse{
+			name:      "override command type guess",
+			component: false,
+			respType:  69,
+			data:      &objects.InteractionApplicationCommandCallbackData{},
+			wantResponse: &objects.InteractionResponse{
 				Type: 69,
 				Data: &objects.InteractionApplicationCommandCallbackData{},
 			},
 		},
 		{
-			name:                  "override component type guess",
-			component:             true,
-			respType:			   69,
-			data:				   &objects.InteractionApplicationCommandCallbackData{},
-			wantResponse:          &objects.InteractionResponse{
+			name:      "override component type guess",
+			component: true,
+			respType:  69,
+			data:      &objects.InteractionApplicationCommandCallbackData{},
+			wantResponse: &objects.InteractionResponse{
 				Type: 69,
 				Data: &objects.InteractionApplicationCommandCallbackData{},
 			},
 		},
 		{
-			name: "full command",
-			component:             false,
-			data:				   &objects.InteractionApplicationCommandCallbackData{
+			name:      "full command",
+			component: false,
+			data: &objects.InteractionApplicationCommandCallbackData{
 				TTS:     true,
 				Content: "testing testing 123",
-				Embeds:  []*objects.Embed{
+				Embeds: []*objects.Embed{
 					{
 						Title: "hello world",
 					},
@@ -124,12 +124,12 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 					},
 				},
 			},
-			wantResponse:          &objects.InteractionResponse{
+			wantResponse: &objects.InteractionResponse{
 				Type: objects.ResponseChannelMessageWithSource,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					TTS:     true,
 					Content: "testing testing 123",
-					Embeds:  []*objects.Embed{
+					Embeds: []*objects.Embed{
 						{
 							Title: "hello world",
 						},
@@ -149,12 +149,12 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 			},
 		},
 		{
-			name: "full component",
-			component:             true,
-			data:				   &objects.InteractionApplicationCommandCallbackData{
+			name:      "full component",
+			component: true,
+			data: &objects.InteractionApplicationCommandCallbackData{
 				TTS:     true,
 				Content: "testing testing 123",
-				Embeds:  []*objects.Embed{
+				Embeds: []*objects.Embed{
 					{
 						Title: "hello world",
 					},
@@ -171,12 +171,12 @@ func Test_responseBuilder_buildResponse(t *testing.T) {
 					},
 				},
 			},
-			wantResponse:          &objects.InteractionResponse{
+			wantResponse: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
 					TTS:     true,
 					Content: "testing testing 123",
-					Embeds:  []*objects.Embed{
+					Embeds: []*objects.Embed{
 						{
 							Title: "hello world",
 						},
@@ -428,13 +428,13 @@ func TestComponentRouterCtx_SetTTS(t *testing.T) {
 func TestCommandRouterCtx_Ephemeral(t *testing.T) {
 	x := &CommandRouterCtx{}
 	assert.NoError(t, callBuilderFunction(t, x, "Ephemeral"))
-	assert.Equal(t, x.responseBuilder.ResponseData().Flags, 64)
+	assert.Equal(t, (objects.MessageFlag)(64), x.responseBuilder.ResponseData().Flags)
 }
 
 func TestComponentRouterCtx_Ephemeral(t *testing.T) {
 	x := &ComponentRouterCtx{}
 	assert.NoError(t, callBuilderFunction(t, x, "Ephemeral"))
-	assert.Equal(t, x.responseBuilder.ResponseData().Flags, 64)
+	assert.Equal(t, (objects.MessageFlag)(64), x.responseBuilder.ResponseData().Flags)
 }
 
 func TestCommandRouterCtx_ChannelMessageWithSource(t *testing.T) {

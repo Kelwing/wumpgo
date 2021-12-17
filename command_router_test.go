@@ -1656,8 +1656,8 @@ func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
 						}),
 					).
 					IntOption("optional_double_option", "The optional double option", false, nil).
-					BoolOption("req_bool_option", "the required boolean option", true, true).
-					BoolOption("optional_bool_option", "the optional boolean option", false, false).
+					BoolOption("req_bool_option", "the required boolean option", true).
+					BoolOption("optional_bool_option", "the optional boolean option", false).
 					RoleOption("req_role_option", "the required role option", true).
 					RoleOption("optional_role_option", "the optional role option", false).
 					ChannelOption("req_channel_option", "the required channel option", true).
@@ -1736,8 +1736,8 @@ func TestCommandRouterCtx_Bind(t *testing.T) {
 					StringOption("str", "A string option", true, nil).
 					StringOption("str2", "A string option", true, nil).
 					IntOption("int", "An int option", true, nil).
-					BoolOption("bool", "A bool option", true, false).
-					BoolOption("bool2", "Another bool option", true, false).
+					BoolOption("bool", "A bool option", true).
+					BoolOption("bool2", "Another bool option", true).
 					ChannelOption("channel", "A channel option", true).
 					DoubleOption("double", "A double option", true, nil).
 					Build()

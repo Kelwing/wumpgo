@@ -87,9 +87,9 @@ func Test_commandBuilder_StringOption(t *testing.T) {
 				var discordifiedChoices []objects.ApplicationCommandOptionChoice
 				if tt.choices {
 					discordifiedChoices = []objects.ApplicationCommandOptionChoice{
-						{Name:  "a", Value: "1"},
-						{Name:  "b", Value: "2"},
-						{Name:  "c", Value: "3"},
+						{Name: "a", Value: "1"},
+						{Name: "b", Value: "2"},
+						{Name: "c", Value: "3"},
 					}
 				}
 				assert.Equal(t, []*objects.ApplicationCommandOption{
@@ -193,9 +193,9 @@ func Test_commandBuilder_IntOption(t *testing.T) {
 				var discordifiedChoices []objects.ApplicationCommandOptionChoice
 				if tt.choices {
 					discordifiedChoices = []objects.ApplicationCommandOptionChoice{
-						{Name:  "a", Value: 1},
-						{Name:  "b", Value: 2},
-						{Name:  "c", Value: 3},
+						{Name: "a", Value: 1},
+						{Name: "b", Value: 2},
+						{Name: "c", Value: 3},
 					}
 				}
 				assert.Equal(t, []*objects.ApplicationCommandOption{
@@ -299,14 +299,14 @@ func Test_commandBuilder_DoubleOption(t *testing.T) {
 				var discordifiedChoices []objects.ApplicationCommandOptionChoice
 				if tt.choices {
 					discordifiedChoices = []objects.ApplicationCommandOptionChoice{
-						{Name:  "a", Value: (float64)(1)},
-						{Name:  "b", Value: (float64)(2)},
-						{Name:  "c", Value: (float64)(3)},
+						{Name: "a", Value: (float64)(1)},
+						{Name: "b", Value: (float64)(2)},
+						{Name: "c", Value: (float64)(3)},
 					}
 				}
 				assert.Equal(t, []*objects.ApplicationCommandOption{
 					{
-						OptionType:   objects.TypeDouble,
+						OptionType:   objects.TypeNumber,
 						Name:         "testing",
 						Description:  "testing 123",
 						Required:     true,
@@ -335,10 +335,10 @@ func Test_textCommandBuilder_StringOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeString,
-			Name:         "testing",
-			Description:  "testing 123",
-			Choices:      []objects.ApplicationCommandOptionChoice{
+			OptionType:  objects.TypeString,
+			Name:        "testing",
+			Description: "testing 123",
+			Choices: []objects.ApplicationCommandOptionChoice{
 				{Name: "a", Value: "b"},
 			},
 			Required: true,
@@ -356,10 +356,10 @@ func Test_textCommandBuilder_IntOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeInteger,
-			Name:         "testing",
-			Description:  "testing 123",
-			Choices:      []objects.ApplicationCommandOptionChoice{
+			OptionType:  objects.TypeInteger,
+			Name:        "testing",
+			Description: "testing 123",
+			Choices: []objects.ApplicationCommandOptionChoice{
 				{Name: "a", Value: 123},
 			},
 			Required: true,
@@ -371,15 +371,13 @@ func Test_textCommandBuilder_BoolOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder{}}
 	assert.NoError(t, callBuilderFunction(
 		t, b, "BoolOption", "testing", "testing 123", true,
-		true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeBoolean,
-			Name:         "testing",
-			Description:  "testing 123",
-			Default:      true,
-			Required:     true,
+			OptionType:  objects.TypeBoolean,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(textCommandBuilder).cmd.Options)
 }
@@ -391,10 +389,10 @@ func Test_textCommandBuilder_UserOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeUser,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeUser,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(textCommandBuilder).cmd.Options)
 }
@@ -406,10 +404,10 @@ func Test_textCommandBuilder_ChannelOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeChannel,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeChannel,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(textCommandBuilder).cmd.Options)
 }
@@ -421,10 +419,10 @@ func Test_textCommandBuilder_RoleOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeRole,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeRole,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(textCommandBuilder).cmd.Options)
 }
@@ -436,10 +434,10 @@ func Test_textCommandBuilder_MentionableOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeMentionable,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeMentionable,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(textCommandBuilder).cmd.Options)
 }
@@ -454,10 +452,10 @@ func Test_textCommandBuilder_DoubleOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeDouble,
-			Name:         "testing",
-			Description:  "testing 123",
-			Choices:      []objects.ApplicationCommandOptionChoice{
+			OptionType:  objects.TypeNumber,
+			Name:        "testing",
+			Description: "testing 123",
+			Choices: []objects.ApplicationCommandOptionChoice{
 				{Name: "a", Value: (float64)(123)},
 			},
 			Required: true,
@@ -494,10 +492,10 @@ func Test_subcommandBuilder_StringOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeString,
-			Name:         "testing",
-			Description:  "testing 123",
-			Choices:      []objects.ApplicationCommandOptionChoice{
+			OptionType:  objects.TypeString,
+			Name:        "testing",
+			Description: "testing 123",
+			Choices: []objects.ApplicationCommandOptionChoice{
 				{Name: "a", Value: "b"},
 			},
 			Required: true,
@@ -515,10 +513,10 @@ func Test_subcommandBuilder_IntOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeInteger,
-			Name:         "testing",
-			Description:  "testing 123",
-			Choices:      []objects.ApplicationCommandOptionChoice{
+			OptionType:  objects.TypeInteger,
+			Name:        "testing",
+			Description: "testing 123",
+			Choices: []objects.ApplicationCommandOptionChoice{
 				{Name: "a", Value: 123},
 			},
 			Required: true,
@@ -530,15 +528,13 @@ func Test_subcommandBuilder_BoolOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder{}}
 	assert.NoError(t, callBuilderFunction(
 		t, b, "BoolOption", "testing", "testing 123", true,
-		true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeBoolean,
-			Name:         "testing",
-			Description:  "testing 123",
-			Default:      true,
-			Required:     true,
+			OptionType:  objects.TypeBoolean,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(subcommandBuilder).cmd.Options)
 }
@@ -550,10 +546,10 @@ func Test_subcommandBuilder_UserOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeUser,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeUser,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(subcommandBuilder).cmd.Options)
 }
@@ -565,10 +561,10 @@ func Test_subcommandBuilder_ChannelOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeChannel,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeChannel,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(subcommandBuilder).cmd.Options)
 }
@@ -580,10 +576,10 @@ func Test_subcommandBuilder_RoleOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeRole,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeRole,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(subcommandBuilder).cmd.Options)
 }
@@ -595,10 +591,10 @@ func Test_subcommandBuilder_MentionableOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeMentionable,
-			Name:         "testing",
-			Description:  "testing 123",
-			Required:     true,
+			OptionType:  objects.TypeMentionable,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(subcommandBuilder).cmd.Options)
 }
@@ -613,10 +609,10 @@ func Test_subcommandBuilder_DoubleOption(t *testing.T) {
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
-			OptionType:   objects.TypeDouble,
-			Name:         "testing",
-			Description:  "testing 123",
-			Choices:      []objects.ApplicationCommandOptionChoice{
+			OptionType:  objects.TypeNumber,
+			Name:        "testing",
+			Description: "testing 123",
+			Choices: []objects.ApplicationCommandOptionChoice{
 				{Name: "a", Value: (float64)(123)},
 			},
 			Required: true,

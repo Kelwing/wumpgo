@@ -118,7 +118,7 @@ func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommand
 				id:   v.Value.(string),
 				data: data,
 			}
-		case objects.TypeDouble:
+		case objects.TypeNumber:
 			mappedOptions[option.Name] = v.Value
 		}
 	}

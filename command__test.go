@@ -20,7 +20,7 @@ func Test_findOption(t *testing.T) {
 		options []*objects.ApplicationCommandOption
 
 		wants *objects.ApplicationCommandOption
- 	}{
+	}{
 		{
 			name: "nil slice",
 		},
@@ -78,19 +78,19 @@ func TestCommand_mapOptions(t *testing.T) {
 	}{
 		{
 			name: "option not in command",
-			cmdOptions:   []*objects.ApplicationCommandOption{
+			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeInteger,
-					Name:		"opt1",
+					Name:       "opt1",
 				},
 				{
 					OptionType: objects.TypeString,
-					Name:		"opt2",
+					Name:       "opt2",
 				},
 			},
 			retOptions: []*objects.ApplicationCommandInteractionDataOption{
 				{
-					Type: objects.TypeString,
+					Type:  objects.TypeString,
 					Name:  "opt3",
 					Value: "123",
 				},
@@ -98,17 +98,17 @@ func TestCommand_mapOptions(t *testing.T) {
 			expectsErr: "interaction option doesn't exist on command",
 		},
 		{
-			name:		  "autocomplete type mismatch",
+			name:         "autocomplete type mismatch",
 			autocomplete: true,
-			cmdOptions:   []*objects.ApplicationCommandOption{
+			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeInteger,
-					Name:		"opt1",
+					Name:       "opt1",
 				},
 			},
 			retOptions: []*objects.ApplicationCommandInteractionDataOption{
 				{
-					Type: objects.TypeString,
+					Type:  objects.TypeString,
 					Name:  "opt1",
 					Value: "123",
 				},
@@ -118,16 +118,16 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:		"non-autocomplete type mismatch",
+			name: "non-autocomplete type mismatch",
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeInteger,
-					Name:		"opt1",
+					Name:       "opt1",
 				},
 			},
 			retOptions: []*objects.ApplicationCommandInteractionDataOption{
 				{
-					Type: objects.TypeString,
+					Type:  objects.TypeString,
 					Name:  "opt1",
 					Value: "123",
 				},
@@ -135,8 +135,8 @@ func TestCommand_mapOptions(t *testing.T) {
 			expectsErr: "mismatched interaction option",
 		},
 		{
-			name:       "channel option",
-			data:       &objects.ApplicationCommandInteractionData{ID: 6921},
+			name: "channel option",
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeChannel,
@@ -158,8 +158,8 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "role option",
-			data:       &objects.ApplicationCommandInteractionData{ID: 6921},
+			name: "role option",
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeRole,
@@ -181,8 +181,8 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "user option",
-			data:       &objects.ApplicationCommandInteractionData{ID: 6921},
+			name: "user option",
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeUser,
@@ -204,7 +204,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "string option",
+			name: "string option",
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeString,
@@ -223,7 +223,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "int option",
+			name: "int option",
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeInteger,
@@ -242,7 +242,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "boolean option",
+			name: "boolean option",
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeBoolean,
@@ -261,8 +261,8 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "mentionable option",
-			data:       &objects.ApplicationCommandInteractionData{ID: 6921},
+			name: "mentionable option",
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeMentionable,
@@ -284,16 +284,16 @@ func TestCommand_mapOptions(t *testing.T) {
 			},
 		},
 		{
-			name:       "double option",
+			name: "double option",
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
-					OptionType: objects.TypeDouble,
+					OptionType: objects.TypeNumber,
 					Name:       "opt1",
 				},
 			},
 			retOptions: []*objects.ApplicationCommandInteractionDataOption{
 				{
-					Type:  objects.TypeDouble,
+					Type:  objects.TypeNumber,
 					Name:  "opt1",
 					Value: (float64)(69),
 				},

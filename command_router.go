@@ -743,7 +743,7 @@ func (c *CommandRouterCtx) Bind(data interface{}) error {
 			}
 			fmt.Printf("setting %s to %d\n", field.Name, optionVal.Int())
 			fieldPointer.Set(optionVal)
-		case objects.TypeDouble:
+		case objects.TypeNumber:
 			if kind != reflect.Float64 {
 				return fmt.Errorf("option %s is a DoubleOption, but the struct type is not a float64", tagValue)
 			}

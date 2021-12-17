@@ -29,33 +29,32 @@ type DoubleChoice struct {
 	Value float64 `json:"value"`
 }
 
-func (c *commandBuilder) appendOption(type_ objects.ApplicationCommandOptionType, name, description string, required, default_ bool) CommandBuilder {
+func (c *commandBuilder) appendOption(type_ objects.ApplicationCommandOptionType, name, description string, required bool) CommandBuilder {
 	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
 		OptionType:  type_,
 		Name:        name,
 		Description: description,
 		Required:    required,
-		Default:     default_,
 	})
 	return c
 }
 
-func (c *commandBuilder) BoolOption(name, description string, required, default_ bool) CommandBuilder {
-	return c.appendOption(objects.TypeBoolean, name, description, required, default_)
+func (c *commandBuilder) BoolOption(name, description string, required bool) CommandBuilder {
+	return c.appendOption(objects.TypeBoolean, name, description, required)
 }
 
 func (c *commandBuilder) UserOption(name, description string, required bool) CommandBuilder {
-	return c.appendOption(objects.TypeUser, name, description, required, false)
+	return c.appendOption(objects.TypeUser, name, description, required)
 }
 
 func (c *commandBuilder) ChannelOption(name, description string, required bool) CommandBuilder {
-	return c.appendOption(objects.TypeChannel, name, description, required, false)
+	return c.appendOption(objects.TypeChannel, name, description, required)
 }
 
 func (c *commandBuilder) RoleOption(name, description string, required bool) CommandBuilder {
-	return c.appendOption(objects.TypeRole, name, description, required, false)
+	return c.appendOption(objects.TypeRole, name, description, required)
 }
 
 func (c *commandBuilder) MentionableOption(name, description string, required bool) CommandBuilder {
-	return c.appendOption(objects.TypeMentionable, name, description, required, false)
+	return c.appendOption(objects.TypeMentionable, name, description, required)
 }

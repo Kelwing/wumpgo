@@ -170,7 +170,7 @@ func (c *commandBuilder) DoubleOption(name, description string, required bool, c
 	}
 
 	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
-		OptionType:   objects.TypeDouble,
+		OptionType:   objects.TypeNumber,
 		Name:         name,
 		Description:  description,
 		Required:     required,
@@ -200,8 +200,8 @@ func (c textCommandBuilder) IntOption(name, description string, required bool, c
 	return c
 }
 
-func (c textCommandBuilder) BoolOption(name, description string, required, default_ bool) TextCommandBuilder {
-	c.commandBuilder.BoolOption(name, description, required, default_)
+func (c textCommandBuilder) BoolOption(name, description string, required bool) TextCommandBuilder {
+	c.commandBuilder.BoolOption(name, description, required)
 	return c
 }
 
@@ -259,8 +259,8 @@ func (c subcommandBuilder) IntOption(name, description string, required bool, ch
 	return c
 }
 
-func (c subcommandBuilder) BoolOption(name, description string, required, default_ bool) SubCommandBuilder {
-	c.commandBuilder.BoolOption(name, description, required, default_)
+func (c subcommandBuilder) BoolOption(name, description string, required bool) SubCommandBuilder {
+	c.commandBuilder.BoolOption(name, description, required)
 	return c
 }
 
@@ -348,7 +348,7 @@ type commandOptions interface {
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	BoolOption(name, description string, required, default_ bool) CommandBuilder
+	BoolOption(name, description string, required bool) CommandBuilder
 
 	// IntOption is used to define an option of the type user.
 	// Maps to option type 6 (USER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -382,7 +382,7 @@ type subCommandOptions interface {
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	BoolOption(name, description string, required, default_ bool) SubCommandBuilder
+	BoolOption(name, description string, required bool) SubCommandBuilder
 
 	// IntOption is used to define an option of the type user.
 	// Maps to option type 6 (USER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -416,7 +416,7 @@ type textCommandOptions interface {
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	BoolOption(name, description string, required, default_ bool) TextCommandBuilder
+	BoolOption(name, description string, required bool) TextCommandBuilder
 
 	// IntOption is used to define an option of the type user.
 	// Maps to option type 6 (USER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type

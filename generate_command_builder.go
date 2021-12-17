@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -63,7 +64,7 @@ func (c *commandBuilder) {{ .TypeName }}Option(name, description string, require
 	}
 
 	c.cmd.Options = append(c.cmd.Options, &objects.ApplicationCommandOption{
-		OptionType:   objects.Type{{ .TypeName }}{{ if eq .TypeName "Int" }}eger{{ end }},
+		OptionType:   objects.Type{{ .InteractionsTypeName }},
 		Name:         name,
 		Description:  description,
 		Required:     required,
@@ -93,8 +94,8 @@ func (c {{ .Struct }}) IntOption(name, description string, required bool, choice
 	return c
 }
 
-func (c {{ .Struct }}) BoolOption(name, description string, required, default_ bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.BoolOption(name, description, required, default_)
+func (c {{ .Struct }}) BoolOption(name, description string, required bool) {{ .BuilderType }}Builder {
+	c.commandBuilder.BoolOption(name, description, required)
 	return c
 }
 
@@ -149,7 +150,7 @@ const optionInterface = `type {{ .OutputInterface }} interface {
 
 	// IntOption is used to define an option of the type bool.
 	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	BoolOption(name, description string, required, default_ bool) {{ .InterfaceName }}
+	BoolOption(name, description string, required bool) {{ .InterfaceName }}
 
 	// IntOption is used to define an option of the type user.
 	// Maps to option type 6 (USER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
@@ -173,20 +174,24 @@ const optionInterface = `type {{ .OutputInterface }} interface {
 }`
 
 var choiceTypes = []struct {
-	TypeName   string
-	ImportName string
+	TypeName             string
+	InteractionsTypeName string
+	ImportName           string
 }{
 	{
-		TypeName:   "String",
-		ImportName: "StringChoice",
+		TypeName:             "String",
+		InteractionsTypeName: "String",
+		ImportName:           "StringChoice",
 	},
 	{
-		TypeName:   "Int",
-		ImportName: "IntChoice",
+		TypeName:             "Int",
+		InteractionsTypeName: "Integer",
+		ImportName:           "IntChoice",
 	},
 	{
-		TypeName:   "Double",
-		ImportName: "DoubleChoice",
+		TypeName:             "Double",
+		InteractionsTypeName: "Number",
+		ImportName:           "DoubleChoice",
 	},
 }
 
