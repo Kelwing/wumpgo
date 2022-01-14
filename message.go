@@ -156,6 +156,8 @@ type Component struct {
 	MaxValues *int             `json:"max_values,omitempty"`
 	MinLength *int             `json:"min_length,omitempty"`
 	MaxLength *int             `json:"max_length,omitempty"`
+	Value     string           `json:"value,omitempty"`
+	Required  bool             `json:"required,omitempty"`
 	Options   []*SelectOptions `json:"options,omitempty"`
 }
 
