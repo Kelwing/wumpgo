@@ -150,6 +150,8 @@ type Interaction struct {
 	Token         string          `json:"token"`
 	Message       *Message        `json:"message,omitempty"`
 	Version       int             `json:"version,omitempty"`
+	Locale        string          `json:"locale"`
+	GuildLocale   string          `json:"guild_locale"`
 }
 
 type InteractionApplicationCommandCallbackData struct {
