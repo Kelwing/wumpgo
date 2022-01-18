@@ -35,12 +35,15 @@ func (s *Snowflake) UnmarshalJSON(bytes []byte) error {
 }
 
 func (s Snowflake) MarshalJSON() ([]byte, error) {
-	snowString := strconv.Itoa(int(s))
-	return json.Marshal(snowString)
+	return json.Marshal(s.String())
 }
 
 // CreatedAt returns a time.Time representing the time a Snowflake was created
 func (s Snowflake) CreatedAt() time.Time {
 	timestampMs := (int64(s) >> 22) + DiscordEpoch
 	return time.Unix(0, timestampMs*int64(time.Millisecond))
+}
+
+func (s Snowflake) String() string {
+	return strconv.FormatUint(uint64(s), 10)
 }
