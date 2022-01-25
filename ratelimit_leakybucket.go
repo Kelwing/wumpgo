@@ -126,14 +126,14 @@ func parseRoute(path string) string {
 	splitPath := strings.Split(path, "/")
 	includeNext := true
 	routeKeyParts := []string{}
-	for _, c := range splitPath[2:] {
+	for _, c := range splitPath[3:] {
 		isSnowflake := snowRe.MatchString(c)
 		if isSnowflake && includeNext {
 			routeKeyParts = append(routeKeyParts, c)
 			includeNext = false
 		} else if !isSnowflake {
 			routeKeyParts = append(routeKeyParts, c)
-			if c == "channel" || c == "guild" || c == "webhooks" {
+			if c == "channels" || c == "guilds" || c == "webhooks" {
 				includeNext = true
 			}
 		}
