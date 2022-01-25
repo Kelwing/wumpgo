@@ -67,9 +67,9 @@ func (c *Client) ModifyCurrentUser(params *ModifyCurrentUserParams) (*objects.Us
 }
 
 type CurrentUserGuildsParams struct {
-	Before objects.Snowflake `json:"before,omitempty"`
-	After  objects.Snowflake `json:"after,omitempty"`
-	Limit  int               `json:"limit,omitempty"`
+	Before objects.Snowflake `url:"before,omitempty"`
+	After  objects.Snowflake `url:"after,omitempty"`
+	Limit  int               `url:"limit,omitempty"`
 }
 
 func (c *Client) GetCurrentUserGuilds(params *CurrentUserGuildsParams) ([]*objects.Guild, error) {
