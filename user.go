@@ -96,6 +96,19 @@ func (c *Client) GetCurrentUserGuilds(params *CurrentUserGuildsParams) ([]*objec
 	return guilds, err
 }
 
+func (c *Client) GetCurrentUserGuildMember(guild objects.Snowflake) (*objects.GuildMember, error) {
+	member := &objects.GuildMember{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		Path(fmt.Sprintf(UsersMeGuildMember, guild)).
+		Expect(http.StatusOK).
+		ContentType(JsonContentType).
+		Bind(member).
+		Send(c)
+
+	return member, err
+}
+
 func (c *Client) LeaveGuild(guild objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).

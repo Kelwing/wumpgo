@@ -82,13 +82,14 @@ const (
 	GuildTemplatesFmt = GuildTemplateFmt + "/%s"
 
 	// Users
-	UsersFmt        = BaseURL + "/users"
-	UsersMeFmt      = UsersFmt + "/@me"
-	UsersMeGuilds   = UsersMeFmt + "/guilds"
-	UsersMeGuild    = UsersMeGuilds + "/%d"
-	UsersMeChannels = UsersMeFmt + "/channels"
-	UserFmt         = UsersFmt + "/%d"
-	UserConnections = UsersMeFmt + "/connections"
+	UsersFmt           = BaseURL + "/users"
+	UsersMeFmt         = UsersFmt + "/@me"
+	UsersMeGuilds      = UsersMeFmt + "/guilds"
+	UsersMeGuild       = UsersMeGuilds + "/%d"
+	UsersMeGuildMember = UsersMeGuild + "/member"
+	UsersMeChannels    = UsersMeFmt + "/channels"
+	UserFmt            = UsersFmt + "/%d"
+	UserConnections    = UsersMeFmt + "/connections"
 
 	// Voice
 	VoiceRegions = BaseURL + "/voice/regions"
