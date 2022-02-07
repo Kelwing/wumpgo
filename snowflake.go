@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var _ SnowflakeObject = (*Snowflake)(nil)
+
 const (
 	DiscordEpoch = 1420070400000
 )
@@ -39,11 +41,15 @@ func (s Snowflake) MarshalJSON() ([]byte, error) {
 }
 
 // CreatedAt returns a time.Time representing the time a Snowflake was created
-func (s Snowflake) CreatedAt() time.Time {
+func (s Snowflake) CreatedAt() Time {
 	timestampMs := (int64(s) >> 22) + DiscordEpoch
-	return time.Unix(0, timestampMs*int64(time.Millisecond))
+	return Time{time.Unix(0, timestampMs*int64(time.Millisecond))}
 }
 
 func (s Snowflake) String() string {
 	return strconv.FormatUint(uint64(s), 10)
+}
+
+func (s Snowflake) GetID() Snowflake {
+	return s
 }

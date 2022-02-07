@@ -1,5 +1,10 @@
 package objects
 
+//go:generate stringer -type UserFlags,PremiumType,ActivityType,ActivityFlag -output user_string.go
+
+var _ Mentionable = (*User)(nil)
+var _ SnowflakeObject = (*User)(nil)
+
 type UserFlags uint
 
 const UserFlagsNone = UserFlags(0)
@@ -13,12 +18,15 @@ const (
 	HouseBalance
 	EarlySupporter
 	TeamUser
-
-	System          = 1 << 12
-	BugHunterLevel2 = 1 << 14
-
-	VerifiedBot               = 1 << 16
-	EarlyVerifiedBotDeveloper = 1 << 17
+	_
+	_
+	_
+	System
+	_
+	BugHunterLevel2
+	_
+	VerifiedBot
+	EarlyVerifiedBotDeveloper
 )
 
 type PremiumType uint
@@ -51,7 +59,7 @@ const (
 )
 
 type User struct {
-	ID            Snowflake   `json:"id"`
+	DiscordBaseObject
 	Username      string      `json:"username"`
 	Discriminator string      `json:"discriminator"`
 	Avatar        string      `json:"avatar,omitempty"`
@@ -66,6 +74,10 @@ type User struct {
 	Flags         UserFlags   `json:"flags"`
 	PremiumType   PremiumType `json:"premium_type,omitempty"`
 	PublicFlags   UserFlags   `json:"public_flags,omitempty"`
+}
+
+func (u *User) Mention() string {
+	return "<@" + u.ID.String() + ">"
 }
 
 type PresenceUpdate struct {

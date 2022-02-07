@@ -1,5 +1,7 @@
 package objects
 
+//go:generate stringer -type=AuditLogEvent -trimprefix=AuditLogEvent -output audit_log_string.go
+
 type AuditLogEvent uint
 
 const (

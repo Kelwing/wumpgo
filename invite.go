@@ -1,11 +1,13 @@
 package objects
 
+//go:generate stringer -type=InviteTargetType -trimprefix=InviteTargetType -output invite_string.go
+
 // https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 type InviteTargetType int
 
 const (
-	InviteTargetType_STREAM InviteTargetType = iota + 1
-	InviteTargetType_EMBEDDED_APPLICATION
+	InviteTargetTypeStream InviteTargetType = iota + 1
+	InviteTargetTypeEmbeddedApplication
 )
 
 // Invite represents a code that when used, adds a user to a guild or group DM channel.

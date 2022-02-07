@@ -1,14 +1,18 @@
 package objects
 
+//go:generate stringer -type=PrivacyLevel -trimprefix=PrivacyLevel -output stage_string.go
+
+var _ SnowflakeObject = (*StageInstance)(nil)
+
 type PrivacyLevel int
 
 const (
-	PrivacyLevel_PUBLIC = iota + 1
-	PrivacyLevel_GUILD_ONLY
+	PrivacyLevelPublic PrivacyLevel = iota + 1
+	PrivacyLevelGuildOnly
 )
 
 type StageInstance struct {
-	ID                   Snowflake    `json:"id"`
+	DiscordBaseObject
 	GuildID              Snowflake    `json:"guild_id"`
 	ChannelID            Snowflake    `json:"channel_id"`
 	Topic                string       `json:"topic"`

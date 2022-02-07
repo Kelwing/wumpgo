@@ -1,12 +1,24 @@
 package objects
 
+//go:generate stringer -type=ApplicationCommandOptionType,InteractionType,ResponseType,ApplicationCommandType,ButtonStyle,ComponentType,TextStyle,ApplicationCommandPermissionType -output interactions_string.go
+
 import "encoding/json"
 
+var _ SnowflakeObject = (*ApplicationCommand)(nil)
+var _ SnowflakeObject = (*Interaction)(nil)
+var _ SnowflakeObject = (*GuildApplicationCommandPermissions)(nil)
+var _ SnowflakeObject = (*ApplicationCommandPermissions)(nil)
+var _ SnowflakeObject = (*ApplicationCommandInteractionData)(nil)
+
 type (
-	ApplicationCommandOptionType int
-	InteractionType              int
-	ResponseType                 int
-	ApplicationCommandType       int
+	ApplicationCommandOptionType     int
+	InteractionType                  int
+	ResponseType                     int
+	ApplicationCommandType           int
+	ButtonStyle                      int
+	ComponentType                    int
+	TextStyle                        int
+	ApplicationCommandPermissionType int
 )
 
 type HandlerFunc func(data *Interaction) *InteractionResponse
@@ -53,16 +65,35 @@ const (
 	ResponseModal
 )
 
-type ApplicationCommandPermissionType int
-
 const (
 	PermissionTypeRole ApplicationCommandPermissionType = iota + 1
 	PermissionTypeUser
 )
 
+const (
+	ButtonStylePrimary ButtonStyle = iota + 1
+	ButtonStyleSecondary
+	ButtonStyleSuccess
+	ButtonStyleDanger
+	ButtonStyleLink
+)
+
+const (
+	TextStyleShort TextStyle = iota + 1
+	TextStyleParagraph
+)
+
+const (
+	ComponentTypeActionRow ComponentType = iota + 1
+	ComponentTypeButton
+	ComponentTypeSelectMenu
+	// ComponentTypeInputText is only usable in modals
+	ComponentTypeInputText
+)
+
 type ApplicationCommand struct {
 	// ID is the unique id of the command
-	ID Snowflake `json:"id,omitempty"`
+	DiscordBaseObject
 	// Type is	the type of command, defaults 1 if not set
 	Type *ApplicationCommandType `json:"type,omitempty"`
 	// Application ID is the unique id of the parent application
@@ -100,14 +131,14 @@ type ApplicationCommandOptionChoice struct {
 }
 
 type GuildApplicationCommandPermissions struct {
-	ID            Snowflake                       `json:"id"`
+	DiscordBaseObject
 	ApplicationID Snowflake                       `json:"application_id"`
 	GuildID       Snowflake                       `json:"guild_id"`
 	Permissions   []ApplicationCommandPermissions `json:"permissions"`
 }
 
 type ApplicationCommandPermissions struct {
-	ID         Snowflake                        `json:"id"`
+	DiscordBaseObject
 	Type       ApplicationCommandPermissionType `json:"type"`
 	Permission bool                             `json:"permission"`
 }
@@ -121,7 +152,7 @@ type ApplicationCommandInteractionDataOption struct {
 }
 
 type ApplicationCommandInteractionData struct {
-	ID       Snowflake                                  `json:"id"`
+	DiscordBaseObject
 	Name     string                                     `json:"name"`
 	Type     ApplicationCommandType                     `json:"type"`
 	Version  Snowflake                                  `json:"version"`
@@ -139,7 +170,7 @@ type ApplicationCommandInteractionDataResolved struct {
 }
 
 type Interaction struct {
-	ID            Snowflake       `json:"id"`
+	DiscordBaseObject
 	ApplicationID Snowflake       `json:"application_id"`
 	Type          InteractionType `json:"type"`
 	Data          json.RawMessage `json:"data,omitempty"`
@@ -172,16 +203,6 @@ type InteractionResponse struct {
 	Data *InteractionApplicationCommandCallbackData `json:"data,omitempty"`
 }
 
-type ComponentType int
-
-const (
-	ComponentTypeActionRow = iota + 1
-	ComponentTypeButton
-	ComponentTypeSelectMenu
-	// ComponentTypeInputText is only usable in modals
-	ComponentTypeInputText
-)
-
 type ApplicationComponentInteractionData struct {
 	CustomID      string        `json:"custom_id"`
 	ComponentType ComponentType `json:"component_type"`
@@ -200,21 +221,30 @@ type InteractionResponseComponent struct {
 	Components []*InteractionResponseComponent `json:"components,omitempty"`
 }
 
-type ButtonStyle int
+type Component struct {
+	Type        ComponentType    `json:"type"`
+	CustomID    string           `json:"custom_id,omitempty"`
+	Disabled    bool             `json:"disabled,omitempty"`
+	Label       string           `json:"label,omitempty"`
+	Style       ButtonStyle      `json:"style,omitempty"`
+	Emoji       *Emoji           `json:"emoji,omitempty"`
+	URL         string           `json:"url,omitempty"`
+	Options     []*SelectOptions `json:"options,omitempty"`
+	Placeholder string           `json:"placeholder,omitempty"`
+	// Must be a pointer, discord assumes omitted value = 1
+	MinValues  *int         `json:"min_values,omitempty"`
+	MaxValues  *int         `json:"max_values,omitempty"`
+	MinLength  *int         `json:"min_length,omitempty"`
+	MaxLength  *int         `json:"max_length,omitempty"`
+	Value      string       `json:"value,omitempty"`
+	Required   bool         `json:"required,omitempty"`
+	Components []*Component `json:"components,omitempty"`
+}
 
-const (
-	ButtonStylePrimary = iota + 1
-	ButtonStyleSecondary
-	ButtonStyleSuccess
-	ButtonStyleDanger
-	ButtonStyleLink
-)
-
-type TextStyle int
-
-const (
-	TextStyleShort = iota + 1
-	TextStyleParagraph
-)
-
-type Style int
+type SelectOptions struct {
+	Label       string `json:"label"`
+	Value       string `json:"value"`
+	Description string `json:"description,omitempty"`
+	Emoji       *Emoji `json:"emoji,omitempty"`
+	Default     bool   `json:"default"`
+}

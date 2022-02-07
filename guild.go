@@ -1,5 +1,15 @@
 package objects
 
+import "github.com/Postcord/objects/permissions"
+
+var _ SnowflakeObject = (*Guild)(nil)
+var _ SnowflakeObject = (*UnavailableGuild)(nil)
+var _ SnowflakeObject = (*GuildPreview)(nil)
+var _ SnowflakeObject = (*WidgetUser)(nil)
+var _ SnowflakeObject = (*GuildWidgetJSON)(nil)
+
+//go:generate stringer -type=VerificationLevel,MessageNotificationsLevel,ExplicitContentFilterLevel,MFALevel,PremiumTierLevel,SystemChannelFlags,GuildNSFWLevel -output guild_string.go
+
 type VerificationLevel uint
 
 const (
@@ -28,20 +38,28 @@ const (
 type GuildFeature string
 
 const (
-	GuildFeatureInviteSplash GuildFeature = "INVITE_SPLASH"
-	GuildFeatureVIPRegions   GuildFeature = "VIP_REGIONS"
-	GuildFeatureVanityURl    GuildFeature = "VANITY_URL"
-
-	GuildFeatureVerified             GuildFeature = "VERIFIED"
-	GuildFeaturePartnered            GuildFeature = "PARTNERED"
-	GuildFeatureCommunity            GuildFeature = "COMMUNITY"
-	GuildFeatureCommerce             GuildFeature = "COMMERCE"
-	GuildFeatureNews                 GuildFeature = "NEWS"
-	GuildFeatureDiscoverable         GuildFeature = "DISCOVERABLE"
-	GuildFeatureFeaturable           GuildFeature = "FEATURABLE"
-	GuildFeatureAnimatedIcon         GuildFeature = "ANIMATED_ICON"
-	GuildFeatureBanner               GuildFeature = "BANNER"
-	GuildFeatureWelcomeScreenEnabled GuildFeature = "WELCOME_SCREEN_ENABLED"
+	GuildFeatureAnimatedIcon                  GuildFeature = "ANIMATED_ICON"
+	GuildFeatureBanner                        GuildFeature = "BANNER"
+	GuildFeatureCommerce                      GuildFeature = "COMMERCE"
+	GuildFeatureCommunity                     GuildFeature = "COMMUNITY"
+	GuildFeatureDiscoverable                  GuildFeature = "DISCOVERABLE"
+	GuildFeatureFeaturable                    GuildFeature = "FEATURABLE"
+	GuildFeatureInviteSplash                  GuildFeature = "INVITE_SPLASH"
+	GuildFeatureMemberVerificationGateEnabled GuildFeature = "MEMBER_VERIFICATION_GATE_ENABLED"
+	GuildFeatureMonetizationEnabled           GuildFeature = "MONETIZATION_ENABLED"
+	GuildFeatureMoreStickers                  GuildFeature = "MORE_STICKERS"
+	GuildFeatureNews                          GuildFeature = "NEWS"
+	GuildFeaturePartnered                     GuildFeature = "PARTNERED"
+	GuildFeaturePreviewEnabled                GuildFeature = "PREVIEW_ENABLED"
+	GuildFeaturePrivateThreads                GuildFeature = "PRIVATE_THREADS"
+	GuildFeatureRoleIcons                     GuildFeature = "ROLE_ICONS"
+	GuildFeatureSevenDayThreadArchive         GuildFeature = "SEVEN_DAY_THREAD_ARCHIVE"
+	GuildFeatureThreeDayThreadArchive         GuildFeature = "THREE_DAY_THREAD_ARCHIVE"
+	GuildFeatureTicketedEventsEnabled         GuildFeature = "TICKETED_EVENTS_ENABLED"
+	GuildFeatureVanityURL                     GuildFeature = "VANITY_URL"
+	GuildFeatureVerified                      GuildFeature = "VERIFIED"
+	GuildFeatureVIPRegions                    GuildFeature = "VIP_REGIONS"
+	GuildFeatureWelcomeScreenEnabled          GuildFeature = "WELCOME_SCREEN_ENABLED"
 )
 
 type MFALevel uint
@@ -67,8 +85,17 @@ const (
 	FlagSupressPremiumSubscriptions
 )
 
+type GuildNSFWLevel int
+
+const (
+	GuildNSFWLevelDefault GuildNSFWLevel = iota
+	GuildNSFWLevelExplicit
+	GuildNSFWLevelSafe
+	GuildNSFWLevelAgeRestricted
+)
+
 type Guild struct {
-	ID                          Snowflake                  `json:"id"`
+	DiscordBaseObject
 	Name                        string                     `json:"name"`
 	Icon                        string                     `json:"icon,omitempty"`
 	IconHash                    string                     `json:"icon_hash,omitempty"`
@@ -76,7 +103,7 @@ type Guild struct {
 	DiscoverySplash             string                     `json:"discovery_splash,omitempty"`
 	Owner                       bool                       `json:"owner,omitempty"`
 	OwnerID                     Snowflake                  `json:"owner_id"`
-	Permissions                 PermissionBit              `json:"permissions,omitempty"`
+	Permissions                 permissions.PermissionBit  `json:"permissions,omitempty"`
 	Region                      string                     `json:"region"`
 	AFKChannelID                Snowflake                  `json:"afk_channel_id,omitempty"`
 	AFKTimeout                  int                        `json:"afk_timeout,omitempty"`
@@ -113,15 +140,19 @@ type Guild struct {
 	MaxVideoChannelUsers        int                        `json:"max_video_channel_users,omitempty"`
 	ApproximateMemberCount      int                        `json:"approximate_member_count,omitempty"`
 	ApproximatePresenceCount    int                        `json:"approximate_presence_count,omitempty"`
+	WelcomeScreen               *WelcomeScreen             `json:"welcome_screen,omitempty"`
+	NSFWLevel                   GuildNSFWLevel             `json:"nsfw_level"`
+	StageInstances              []*StageInstance           `json:"stage_instances,omitempty"`
+	Stickers                    []*Sticker                 `json:"stickers"`
 }
 
-type GuildUnavailable struct {
-	ID          Snowflake `json:"id"`
-	Unavailable bool      `json:"unavailable"`
+type UnavailableGuild struct {
+	DiscordBaseObject
+	Unavailable bool `json:"unavailable"`
 }
 
 type GuildPreview struct {
-	ID                       Snowflake      `json:"id"`
+	DiscordBaseObject
 	Name                     string         `json:"name"`
 	Icon                     string         `json:"icon,omitempty"`
 	Splash                   string         `json:"splash,omitempty"`
@@ -134,15 +165,15 @@ type GuildPreview struct {
 }
 
 type WidgetUser struct {
-	ID            Snowflake `json:"id"`
-	Username      string    `json:"username"`
-	Discriminator string    `json:"discriminator"`
-	Status        string    `json:"status"`
-	AvatarURL     string    `json:"avatar_url"`
+	DiscordBaseObject
+	Username      string `json:"username"`
+	Discriminator string `json:"discriminator"`
+	Status        string `json:"status"`
+	AvatarURL     string `json:"avatar_url"`
 }
 
 type GuildWidgetJSON struct {
-	ID            Snowflake     `json:"id"`
+	DiscordBaseObject
 	Name          string        `json:"name"`
 	Channels      []*Channel    `json:"channels"`
 	Members       []*WidgetUser `json:"members"`

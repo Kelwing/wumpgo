@@ -1,5 +1,9 @@
 package objects
 
+//go:generate stringer -type=WebhookType -output webhook_string.go
+
+var _ SnowflakeObject = (*Webhook)(nil)
+
 // https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-types
 type WebhookType uint
 
@@ -10,9 +14,7 @@ const (
 
 // https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 type Webhook struct {
-
-	// the id of the webhook
-	ID Snowflake `json:"id"`
+	DiscordBaseObject
 
 	// the type of the webhook
 	Type WebhookType `json:"type"`

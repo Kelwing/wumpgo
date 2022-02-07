@@ -88,8 +88,8 @@ type (
 	}
 
 	GuildStickersUpdate struct {
-		GuildID  Snowflake         `json:"guild_id"`
-		Stickers []*MessageSticker `json:"stickers"`
+		GuildID  Snowflake  `json:"guild_id"`
+		Stickers []*Sticker `json:"stickers"`
 	}
 
 	GuildIntegrationsUpdate struct {

@@ -1,5 +1,11 @@
 package objects
 
+//go:generate stringer -type=ChannelType -trimprefix=ChannelType -output channel_string.go
+
+var _ Mentionable = (*Channel)(nil)
+var _ SnowflakeObject = (*Channel)(nil)
+var _ SnowflakeObject = (*ThreadMember)(nil)
+
 type ChannelType uint
 
 const (
@@ -20,7 +26,7 @@ type PermissionOverwrite struct {
 }
 
 type Channel struct {
-	ID                         Snowflake             `json:"id"`
+	DiscordBaseObject
 	Type                       ChannelType           `json:"type"`
 	GuildID                    Snowflake             `json:"guild_id,omitempty"`
 	Position                   int                   `json:"position,omitempty"`
@@ -48,6 +54,10 @@ type Channel struct {
 	Permissions                *string               `json:"permissions,omitempty"`
 }
 
+func (c *Channel) Mention() string {
+	return "<#" + c.GetID().String() + ">"
+}
+
 type AllowedMentions struct {
 	Parse       []string    `json:"parse"`
 	Roles       []Snowflake `json:"roles,omitempty"`
@@ -61,7 +71,7 @@ type FollowedChannel struct {
 }
 
 type ThreadMember struct {
-	ID       Snowflake `json:"id"`
+	DiscordBaseObject
 	UserID   Snowflake `json:"user_id"`
 	JoinedAt Time      `json:"join_timestamp"`
 	Flags    uint      `json:"flags"`
