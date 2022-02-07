@@ -1,29 +1,21 @@
 package commanderrors
 
 import (
-	"runtime/debug"
-
 	"github.com/Postcord/objects"
+	"github.com/rs/zerolog"
 )
 
-type ErrorLogger interface {
-	Errorf(format string, args ...interface{})
-}
-
-func ErrorHandler(logger ...ErrorLogger) func(err error) *objects.InteractionResponse {
+func ErrorHandler(logger zerolog.Logger) func(err error) *objects.InteractionResponse {
 	return func(err error) *objects.InteractionResponse {
 		data := &objects.InteractionApplicationCommandCallbackData{
-			Flags: int(objects.MsgFlagEphemeral),
+			Flags: objects.MsgFlagEphemeral,
 		}
 
 		switch err.(type) {
 		case CommandError:
 			data.Content = err.Error()
 		default:
-			if len(logger) > 0 {
-				logger[0].Errorf("%s\n", debug.Stack())
-				logger[0].Errorf("%+v\n", err)
-			}
+			logger.Error().Err(err).Stack().Msg("unhandled error")
 			data.Content = "An unknown error occurred"
 		}
 		return &objects.InteractionResponse{
