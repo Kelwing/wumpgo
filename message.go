@@ -127,12 +127,15 @@ type MessageApplication struct {
 
 type Attachment struct {
 	DiscordBaseObject
-	Filename string `json:"filename"`
-	Size     int    `json:"size"`
-	URL      string `json:"url"`
-	ProxyURL string `json:"proxy_url"`
-	Height   int    `json:"height,omitempty"`
-	Width    int    `json:"width,omitempty"`
+	Filename    string `json:"filename,omitempty"`
+	Description string `json:"description,omitempty"`
+	ContentType string `json:"content_type,omitempty"`
+	Size        int    `json:"size,omitempty"`
+	URL         string `json:"url,omitempty"`
+	ProxyURL    string `json:"proxy_url,omitempty"`
+	Height      int    `json:"height,omitempty"`
+	Width       int    `json:"width,omitempty"`
+	Ephemeral   bool   `json:"ephemeral,omitempty"`
 }
 
 type ChannelMention struct {

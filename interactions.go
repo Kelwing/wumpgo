@@ -192,6 +192,8 @@ type InteractionApplicationCommandCallbackData struct {
 	AllowedMentions *AllowedMentions                  `json:"allowed_mentions,omitempty"`
 	Flags           MessageFlag                       `json:"flags,omitempty"`
 	Components      []*Component                      `json:"components"`
+	Attachments     []*Attachment                     `json:"attachments,omitempty"`
+	Files           []*DiscordFile                    `json:"-"`
 	Choices         []*ApplicationCommandOptionChoice `json:"choices,omitempty"`
 	// Data for modal response
 	CustomID string `json:"custom_id,omitempty"`
