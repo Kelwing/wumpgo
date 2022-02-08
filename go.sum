@@ -6,8 +6,12 @@ github.com/CloudyKit/jet/v3 v3.0.0/go.mod h1:HKQPgSJmdK8hdoAbKUUWajkHyHo4RaU5rMd
 github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKzY=
 github.com/Postcord/objects v0.1.1 h1:Az8+G2c6LWAIW3UEKW1zFq4BYKzk5FBtyKtIiufczcQ=
 github.com/Postcord/objects v0.1.1/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
+github.com/Postcord/objects v0.1.2-0.20220208220900-6d07594d962a h1:ZE1kOGMqpJ8BiSID42gZIjCN78KcaZGVziB0c+tAW5U=
+github.com/Postcord/objects v0.1.2-0.20220208220900-6d07594d962a/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
 github.com/Postcord/rest v0.1.1 h1:6IZiFNS321tQhCym25kEqbNyjweMiYx/Qd88ZksVMU4=
 github.com/Postcord/rest v0.1.1/go.mod h1:dKe+ng5rgLodGuY8ZoVUtqRdGHHvUntcIkXVX0UCuvo=
+github.com/Postcord/rest v0.1.2-0.20220208224348-e8eba7748754 h1:xXql2eNVd0CP0KsSfeaihCy7/9k+lIbhT9knTucQRF4=
+github.com/Postcord/rest v0.1.2-0.20220208224348-e8eba7748754/go.mod h1:rd1cYYHgmtTI+8aHX0kPNBN261857OfbwPisPAMlH4U=
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398/go.mod h1:a1uqRtAwp2Xwc6WNPJEufxJ7fx3npB4UV/JOLmbu5I0=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/andybalholm/brotli v1.0.0/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
