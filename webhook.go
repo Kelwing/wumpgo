@@ -5,11 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/Postcord/objects"
 	"github.com/google/go-querystring/query"
@@ -191,17 +189,20 @@ func (c *Client) DeleteWebhookWithToken(ctx context.Context, id objects.Snowflak
 }
 
 type ExecuteWebhookParams struct {
-	Wait bool `json:"-" url:"wait"`
+	Wait     bool              `json:"-" url:"wait"`
+	ThreadID objects.Snowflake `json:"-" url:"thread_id,omitempty"`
 
-	Content   string                     `json:"content,omitempty" url:"-"`
-	Username  string                     `json:"username,omitempty" url:"-"`
-	AvatarURL string                     `json:"avatar_url,omitempty" url:"-"`
-	TTS       bool                       `json:"tts,omitempty" url:"-"`
-	Files     []*CreateMessageFileParams `json:"-" url:"-"`
-	Embeds    []*objects.Embed           `json:"embeds,omitempty" url:"-"`
+	Content   string                 `json:"content,omitempty" url:"-"`
+	Username  string                 `json:"username,omitempty" url:"-"`
+	AvatarURL string                 `json:"avatar_url,omitempty" url:"-"`
+	TTS       bool                   `json:"tts,omitempty" url:"-"`
+	Files     []*objects.DiscordFile `json:"-" url:"-"`
+	Embeds    []*objects.Embed       `json:"embeds,omitempty" url:"-"`
 
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions,omitempty" url:"-"`
-	Components      []*objects.Component     `json:"components,omitempty"`
+	Components      []*objects.Component     `json:"components,omitempty" url:"-"`
+	Attachments     []*objects.Attachment    `json:"attachments,omitempty" url:"-"`
+	Flags           objects.MessageFlag      `json:"flags,omitempty" url:"-"`
 }
 
 func (c *Client) ExecuteWebhook(ctx context.Context, id objects.SnowflakeObject, token string, params *ExecuteWebhookParams) (*objects.Message, error) {
@@ -212,35 +213,23 @@ func (c *Client) ExecuteWebhook(ctx context.Context, id objects.SnowflakeObject,
 		buffer := new(bytes.Buffer)
 		m := multipart.NewWriter(buffer)
 
-		b, err := json.Marshal(params)
-		if err != nil {
-			return nil, err
+		for n, file := range params.Files {
+			a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+			if err != nil {
+				continue
+			}
+			params.Attachments = append(params.Attachments, a)
 		}
 
-		if field, err := m.CreateFormField("payload_json"); err != nil {
+		if w, err := m.CreateFormField("payload_json"); err != nil {
 			return nil, err
 		} else {
-			if _, err = field.Write(b); err != nil {
-				return nil, err
-			}
-		}
-
-		for n, file := range params.Files {
-			if file.Spoiler && !strings.HasPrefix(file.Filename, "SPOILER_") {
-				file.Filename = "SPOILER_" + file.Filename
-			}
-
-			w, err := m.CreateFormFile(fmt.Sprintf("file%d", n), file.Filename)
-			if err != nil {
-				return nil, err
-			}
-
-			if _, err = io.Copy(w, file.Reader); err != nil {
+			if err := json.NewEncoder(w).Encode(params); err != nil {
 				return nil, err
 			}
 		}
 		contentType = m.FormDataContentType()
-		if err = m.Close(); err != nil {
+		if err := m.Close(); err != nil {
 			return nil, err
 		}
 		body = buffer.Bytes()

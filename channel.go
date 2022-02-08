@@ -5,11 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/Postcord/objects"
 	"github.com/Postcord/objects/permissions"
@@ -423,21 +421,17 @@ func (c *Client) DeletePinnedMessage(ctx context.Context, channel, message objec
 		Send(c)
 }
 
-type CreateMessageFileParams struct {
-	Reader   io.Reader
-	Filename string
-	Spoiler  bool
-}
-
 type CreateMessageParams struct {
-	Content          string                     `json:"content,omitempty"`
-	Nonce            string                     `json:"nonce,omitempty"`
-	TTS              bool                       `json:"tts,omitempty"`
-	Files            []*CreateMessageFileParams `json:"-"`
-	Embed            *objects.Embed             `json:"embed,omitempty"`
-	AllowedMentions  *objects.AllowedMentions   `json:"allowed_mentions,omitempty"`
-	MessageReference *objects.MessageReference  `json:"message_reference,omitempty"`
-	Components       []*objects.Component       `json:"components,omitempty"`
+	Content          string                    `json:"content,omitempty"`
+	TTS              bool                      `json:"tts,omitempty"`
+	Embeds           []*objects.Embed          `json:"embeds,omitempty"`
+	AllowedMentions  *objects.AllowedMentions  `json:"allowed_mentions,omitempty"`
+	MessageReference *objects.MessageReference `json:"message_reference,omitempty"`
+	Components       []*objects.Component      `json:"components,omitempty"`
+	StickerIDs       []objects.Snowflake       `json:"sticker_ids,omitempty"`
+	Attachments      []*objects.Attachment     `json:"attachments,omitempty"`
+	Flags            objects.MessageFlag       `json:"flags,omitempty"`
+	Files            []*objects.DiscordFile    `json:"-"`
 }
 
 func (c *Client) CreateMessage(ctx context.Context, channel objects.SnowflakeObject, params *CreateMessageParams) (*objects.Message, error) {
@@ -448,34 +442,24 @@ func (c *Client) CreateMessage(ctx context.Context, channel objects.SnowflakeObj
 		buffer := new(bytes.Buffer)
 		m := multipart.NewWriter(buffer)
 
-		b, err := json.Marshal(params)
-		if err != nil {
-			return nil, err
+		for n, file := range params.Files {
+			a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+			if err != nil {
+				continue
+			}
+			params.Attachments = append(params.Attachments, a)
 		}
 
 		if w, err := m.CreateFormField("payload_json"); err != nil {
 			return nil, err
 		} else {
-			if _, err = w.Write(b); err != nil {
-				return nil, err
-			}
-		}
-
-		for n, file := range params.Files {
-			if file.Spoiler && !strings.HasPrefix(file.Filename, "SPOILER_") {
-				file.Filename = "SPOILER_" + file.Filename
-			}
-			w, err := m.CreateFormFile(fmt.Sprintf("file%d", n), file.Filename)
-			if err != nil {
-				return nil, err
-			}
-			if _, err = io.Copy(w, file.Reader); err != nil {
+			if err := json.NewEncoder(w).Encode(params); err != nil {
 				return nil, err
 			}
 		}
 
 		contentType = m.FormDataContentType()
-		if err = m.Close(); err != nil {
+		if err := m.Close(); err != nil {
 			return nil, err
 		}
 		body = buffer.Bytes()

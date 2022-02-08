@@ -5,28 +5,56 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/Postcord/objects"
 	"github.com/google/go-querystring/query"
 )
 
 func (c *Client) CreateInteractionResponse(ctx context.Context, interactionID objects.SnowflakeObject, token string, response *objects.InteractionResponse) error {
-	data, err := json.Marshal(response)
-	if err != nil {
-		return err
+	var contentType string
+	var body []byte
+
+	if len(response.Data.Files) > 0 {
+		buffer := new(bytes.Buffer)
+		m := multipart.NewWriter(buffer)
+
+		for n, file := range response.Data.Files {
+			a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+			if err != nil {
+				continue
+			}
+			response.Data.Attachments = append(response.Data.Attachments, a)
+		}
+
+		if w, err := m.CreateFormField("payload_json"); err != nil {
+			return err
+		} else {
+			if err := json.NewEncoder(w).Encode(response); err != nil {
+				return err
+			}
+		}
+		contentType = m.FormDataContentType()
+		if err := m.Close(); err != nil {
+			return err
+		}
+		body = buffer.Bytes()
+	} else {
+		contentType = JsonContentType
+		var err error
+		if body, err = json.Marshal(response); err != nil {
+			return err
+		}
 	}
 
 	return NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
 		Path(fmt.Sprintf(CreateInteractionResponseFmt, interactionID.GetID(), token)).
-		Body(data).
-		ContentType(JsonContentType).
+		Body(body).
+		ContentType(contentType).
 		OmitAuth().
 		Send(c)
 }
@@ -74,18 +102,15 @@ func (c *Client) DeleteOriginalInteractionResponse(ctx context.Context, applicat
 }
 
 type CreateFollowupMessageParams struct {
-	Wait bool `json:"-" url:"wait"`
-
-	Content   string                     `json:"content,omitempty" url:"-"`
-	Username  string                     `json:"username,omitempty" url:"-"`
-	AvatarURL string                     `json:"avatar_url,omitempty" url:"-"`
-	TTS       bool                       `json:"tts,omitempty" url:"-"`
-	Files     []*CreateMessageFileParams `json:"-" url:"-"`
-	Embeds    []*objects.Embed           `json:"embeds,omitempty" url:"-"`
-	Flags     int                        `json:"flags" url:"-"`
+	Content string                 `json:"content,omitempty" url:"-"`
+	TTS     bool                   `json:"tts,omitempty" url:"-"`
+	Files   []*objects.DiscordFile `json:"-" url:"-"`
+	Embeds  []*objects.Embed       `json:"embeds,omitempty" url:"-"`
 
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions,omitempty" url:"-"`
-	Components      []*objects.Component     `json:"components,omitempty"`
+	Components      []*objects.Component     `json:"components,omitempty" url:"-"`
+	Attachments     []*objects.Attachment    `json:"attachments,omitempty" url:"-"`
+	Flags           objects.MessageFlag      `json:"flags,omitempty" url:"-"`
 }
 
 func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, params *CreateFollowupMessageParams) (*objects.Message, error) {
@@ -96,35 +121,23 @@ func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID object
 		buffer := new(bytes.Buffer)
 		m := multipart.NewWriter(buffer)
 
-		b, err := json.Marshal(params)
-		if err != nil {
-			return nil, err
+		for n, file := range params.Files {
+			a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+			if err != nil {
+				continue
+			}
+			params.Attachments = append(params.Attachments, a)
 		}
 
-		if field, err := m.CreateFormField("payload_json"); err != nil {
+		if w, err := m.CreateFormField("payload_json"); err != nil {
 			return nil, err
 		} else {
-			if _, err = field.Write(b); err != nil {
-				return nil, err
-			}
-		}
-
-		for n, file := range params.Files {
-			if file.Spoiler && !strings.HasPrefix(file.Filename, "SPOILER_") {
-				file.Filename = "SPOILER_" + file.Filename
-			}
-
-			w, err := m.CreateFormFile(fmt.Sprintf("file%d", n), file.Filename)
-			if err != nil {
-				return nil, err
-			}
-
-			if _, err = io.Copy(w, file.Reader); err != nil {
+			if err := json.NewEncoder(w).Encode(params); err != nil {
 				return nil, err
 			}
 		}
 		contentType = m.FormDataContentType()
-		if err = m.Close(); err != nil {
+		if err := m.Close(); err != nil {
 			return nil, err
 		}
 		body = buffer.Bytes()
