@@ -22,6 +22,7 @@ type DefaultHTTPClient struct {
 }
 
 func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
+	l := zerolog.Ctx(req.ctx)
 	var reader io.Reader = nil
 	if req.body != nil {
 		reader = bytes.NewReader(req.body)
@@ -31,11 +32,7 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 	var err error
 
 	if req.ctx != nil {
-		l := zerolog.Ctx(req.ctx)
-		l.UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("method", req.method).Str("path", req.path)
-		})
-		l.Debug().Msg("request")
+		l.Debug().Str("method", req.method).Str("path", req.path).Msg("request")
 		rawReq, err = http.NewRequestWithContext(req.ctx, req.method, req.path, reader)
 	} else {
 		rawReq, err = http.NewRequest(req.method, req.path, reader)
@@ -62,7 +59,6 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 
 	resp, err := c.doer.Do(rawReq)
 	if err != nil {
-		l := zerolog.Ctx(resp.Request.Context())
 		l.Debug().Err(err).Msg("request failed")
 		return nil, err
 	}
@@ -72,11 +68,7 @@ func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
 		return nil, err
 	}
 
-	l := zerolog.Ctx(resp.Request.Context())
-	l.UpdateContext(func(c zerolog.Context) zerolog.Context {
-		return c.Int("status", resp.StatusCode)
-	})
-	l.Debug().Msg("response")
+	l.Debug().Int("status", resp.StatusCode).Msg("response")
 
 	return &DiscordResponse{
 		Body:       respBody,
