@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"sync"
 	"time"
@@ -141,10 +142,46 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 			return
 		}
 
-		err = jr.Encode(resp)
-		if err != nil {
-			a.logger.Error().Err(err).Msg("failed to write response")
+		switch resp.Type {
+		case objects.ResponseChannelMessageWithSource, objects.ResponseUpdateMessage:
+			if len(resp.Data.Files) > 0 {
+				m := multipart.NewWriter(w)
+				for n, file := range resp.Data.Files {
+					a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+					if err != nil {
+						continue
+					}
+					resp.Data.Attachments = append(resp.Data.Attachments, a)
+				}
+
+				if w, err := m.CreateFormField("payload_json"); err != nil {
+					break
+				} else {
+					if err := json.NewEncoder(w).Encode(resp); err != nil {
+						break
+					}
+				}
+				w.Header().Set("Content-Type", m.FormDataContentType())
+				if err := m.Close(); err != nil {
+					break
+				}
+				return
+			}
+			fallthrough
+		default:
+			err = jr.Encode(resp)
+			if err != nil {
+				a.logger.Error().Err(err).Msg("failed to write response")
+			}
+			return
 		}
+		_ = jr.Encode(objects.InteractionResponse{
+			Type: objects.ResponseChannelMessageWithSource,
+			Data: &objects.InteractionApplicationCommandCallbackData{
+				Content: "An unknown error occurred",
+				Flags:   objects.MsgFlagEphemeral,
+			},
+		})
 	})
 }
 
