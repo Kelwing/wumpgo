@@ -7,7 +7,7 @@ type SnowflakeObject interface {
 }
 
 type DiscordBaseObject struct {
-	ID Snowflake `json:"id"`
+	ID Snowflake `json:"id,omitempty"`
 }
 
 func (d DiscordBaseObject) GetID() Snowflake {
