@@ -63,6 +63,11 @@ const (
 	GuildMembershipScreeningFmt       = GuildBaseFmt + "/member-verification"
 	GuildThreadsFmt                   = GuildBaseFmt + "/threads/active"
 
+	// Scheduled Events
+	GuildScheduledEventBaseFmt  = GuildBaseFmt + "/scheduled-events"
+	GuildScheduledEventFmt      = GuildScheduledEventBaseFmt + "/%d"
+	GuildScheduledEventUsersFmt = GuildScheduledEventFmt + "/users"
+
 	// Roles
 	GuildMemberRoleFmt = GuildBaseFmt + "/members/%d/roles/%d"
 	GuildRolesFmt      = GuildBaseFmt + "/roles"
@@ -80,6 +85,12 @@ const (
 	TemplateFmt       = BaseURL + "/guilds/templates/%s"
 	GuildTemplateFmt  = BaseURL + "/guilds/%d/templates"
 	GuildTemplatesFmt = GuildTemplateFmt + "/%s"
+
+	// Stickers
+	StickerFmt       = BaseURL + "/stickers/%d"
+	NitroStickerFmt  = BaseURL + "/sticker-packs"
+	GuildStickersFmt = GuildBaseFmt + "/stickers"
+	GuildStickerFmt  = GuildStickersFmt + "/%d"
 
 	// Users
 	UsersFmt           = BaseURL + "/users"

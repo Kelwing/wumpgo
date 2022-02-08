@@ -24,7 +24,6 @@ type LeakyBucketRatelimiter struct {
 	sync.RWMutex
 	buckets  map[string]*rate.Limiter
 	routeMap map[string]string
-	logger   *zerolog.Logger
 }
 
 func (c *LeakyBucketRatelimiter) Request(httpClient HTTPClient, req *request) (*DiscordResponse, error) {
@@ -38,7 +37,7 @@ func (c *LeakyBucketRatelimiter) Request(httpClient HTTPClient, req *request) (*
 		if !res.OK() {
 			return nil, ErrMaxRetriesExceeded
 		}
-		c.logger.Warn().Msgf("Ratelimited request to %s, waiting %v", url.Path, res.Delay())
+		zerolog.Ctx(req.ctx).Debug().Msgf("Ratelimited request to %s, waiting %v", url.Path, res.Delay())
 		time.Sleep(res.Delay())
 	}
 
@@ -66,11 +65,10 @@ func (c *LeakyBucketRatelimiter) mappingExists(name string) bool {
 	return ok
 }
 
-func (c *LeakyBucketRatelimiter) addBucket(name string, r time.Duration, count int) {
+func (c *LeakyBucketRatelimiter) addBucket(name string, r int, count int) {
 	c.Lock()
 	defer c.Unlock()
-	c.logger.Debug().Msgf("Adding bucket %s with %d requests per %v seconds", name, count, r)
-	c.buckets[name] = rate.NewLimiter(rate.Every(r), count)
+	c.buckets[name] = rate.NewLimiter(rate.Limit(count/r), count)
 	// Reserve a ticket since we JUST made a request
 	c.buckets[name].Reserve()
 }
@@ -78,7 +76,6 @@ func (c *LeakyBucketRatelimiter) addBucket(name string, r time.Duration, count i
 func (c *LeakyBucketRatelimiter) addMapping(routeKey, bucket string) {
 	c.Lock()
 	defer c.Unlock()
-	c.logger.Debug().Msgf("Adding mapping %s to bucket %s", routeKey, bucket)
 	c.routeMap[routeKey] = bucket
 }
 
@@ -110,7 +107,7 @@ func (c *LeakyBucketRatelimiter) updateFromResponse(h http.Header, path string) 
 
 	if !c.bucketExists(bucket) {
 		// Upon first request, limit and resetAfter should be actual values
-		c.addBucket(bucket, time.Duration(reset)*time.Second, int(count))
+		c.addBucket(bucket, int(reset), int(count))
 	}
 
 	routeKey := parseRoute(path)

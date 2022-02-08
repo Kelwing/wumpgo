@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,7 +14,7 @@ type GetInviteParams struct {
 	WithCounts bool `url:"with_counts"`
 }
 
-func (c *Client) GetInvite(code string, params *GetInviteParams) (*objects.Invite, error) {
+func (c *Client) GetInvite(ctx context.Context, code string, params *GetInviteParams) (*objects.Invite, error) {
 	u, err := url.Parse(fmt.Sprintf(InviteFmt, code))
 	if err != nil {
 		return nil, err
@@ -29,6 +30,7 @@ func (c *Client) GetInvite(code string, params *GetInviteParams) (*objects.Invit
 	invite := &objects.Invite{}
 	err = NewRequest().
 		Method(http.MethodGet).
+		WithContext(ctx).
 		Path(u.String()).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
@@ -38,10 +40,11 @@ func (c *Client) GetInvite(code string, params *GetInviteParams) (*objects.Invit
 	return invite, err
 }
 
-func (c *Client) DeleteInvite(code, reason string) (*objects.Invite, error) {
+func (c *Client) DeleteInvite(ctx context.Context, code, reason string) (*objects.Invite, error) {
 	invite := &objects.Invite{}
 	err := NewRequest().
 		Method(http.MethodDelete).
+		WithContext(ctx).
 		Path(fmt.Sprintf(InviteFmt, code)).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).

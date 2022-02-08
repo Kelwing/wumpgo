@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,7 +21,7 @@ type CreateWebhookParams struct {
 	Reason string `json:"-"`
 }
 
-func (c *Client) CreateWebhook(channel objects.Snowflake, params *CreateWebhookParams) (*objects.Webhook, error) {
+func (c *Client) CreateWebhook(ctx context.Context, channel objects.SnowflakeObject, params *CreateWebhookParams) (*objects.Webhook, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -34,7 +35,8 @@ func (c *Client) CreateWebhook(channel objects.Snowflake, params *CreateWebhookP
 	webhook := &objects.Webhook{}
 	err = NewRequest().
 		Method(http.MethodPost).
-		Path(fmt.Sprintf(ChannelWebhookFmt, channel)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(ChannelWebhookFmt, channel.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -45,11 +47,12 @@ func (c *Client) CreateWebhook(channel objects.Snowflake, params *CreateWebhookP
 	return webhook, err
 }
 
-func (c *Client) GetChannelWebhooks(channel objects.Snowflake) ([]*objects.Webhook, error) {
+func (c *Client) GetChannelWebhooks(ctx context.Context, channel objects.SnowflakeObject) ([]*objects.Webhook, error) {
 	webhooks := []*objects.Webhook{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(ChannelWebhookFmt, channel)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(ChannelWebhookFmt, channel.GetID())).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
 		Bind(&webhooks).
@@ -58,11 +61,12 @@ func (c *Client) GetChannelWebhooks(channel objects.Snowflake) ([]*objects.Webho
 	return webhooks, err
 }
 
-func (c *Client) GetGuildWebhooks(guild objects.Snowflake) ([]*objects.Webhook, error) {
+func (c *Client) GetGuildWebhooks(ctx context.Context, guild objects.SnowflakeObject) ([]*objects.Webhook, error) {
 	webhooks := []*objects.Webhook{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(GuildWebhookFmt, guild)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(GuildWebhookFmt, guild.GetID())).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
 		Bind(&webhooks).
@@ -71,11 +75,12 @@ func (c *Client) GetGuildWebhooks(guild objects.Snowflake) ([]*objects.Webhook, 
 	return webhooks, err
 }
 
-func (c *Client) GetWebhook(id objects.Snowflake) (*objects.Webhook, error) {
+func (c *Client) GetWebhook(ctx context.Context, id objects.SnowflakeObject) (*objects.Webhook, error) {
 	webhook := &objects.Webhook{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(WebhookFmt, id)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookFmt, id.GetID())).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
 		Bind(webhook).
@@ -84,11 +89,12 @@ func (c *Client) GetWebhook(id objects.Snowflake) (*objects.Webhook, error) {
 	return webhook, err
 }
 
-func (c *Client) GetWebhookWithToken(id objects.Snowflake, token string) (*objects.Webhook, error) {
+func (c *Client) GetWebhookWithToken(ctx context.Context, id objects.SnowflakeObject, token string) (*objects.Webhook, error) {
 	webhook := &objects.Webhook{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(WebhookWithTokenFmt, id, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookWithTokenFmt, id.GetID(), token)).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
 		Bind(webhook).
@@ -105,7 +111,7 @@ type ModifyWebhookParams struct {
 	Reason    string            `json:"-"`
 }
 
-func (c *Client) ModifyWebhook(id objects.Snowflake, params *ModifyWebhookParams) (*objects.Webhook, error) {
+func (c *Client) ModifyWebhook(ctx context.Context, id objects.SnowflakeObject, params *ModifyWebhookParams) (*objects.Webhook, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -119,7 +125,8 @@ func (c *Client) ModifyWebhook(id objects.Snowflake, params *ModifyWebhookParams
 	webhook := &objects.Webhook{}
 	err = NewRequest().
 		Method(http.MethodPatch).
-		Path(fmt.Sprintf(WebhookFmt, id)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookFmt, id.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -136,7 +143,7 @@ type ModifyWebhookWithTokenParams struct {
 	Reason string `json:"-"`
 }
 
-func (c *Client) ModifyWebhookWithToken(id objects.Snowflake, token string, params *ModifyWebhookWithTokenParams) (*objects.Webhook, error) {
+func (c *Client) ModifyWebhookWithToken(ctx context.Context, id objects.SnowflakeObject, token string, params *ModifyWebhookWithTokenParams) (*objects.Webhook, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -150,7 +157,8 @@ func (c *Client) ModifyWebhookWithToken(id objects.Snowflake, token string, para
 	webhook := &objects.Webhook{}
 	err = NewRequest().
 		Method(http.MethodPatch).
-		Path(fmt.Sprintf(WebhookWithTokenFmt, id, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookWithTokenFmt, id.GetID(), token)).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -161,19 +169,21 @@ func (c *Client) ModifyWebhookWithToken(id objects.Snowflake, token string, para
 	return webhook, err
 }
 
-func (c *Client) DeleteWebhook(id objects.Snowflake) error {
+func (c *Client) DeleteWebhook(ctx context.Context, id objects.SnowflakeObject) error {
 	return NewRequest().
 		Method(http.MethodDelete).
-		Path(fmt.Sprintf(WebhookFmt, id)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookFmt, id.GetID())).
 		ContentType(JsonContentType).
 		Expect(http.StatusNoContent).
 		Send(c)
 }
 
-func (c *Client) DeleteWebhookWithToken(id objects.Snowflake, token string) error {
+func (c *Client) DeleteWebhookWithToken(ctx context.Context, id objects.SnowflakeObject, token string) error {
 	return NewRequest().
 		Method(http.MethodDelete).
-		Path(fmt.Sprintf(WebhookWithTokenFmt, id, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookWithTokenFmt, id.GetID(), token)).
 		ContentType(JsonContentType).
 		Expect(http.StatusNoContent).
 		OmitAuth().
@@ -194,7 +204,7 @@ type ExecuteWebhookParams struct {
 	Components      []*objects.Component     `json:"components,omitempty"`
 }
 
-func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *ExecuteWebhookParams) (*objects.Message, error) {
+func (c *Client) ExecuteWebhook(ctx context.Context, id objects.SnowflakeObject, token string, params *ExecuteWebhookParams) (*objects.Message, error) {
 	var contentType string
 	var body []byte
 
@@ -242,7 +252,7 @@ func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *Exec
 		}
 	}
 
-	u, err := url.Parse(fmt.Sprintf(WebhookWithTokenFmt, id, token))
+	u, err := url.Parse(fmt.Sprintf(WebhookWithTokenFmt, id.GetID(), token))
 	if err != nil {
 		return nil, err
 	}
@@ -257,6 +267,7 @@ func (c *Client) ExecuteWebhook(id objects.Snowflake, token string, params *Exec
 	msg := &objects.Message{}
 	err = NewRequest().
 		Method(http.MethodPost).
+		WithContext(ctx).
 		Path(u.String()).
 		ContentType(contentType).
 		Body(body).
@@ -274,7 +285,7 @@ type EditWebhookMessageParams struct {
 	Components      []*objects.Component     `json:"components"`
 }
 
-func (c *Client) EditWebhookMessage(messageID, webhookID objects.Snowflake, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
+func (c *Client) EditWebhookMessage(ctx context.Context, messageID, webhookID objects.SnowflakeObject, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -283,7 +294,8 @@ func (c *Client) EditWebhookMessage(messageID, webhookID objects.Snowflake, toke
 	msg := &objects.Message{}
 	err = NewRequest().
 		Method(http.MethodPatch).
-		Path(fmt.Sprintf(WebhookMessageFmt, webhookID, token, messageID)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookMessageFmt, webhookID.GetID(), token, messageID.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
 		Expect(http.StatusOK).
@@ -294,10 +306,11 @@ func (c *Client) EditWebhookMessage(messageID, webhookID objects.Snowflake, toke
 	return msg, err
 }
 
-func (c *Client) DeleteWebhookMessage(messageID, webhookID objects.Snowflake, token string) error {
+func (c *Client) DeleteWebhookMessage(ctx context.Context, messageID, webhookID objects.SnowflakeObject, token string) error {
 	return NewRequest().
 		Method(http.MethodDelete).
-		Path(fmt.Sprintf(WebhookMessageFmt, webhookID, token, messageID)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookMessageFmt, webhookID.GetID(), token, messageID.GetID())).
 		ContentType(JsonContentType).
 		Expect(http.StatusNoContent).
 		OmitAuth().

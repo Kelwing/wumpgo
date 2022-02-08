@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,7 +15,7 @@ import (
 	"github.com/google/go-querystring/query"
 )
 
-func (c *Client) CreateInteractionResponse(interactionID objects.Snowflake, token string, response *objects.InteractionResponse) error {
+func (c *Client) CreateInteractionResponse(ctx context.Context, interactionID objects.SnowflakeObject, token string, response *objects.InteractionResponse) error {
 	data, err := json.Marshal(response)
 	if err != nil {
 		return err
@@ -22,18 +23,20 @@ func (c *Client) CreateInteractionResponse(interactionID objects.Snowflake, toke
 
 	return NewRequest().
 		Method(http.MethodPost).
-		Path(fmt.Sprintf(CreateInteractionResponseFmt, interactionID, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(CreateInteractionResponseFmt, interactionID.GetID(), token)).
 		Body(data).
 		ContentType(JsonContentType).
 		OmitAuth().
 		Send(c)
 }
 
-func (c *Client) GetOriginalInteractionResponse(applicationID objects.Snowflake, token string) (*objects.Message, error) {
+func (c *Client) GetOriginalInteractionResponse(ctx context.Context, applicationID objects.SnowflakeObject, token string) (*objects.Message, error) {
 	msg := &objects.Message{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
 		Bind(msg).
 		Expect(http.StatusOK).
 		OmitAuth().
@@ -41,7 +44,7 @@ func (c *Client) GetOriginalInteractionResponse(applicationID objects.Snowflake,
 	return msg, err
 }
 
-func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
+func (c *Client) EditOriginalInteractionResponse(ctx context.Context, applicationID objects.SnowflakeObject, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -50,7 +53,8 @@ func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake
 	msg := &objects.Message{}
 	err = NewRequest().
 		Method(http.MethodPatch).
-		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
 		Body(data).
 		ContentType(JsonContentType).
 		Bind(msg).
@@ -59,10 +63,11 @@ func (c *Client) EditOriginalInteractionResponse(applicationID objects.Snowflake
 	return msg, err
 }
 
-func (c *Client) DeleteOriginalInteractionResponse(applicationID objects.Snowflake, token string) error {
+func (c *Client) DeleteOriginalInteractionResponse(ctx context.Context, applicationID objects.SnowflakeObject, token string) error {
 	return NewRequest().
 		Method(http.MethodDelete).
-		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID, token)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
 		Expect(http.StatusNoContent).
 		OmitAuth().
 		Send(c)
@@ -83,7 +88,7 @@ type CreateFollowupMessageParams struct {
 	Components      []*objects.Component     `json:"components,omitempty"`
 }
 
-func (c *Client) CreateFollowupMessage(applicationID objects.Snowflake, token string, params *CreateFollowupMessageParams) (*objects.Message, error) {
+func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, params *CreateFollowupMessageParams) (*objects.Message, error) {
 	var contentType string
 	var body []byte
 
@@ -131,7 +136,7 @@ func (c *Client) CreateFollowupMessage(applicationID objects.Snowflake, token st
 		}
 	}
 
-	u, err := url.Parse(fmt.Sprintf(WebhookWithTokenFmt, applicationID, token))
+	u, err := url.Parse(fmt.Sprintf(WebhookWithTokenFmt, applicationID.GetID(), token))
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +151,7 @@ func (c *Client) CreateFollowupMessage(applicationID objects.Snowflake, token st
 	msg := &objects.Message{}
 	err = NewRequest().
 		Method(http.MethodPost).
+		WithContext(ctx).
 		Path(u.String()).
 		ContentType(contentType).
 		Body(body).
@@ -156,11 +162,12 @@ func (c *Client) CreateFollowupMessage(applicationID objects.Snowflake, token st
 	return msg, err
 }
 
-func (c *Client) GetFollowupMessage(applicationID objects.Snowflake, token string, messageID objects.Snowflake) (*objects.Message, error) {
+func (c *Client) GetFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, messageID objects.SnowflakeObject) (*objects.Message, error) {
 	msg := &objects.Message{}
 	err := NewRequest().
 		Method(http.MethodGet).
-		Path(fmt.Sprintf(WebhookMessageFmt, applicationID, token, messageID)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
 		Bind(msg).
 		Expect(http.StatusOK).
 		OmitAuth().
@@ -168,7 +175,7 @@ func (c *Client) GetFollowupMessage(applicationID objects.Snowflake, token strin
 	return msg, err
 }
 
-func (c *Client) EditFollowupMessage(applicationID objects.Snowflake, token string, messageID objects.Snowflake, params *EditWebhookMessageParams) (*objects.Message, error) {
+func (c *Client) EditFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, messageID objects.SnowflakeObject, params *EditWebhookMessageParams) (*objects.Message, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -177,7 +184,8 @@ func (c *Client) EditFollowupMessage(applicationID objects.Snowflake, token stri
 	msg := &objects.Message{}
 	err = NewRequest().
 		Method(http.MethodPatch).
-		Path(fmt.Sprintf(WebhookMessageFmt, applicationID, token, messageID)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
 		Body(data).
 		Expect(http.StatusOK).
 		ContentType(JsonContentType).
@@ -187,10 +195,11 @@ func (c *Client) EditFollowupMessage(applicationID objects.Snowflake, token stri
 	return msg, err
 }
 
-func (c *Client) DeleteFollowupMessage(applicationID objects.Snowflake, token string, messageID objects.Snowflake) error {
+func (c *Client) DeleteFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, messageID objects.SnowflakeObject) error {
 	return NewRequest().
 		Method(http.MethodDelete).
-		Path(fmt.Sprintf(WebhookMessageFmt, applicationID, token, messageID)).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
 		Expect(http.StatusNoContent).
 		OmitAuth().
 		Send(c)

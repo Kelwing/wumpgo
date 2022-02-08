@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"time"
@@ -28,6 +29,7 @@ type Client struct {
 }
 
 type request struct {
+	ctx         context.Context
 	method      string
 	path        string
 	contentType string
@@ -44,6 +46,11 @@ type request struct {
 
 func NewRequest() *request {
 	return &request{}
+}
+
+func (r *request) WithContext(ctx context.Context) *request {
+	r.ctx = ctx
+	return r
 }
 
 func (r *request) Expect(status ...int) *request {

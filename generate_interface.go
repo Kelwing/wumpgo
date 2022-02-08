@@ -23,6 +23,7 @@ func generateInterface() string {
 package rest
 
 import (
+	"context"
 	"image"
 
 	"github.com/Postcord/objects"

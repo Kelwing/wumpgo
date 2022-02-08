@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -44,7 +45,7 @@ func testChannelSnowflake(t *testing.T) objects.Snowflake {
 func TestClient_GetChannel_Integration(t *testing.T) {
 	client := getRealClient(t)
 
-	c, err := client.GetChannel(testChannelSnowflake(t))
+	c, err := client.GetChannel(context.Background(), testChannelSnowflake(t))
 	if err != nil {
 		t.Error("failed to get channel:", err)
 	}
@@ -55,7 +56,7 @@ func TestClient_GetChannel_Integration(t *testing.T) {
 func TestClient_GetChannelMessages_Integration(t *testing.T) {
 	client := getRealClient(t)
 
-	c, err := client.GetChannelMessages(testChannelSnowflake(t), nil)
+	c, err := client.GetChannelMessages(context.Background(), testChannelSnowflake(t), nil)
 	if err != nil {
 		t.Error("failed to get channel messages:", err)
 	}

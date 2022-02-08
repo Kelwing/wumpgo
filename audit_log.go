@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -16,8 +17,8 @@ type GetAuditLogParams struct {
 	Limit      int                   `url:"limit,omitempty"`
 }
 
-func (c *Client) GetAuditLogs(guild objects.Snowflake, params *GetAuditLogParams) (*objects.AuditLog, error) {
-	u, err := url.Parse(fmt.Sprintf(GuildAuditLogsFmt, guild))
+func (c *Client) GetAuditLogs(ctx context.Context, guild objects.SnowflakeObject, params *GetAuditLogParams) (*objects.AuditLog, error) {
+	u, err := url.Parse(fmt.Sprintf(GuildAuditLogsFmt, guild.GetID()))
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +32,7 @@ func (c *Client) GetAuditLogs(guild objects.Snowflake, params *GetAuditLogParams
 	entries := &objects.AuditLog{}
 	err = NewRequest().
 		Method(http.MethodGet).
+		WithContext(ctx).
 		Path(u.String()).
 		ContentType(JsonContentType).
 		Bind(entries).

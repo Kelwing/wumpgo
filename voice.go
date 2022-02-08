@@ -1,15 +1,17 @@
 package rest
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Postcord/objects"
 )
 
-func (c *Client) GetVoiceRegions() ([]*objects.VoiceRegion, error) {
+func (c *Client) GetVoiceRegions(ctx context.Context) ([]*objects.VoiceRegion, error) {
 	regions := []*objects.VoiceRegion{}
 	err := NewRequest().
 		Method(http.MethodGet).
+		WithContext(ctx).
 		Path(VoiceRegions).
 		ContentType(JsonContentType).
 		Expect(http.StatusOK).
