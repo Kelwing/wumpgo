@@ -53,3 +53,12 @@ func (s Snowflake) String() string {
 func (s Snowflake) GetID() Snowflake {
 	return s
 }
+
+func SnowflakeFromString(s string) (Snowflake, error) {
+	i, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return Snowflake(i), nil
+}
