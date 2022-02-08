@@ -101,6 +101,11 @@ func (a *App) LambdaHandler() LambdaHandler {
 	return handlerfunc.New(a.HTTPHandler()).ProxyWithContext
 }
 
+// ServeHTTP makes App implement the http.Handler interface
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.HTTPHandler()(w, r)
+}
+
 // HTTPHandler exposes a net/http handler to process incoming interactions
 func (a *App) HTTPHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
