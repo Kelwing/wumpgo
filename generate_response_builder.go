@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -105,7 +106,7 @@ func (c *{{ .Type }}) UpdateLater(f func(*{{ .Type }}) error) *{{ .Type }} {
 		} else {
 			response = cpy.errorHandler(err)
 		}
-		processUpdateLaterResponse(cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+		processUpdateLaterResponse(c.Context, cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
 	}()
 	return c
 }

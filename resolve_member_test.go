@@ -8,27 +8,27 @@ import (
 )
 
 var fullUser = objects.User{
-	ID:            1,
-	Username:      "test",
-	Discriminator: "1234",
-	Avatar:        "a_fgeiogeig",
-	Bot:           true,
-	System:        true,
-	MFAEnabled:    true,
-	Locale:        "en",
-	Verified:      true,
-	Email:         "test@example.com",
-	Flags:         1,
-	PremiumType:   1,
-	PublicFlags:   1,
+	DiscordBaseObject: objects.DiscordBaseObject{ID: 1},
+	Username:          "test",
+	Discriminator:     "1234",
+	Avatar:            "a_fgeiogeig",
+	Bot:               true,
+	System:            true,
+	MFAEnabled:        true,
+	Locale:            "en",
+	Verified:          true,
+	Email:             "test@example.com",
+	Flags:             1,
+	PremiumType:       1,
+	PublicFlags:       1,
 }
 
 var fullMemberExceptUser = objects.GuildMember{
-	Nick:         "testing",
-	Roles:        []objects.Snowflake{1},
-	Deaf:         true,
-	Mute:         true,
-	Pending:      true,
+	Nick:    "testing",
+	Roles:   []objects.Snowflake{1},
+	Deaf:    true,
+	Mute:    true,
+	Pending: true,
 }
 
 var fullMember *objects.GuildMember
@@ -41,10 +41,10 @@ func init() {
 }
 
 func TestResolvableUser_ResolveMember(t *testing.T) {
-	tests := [] struct{
+	tests := []struct {
 		name string
 
-		data *objects.ApplicationCommandInteractionData
+		data   *objects.ApplicationCommandInteractionData
 		member *objects.GuildMember
 	}{
 		{
@@ -67,7 +67,7 @@ func TestResolvableUser_ResolveMember(t *testing.T) {
 			name: "full",
 			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
-					Users: map[objects.Snowflake]objects.User{1: fullUser},
+					Users:   map[objects.Snowflake]objects.User{1: fullUser},
 					Members: map[objects.Snowflake]objects.GuildMember{1: fullMemberExceptUser},
 				},
 			},

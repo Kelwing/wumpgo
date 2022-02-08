@@ -1,6 +1,8 @@
 package router
 
 import (
+	"context"
+
 	"github.com/Postcord/objects"
 	"github.com/Postcord/rest"
 	"github.com/stretchr/testify/assert"
@@ -10,8 +12,8 @@ import (
 
 type mockRestEditInteractionParams struct {
 	applicationID objects.Snowflake
-	token string
-	params *rest.EditWebhookMessageParams
+	token         string
+	params        *rest.EditWebhookMessageParams
 }
 
 type mockRestEditInteractionResponse struct {
@@ -24,14 +26,14 @@ func newMockRestEditInteractionResponse(t *testing.T) *mockRestEditInteractionRe
 	return &mockRestEditInteractionResponse{t: t}
 }
 
-func (m *mockRestEditInteractionResponse) EditOriginalInteractionResponse(applicationID objects.Snowflake, token string, params *rest.EditWebhookMessageParams) (*objects.Message, error) {
+func (m *mockRestEditInteractionResponse) EditOriginalInteractionResponse(reqCtx context.Context, applicationID objects.SnowflakeObject, token string, params *rest.EditWebhookMessageParams) (*objects.Message, error) {
 	m.t.Helper()
 	if m.params != nil {
 		m.t.Fatal("edit interaction already called")
 		return nil, nil
 	}
 	m.params = &mockRestEditInteractionParams{
-		applicationID: applicationID,
+		applicationID: applicationID.GetID(),
 		token:         token,
 		params:        params,
 	}
@@ -43,11 +45,11 @@ func Test_processUpdateLaterResponse(t *testing.T) {
 		name string
 
 		applicationID objects.Snowflake
-		token string
-		response *objects.InteractionResponse
+		token         string
+		response      *objects.InteractionResponse
 
 		restParams *mockRestEditInteractionParams
-	} {
+	}{
 		{
 			name:          "deferred message update",
 			applicationID: 1,
@@ -64,11 +66,11 @@ func Test_processUpdateLaterResponse(t *testing.T) {
 			name:          "update message",
 			applicationID: 1,
 			token:         "a",
-			response:      &objects.InteractionResponse{
+			response: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content:         "Hello World",
-					Embeds:          []*objects.Embed{
+					Content: "Hello World",
+					Embeds: []*objects.Embed{
 						{
 							Title: "a embed",
 						},
@@ -79,19 +81,19 @@ func Test_processUpdateLaterResponse(t *testing.T) {
 						Users:       []objects.Snowflake{3},
 						RepliedUser: true,
 					},
-					Components:      []*objects.Component{
+					Components: []*objects.Component{
 						{
 							Label: "Testing testing 123",
 						},
 					},
 				},
 			},
-			restParams:    &mockRestEditInteractionParams{
+			restParams: &mockRestEditInteractionParams{
 				applicationID: 1,
 				token:         "a",
-				params:        &rest.EditWebhookMessageParams{
-					Content:         "Hello World",
-					Embeds:          []*objects.Embed{
+				params: &rest.EditWebhookMessageParams{
+					Content: "Hello World",
+					Embeds: []*objects.Embed{
 						{
 							Title: "a embed",
 						},
@@ -102,7 +104,7 @@ func Test_processUpdateLaterResponse(t *testing.T) {
 						Users:       []objects.Snowflake{3},
 						RepliedUser: true,
 					},
-					Components:      []*objects.Component{
+					Components: []*objects.Component{
 						{
 							Label: "Testing testing 123",
 						},
@@ -114,7 +116,7 @@ func Test_processUpdateLaterResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			restClient := newMockRestEditInteractionResponse(t)
-			processUpdateLaterResponse(restClient, tt.applicationID, tt.token, tt.response)
+			processUpdateLaterResponse(context.Background(), restClient, tt.applicationID, tt.token, tt.response)
 			assert.Equal(t, tt.restParams, restClient.params)
 		})
 	}

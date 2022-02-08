@@ -19,6 +19,7 @@ package router
 //go:generate go run generate_rest_tape_player.go
 
 import (
+	"context"
 	"image"
 
 	"github.com/Postcord/objects"

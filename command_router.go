@@ -2,6 +2,7 @@ package router
 
 import (
 	"container/list"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,6 +29,9 @@ type CommandRouterCtx struct {
 
 	// Defines the interaction which started this.
 	*objects.Interaction
+
+	// Context is a context.Context passed from the HTTP handler.
+	Context context.Context
 
 	// Command defines the command that was invoked.
 	Command *Command `json:"command"`
@@ -204,7 +208,7 @@ var NoAutoCompleteFunc = errors.New("discord sent auto-complete for argument wit
 
 // Used to define the autocomplete handler.
 func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough) interactions.HandlerFunc {
-	return func(interaction *objects.Interaction) *objects.InteractionResponse {
+	return func(reqCtx context.Context, interaction *objects.Interaction) *objects.InteractionResponse {
 		// Parse the data JSON.
 		var rootData objects.ApplicationCommandInteractionData
 		if err := json.Unmarshal(interaction.Data, &rootData); err != nil {
@@ -429,7 +433,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 	}
 
 	// Process the response.
-	return func(interaction *objects.Interaction) *objects.InteractionResponse {
+	return func(reqCtx context.Context, interaction *objects.Interaction) *objects.InteractionResponse {
 		// Handle middleware.
 		middlewareList := list.New()
 		if c.middleware != nil {
@@ -488,7 +492,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 			switch x := cmdOrCat.(type) {
 			case *Command:
 				// In this case, we should go ahead and execute.
-				resp := x.execute(commandExecutionOptions{
+				resp := x.execute(reqCtx, commandExecutionOptions{
 					restClient:       r,
 					exceptionHandler: errHandler,
 					allowedMentions:  allowedMentions,

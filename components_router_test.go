@@ -1,11 +1,13 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"github.com/Postcord/rest"
 	"reflect"
 	"testing"
+
+	"github.com/Postcord/rest"
 
 	"github.com/Postcord/objects"
 	"github.com/stretchr/testify/assert"
@@ -94,9 +96,9 @@ func TestComponentRouter_build(t *testing.T) {
 	tests := []struct {
 		name string
 
-		restClient rest.RESTClient
+		restClient            rest.RESTClient
 		globalAllowedMentions *objects.AllowedMentions
-		init func(t *testing.T, r *ComponentRouter)
+		init                  func(t *testing.T, r *ComponentRouter)
 
 		interaction *objects.Interaction
 
@@ -107,7 +109,7 @@ func TestComponentRouter_build(t *testing.T) {
 			name: "internal void function",
 			interaction: &objects.Interaction{
 				Data: jsonify(t, objects.ApplicationComponentInteractionData{
-					CustomID:      "/_postcord/void/1",
+					CustomID: "/_postcord/void/1",
 				}),
 			},
 			expects: &objects.InteractionResponse{
@@ -118,7 +120,7 @@ func TestComponentRouter_build(t *testing.T) {
 			name: "unset route",
 			interaction: &objects.Interaction{
 				Data: jsonify(t, objects.ApplicationComponentInteractionData{
-					CustomID:      "/a",
+					CustomID: "/a",
 				}),
 			},
 			expects: nil,
@@ -144,7 +146,7 @@ func TestComponentRouter_build(t *testing.T) {
 			expects: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content:         "hello world",
+					Content: "hello world",
 				},
 			},
 		},
@@ -165,7 +167,7 @@ func TestComponentRouter_build(t *testing.T) {
 			expects: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content:         "hello",
+					Content: "hello",
 				},
 			},
 		},
@@ -223,7 +225,7 @@ func TestComponentRouter_build(t *testing.T) {
 			expects: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content:         "hello world",
+					Content: "hello world",
 				},
 			},
 		},
@@ -247,7 +249,7 @@ func TestComponentRouter_build(t *testing.T) {
 			expects: &objects.InteractionResponse{
 				Type: objects.ResponseUpdateMessage,
 				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content:         "hello",
+					Content: "hello",
 				},
 			},
 		},
@@ -300,7 +302,7 @@ func TestComponentRouter_build(t *testing.T) {
 				tt.init(t, r)
 			}
 			builtFunc := r.build(loaderPassthrough{dummyRestClient, setError, tt.globalAllowedMentions, false}) // TODO: test frames!
-			resp := builtFunc(tt.interaction)
+			resp := builtFunc(context.Background(), tt.interaction)
 
 			// Verify the error.
 			if tt.expectsErr == "" {

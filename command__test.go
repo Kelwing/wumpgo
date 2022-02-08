@@ -5,6 +5,7 @@ package router
 
 import (
 	"container/list"
+	"context"
 	"errors"
 	"testing"
 
@@ -136,7 +137,7 @@ func TestCommand_mapOptions(t *testing.T) {
 		},
 		{
 			name: "channel option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeChannel,
@@ -153,13 +154,13 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]interface{}{
 				"opt1": &ResolvableChannel{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 				},
 			},
 		},
 		{
 			name: "role option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeRole,
@@ -176,13 +177,13 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]interface{}{
 				"opt1": &ResolvableRole{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 				},
 			},
 		},
 		{
 			name: "user option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeUser,
@@ -199,7 +200,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]interface{}{
 				"opt1": &ResolvableUser{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 				},
 			},
 		},
@@ -262,7 +263,7 @@ func TestCommand_mapOptions(t *testing.T) {
 		},
 		{
 			name: "mentionable option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeMentionable,
@@ -279,7 +280,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]interface{}{
 				"opt1": &ResolvableMentionable{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
 				},
 			},
 		},
@@ -333,12 +334,12 @@ var messageTargetData = &objects.ApplicationCommandInteractionData{
 	Resolved: objects.ApplicationCommandInteractionDataResolved{
 		Users: map[objects.Snowflake]objects.User{
 			1: {
-				ID: 1234,
+				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
 			},
 		},
 		Messages: map[objects.Snowflake]objects.Message{
 			1: {
-				ID: 5678,
+				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
 			},
 		},
 	},
@@ -349,12 +350,12 @@ var userTargetData = &objects.ApplicationCommandInteractionData{
 	Resolved: objects.ApplicationCommandInteractionDataResolved{
 		Users: map[objects.Snowflake]objects.User{
 			2: {
-				ID: 1234,
+				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
 			},
 		},
 		Messages: map[objects.Snowflake]objects.Message{
 			1: {
-				ID: 5678,
+				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
 			},
 		},
 	},
@@ -515,7 +516,7 @@ func TestCommand_execute(t *testing.T) {
 			}
 
 			// Execute the command.
-			resp := c.execute(commandExecutionOptions{
+			resp := c.execute(context.Background(), commandExecutionOptions{
 				restClient:       dummyRestClient,
 				exceptionHandler: errHandler,
 				interaction:      dummyInteraction,

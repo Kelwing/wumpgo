@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,6 +30,9 @@ type ComponentRouterCtx struct {
 
 	// Defines the response builder.
 	responseBuilder
+
+	// Context is a context.Context passed from the HTTP handler.
+	Context context.Context
 
 	// Defines the interaction which started this.
 	*objects.Interaction
@@ -86,7 +90,7 @@ var NotSelectionMenu = errors.New("the data returned is not that of a selection 
 var NotButton = errors.New("the data returned is not that of a button")
 
 // Adds the argument context to the handler.
-type contextCallback func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse
+type contextCallback func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse
 
 // Defines the data for the context for the route.
 type routeContext struct {
@@ -114,7 +118,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 	c.prep()
 	root := new(node)
 	root.addRoute("/_postcord/void/:number", &routeContext{
-		cb: func(ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
+		cb: func(reqCtx context.Context, ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
 			// The point of this route is to just return the default handler.
 			rctx := &ComponentRouterCtx{
 				globalAllowedMentions: loader.globalAllowedMentions,
@@ -128,7 +132,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 		var cb contextCallback
 		switch x := v.(type) {
 		case ButtonFunc:
-			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
+			cb = func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 				if data.ComponentType != objects.ComponentTypeButton {
 					return loader.errHandler(NotButton)
 				}
@@ -142,6 +146,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 					errorHandler:          loader.errHandler,
 					globalAllowedMentions: loader.globalAllowedMentions,
 					Interaction:           ctx,
+					Context:               reqCtx,
 					Params:                params,
 					RESTClient:            rest,
 				}
@@ -151,7 +156,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 				return rctx.buildResponse(true, loader.errHandler, loader.globalAllowedMentions)
 			}
 		case SelectMenuFunc:
-			cb = func(ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
+			cb = func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 				values := data.Values
 				if values == nil {
 					// This is a blank result from Discord.
@@ -170,6 +175,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 					globalAllowedMentions: loader.globalAllowedMentions,
 					errorHandler:          loader.errHandler,
 					Interaction:           ctx,
+					Context:               reqCtx,
 					Params:                params,
 					RESTClient:            rest,
 				}
@@ -185,7 +191,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 	}
 
 	// Return the router.
-	return func(ctx *objects.Interaction) *objects.InteractionResponse {
+	return func(reqCtx context.Context, ctx *objects.Interaction) *objects.InteractionResponse {
 		// Create the rest tape if this is wanted.
 		r := loader.rest
 		tape := tape{}
@@ -212,7 +218,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 		if route == nil {
 			return nil
 		}
-		resp := route.cb(ctx, &data, params, r, errHandler)
+		resp := route.cb(reqCtx, ctx, &data, params, r, errHandler)
 		if loader.generateFrames {
 			// Now we have all the data, we can generate the frame.
 			fr := frame{ctx, tape, returnedErr, resp}

@@ -92,7 +92,7 @@ func (c *ComponentRouterCtx) UpdateLater(f func(*ComponentRouterCtx) error) *Com
 		} else {
 			response = cpy.errorHandler(err)
 		}
-		processUpdateLaterResponse(cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+		processUpdateLaterResponse(c.Context, cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
 	}()
 	return c
 }
@@ -192,7 +192,7 @@ func (c *CommandRouterCtx) UpdateLater(f func(*CommandRouterCtx) error) *Command
 		} else {
 			response = cpy.errorHandler(err)
 		}
-		processUpdateLaterResponse(cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+		processUpdateLaterResponse(c.Context, cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
 	}()
 	return c
 }

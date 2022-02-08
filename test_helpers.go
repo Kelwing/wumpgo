@@ -1,12 +1,14 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/Postcord/rest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/Postcord/rest"
 
 	"github.com/Postcord/objects"
 	"github.com/stretchr/testify/assert"
@@ -115,7 +117,7 @@ func TestComponent(t TestingT, b LoaderBuilder, path string) {
 			})
 
 			// Run the handler.
-			resp := handler(frameData.Request)
+			resp := handler(context.Background(), frameData.Request)
 
 			// Write the tape.
 			if regen&2 != 0 {
@@ -255,9 +257,9 @@ func testCommand(t TestingT, b LoaderBuilder, autocomplete bool, commandRoute ..
 			// Run the handler.
 			var resp *objects.InteractionResponse
 			if autocomplete {
-				resp = autoCompleteHandler(frameData.Request)
+				resp = autoCompleteHandler(context.Background(), frameData.Request)
 			} else {
-				resp = cmdHandler(frameData.Request)
+				resp = cmdHandler(context.Background(), frameData.Request)
 			}
 
 			// Write the tape.

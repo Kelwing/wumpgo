@@ -5,6 +5,7 @@ package router
 //go:generate go run generate_rest_tape_player.go
 
 import (
+	"context"
 	"image"
 
 	"github.com/Postcord/objects"
@@ -18,1443 +19,1586 @@ type restTapePlayer struct {
 	index int
 }
 
-func (r *restTapePlayer) AddGuildCommand(a objects.Snowflake, b objects.Snowflake, c *objects.ApplicationCommand) (d *objects.ApplicationCommand, e error) {
+func (r *restTapePlayer) AddGuildCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *objects.ApplicationCommand) (e *objects.ApplicationCommand, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected AddGuildCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "AddGuildCommand", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "AddGuildCommand", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) AddGuildMember(a objects.Snowflake, b objects.Snowflake, c *rest.AddGuildMemberParams) (d *objects.GuildMember, e error) {
+func (r *restTapePlayer) AddGuildMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.AddGuildMemberParams) (e *objects.GuildMember, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected AddGuildMember at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "AddGuildMember", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "AddGuildMember", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) AddGuildMemberRole(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake, d string) (e error) {
+func (r *restTapePlayer) AddGuildMemberRole(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject, e string) (f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected AddGuildMemberRole at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "AddGuildMemberRole", false, 4, a, b, c, d, &e)
+	action.match(r.t, "AddGuildMemberRole", false, 5, a, b, c, d, e, &f)
 	return
 }
 
-func (r *restTapePlayer) AddPinnedMessage(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) AddPinnedMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected AddPinnedMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "AddPinnedMessage", false, 2, a, b, &c)
+	action.match(r.t, "AddPinnedMessage", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) AddThreadMember(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) AddThreadMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected AddThreadMember at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "AddThreadMember", false, 2, a, b, &c)
+	action.match(r.t, "AddThreadMember", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) BatchEditApplicationCommandPermissions(a objects.Snowflake, b objects.Snowflake, c []*objects.GuildApplicationCommandPermissions) (d []*objects.GuildApplicationCommandPermissions, e error) {
+func (r *restTapePlayer) BatchEditApplicationCommandPermissions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d []*objects.GuildApplicationCommandPermissions) (e []*objects.GuildApplicationCommandPermissions, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected BatchEditApplicationCommandPermissions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "BatchEditApplicationCommandPermissions", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "BatchEditApplicationCommandPermissions", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) BeginGuildPrune(a objects.Snowflake, b *rest.BeginGuildPruneParams) (c int, d error) {
+func (r *restTapePlayer) BeginGuildPrune(a context.Context, b objects.SnowflakeObject, c *rest.BeginGuildPruneParams) (d int, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected BeginGuildPrune at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "BeginGuildPrune", false, 2, a, b, &c, &d)
+	action.match(r.t, "BeginGuildPrune", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) BulkDeleteMessages(a objects.Snowflake, b *rest.DeleteMessagesParams) (c error) {
+func (r *restTapePlayer) BulkDeleteMessages(a context.Context, b objects.SnowflakeObject, c *rest.DeleteMessagesParams) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected BulkDeleteMessages at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "BulkDeleteMessages", false, 2, a, b, &c)
+	action.match(r.t, "BulkDeleteMessages", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) BulkOverwriteGlobalCommands(a objects.Snowflake, b []*objects.ApplicationCommand) (c []*objects.ApplicationCommand, d error) {
+func (r *restTapePlayer) BulkOverwriteGlobalCommands(a context.Context, b objects.SnowflakeObject, c []*objects.ApplicationCommand) (d []*objects.ApplicationCommand, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected BulkOverwriteGlobalCommands at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "BulkOverwriteGlobalCommands", false, 2, a, b, &c, &d)
+	action.match(r.t, "BulkOverwriteGlobalCommands", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) BulkOverwriteGuildCommands(a objects.Snowflake, b objects.Snowflake, c []*objects.ApplicationCommand) (d []*objects.ApplicationCommand, e error) {
+func (r *restTapePlayer) BulkOverwriteGuildCommands(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d []*objects.ApplicationCommand) (e []*objects.ApplicationCommand, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected BulkOverwriteGuildCommands at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "BulkOverwriteGuildCommands", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "BulkOverwriteGuildCommands", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) CreateBan(a objects.Snowflake, b objects.Snowflake, c *rest.CreateGuildBanParams) (d error) {
+func (r *restTapePlayer) CreateBan(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.CreateGuildBanParams) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateBan at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateBan", false, 3, a, b, c, &d)
+	action.match(r.t, "CreateBan", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateChannelInvite(a objects.Snowflake, b *rest.CreateInviteParams) (c *objects.Invite, d error) {
+func (r *restTapePlayer) CreateChannelInvite(a context.Context, b objects.SnowflakeObject, c *rest.CreateInviteParams) (d *objects.Invite, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateChannelInvite at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateChannelInvite", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateChannelInvite", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateCommand(a objects.Snowflake, b *objects.ApplicationCommand) (c *objects.ApplicationCommand, d error) {
+func (r *restTapePlayer) CreateCommand(a context.Context, b objects.SnowflakeObject, c *objects.ApplicationCommand) (d *objects.ApplicationCommand, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateCommand", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateCommand", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateDM(a *rest.CreateDMParams) (b *objects.Channel, c error) {
+func (r *restTapePlayer) CreateDM(a context.Context, b *rest.CreateDMParams) (c *objects.Channel, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateDM at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateDM", false, 1, a, &b, &c)
+	action.match(r.t, "CreateDM", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) CreateFollowupMessage(a objects.Snowflake, b string, c *rest.CreateFollowupMessageParams) (d *objects.Message, e error) {
+func (r *restTapePlayer) CreateFollowupMessage(a context.Context, b objects.SnowflakeObject, c string, d *rest.CreateFollowupMessageParams) (e *objects.Message, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateFollowupMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateFollowupMessage", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "CreateFollowupMessage", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) CreateGroupDM(a *rest.CreateGroupDMParams) (b *objects.Channel, c error) {
+func (r *restTapePlayer) CreateGroupDM(a context.Context, b *rest.CreateGroupDMParams) (c *objects.Channel, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateGroupDM at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateGroupDM", false, 1, a, &b, &c)
+	action.match(r.t, "CreateGroupDM", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) CreateGuild(a *rest.CreateGuildParams) (b *objects.Guild, c error) {
+func (r *restTapePlayer) CreateGuild(a context.Context, b *rest.CreateGuildParams) (c *objects.Guild, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateGuild at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateGuild", false, 1, a, &b, &c)
+	action.match(r.t, "CreateGuild", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) CreateGuildChannel(a objects.Snowflake, b *rest.ChannelCreateParams) (c *objects.Channel, d error) {
+func (r *restTapePlayer) CreateGuildChannel(a context.Context, b objects.SnowflakeObject, c *rest.ChannelCreateParams) (d *objects.Channel, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateGuildChannel at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateGuildChannel", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateGuildChannel", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateGuildFromTemplate(a string, b string) (c *objects.Guild, d error) {
+func (r *restTapePlayer) CreateGuildFromTemplate(a context.Context, b string, c string) (d *objects.Guild, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateGuildFromTemplate at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateGuildFromTemplate", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateGuildFromTemplate", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateGuildRole(a objects.Snowflake, b *rest.CreateGuildRoleParams) (c *objects.Role, d error) {
+func (r *restTapePlayer) CreateGuildRole(a context.Context, b objects.SnowflakeObject, c *rest.CreateGuildRoleParams) (d *objects.Role, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateGuildRole at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateGuildRole", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateGuildRole", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateGuildTemplate(a objects.Snowflake, b *rest.CreateGuildTemplateParams) (c *objects.Template, d error) {
+func (r *restTapePlayer) CreateGuildScheduledEvent(a context.Context, b objects.SnowflakeObject, c *rest.CreateGuildScheduledEventParams) (d *objects.GuildScheduledEvent, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected CreateGuildScheduledEvent at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "CreateGuildScheduledEvent", false, 3, a, b, c, &d, &e)
+	return
+}
+
+func (r *restTapePlayer) CreateGuildSticker(a context.Context, b objects.SnowflakeObject, c *rest.CreateGuildStickerParams) (d *objects.Sticker, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected CreateGuildSticker at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "CreateGuildSticker", false, 3, a, b, c, &d, &e)
+	return
+}
+
+func (r *restTapePlayer) CreateGuildTemplate(a context.Context, b objects.SnowflakeObject, c *rest.CreateGuildTemplateParams) (d *objects.Template, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateGuildTemplate at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateGuildTemplate", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateGuildTemplate", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateInteractionResponse(a objects.Snowflake, b string, c *objects.InteractionResponse) (d error) {
+func (r *restTapePlayer) CreateInteractionResponse(a context.Context, b objects.SnowflakeObject, c string, d *objects.InteractionResponse) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateInteractionResponse at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateInteractionResponse", false, 3, a, b, c, &d)
+	action.match(r.t, "CreateInteractionResponse", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateMessage(a objects.Snowflake, b *rest.CreateMessageParams) (c *objects.Message, d error) {
+func (r *restTapePlayer) CreateMessage(a context.Context, b objects.SnowflakeObject, c *rest.CreateMessageParams) (d *objects.Message, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateMessage", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateMessage", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateReaction(a objects.Snowflake, b objects.Snowflake, c interface {}) (d error) {
+func (r *restTapePlayer) CreateReaction(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d interface {}) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateReaction at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateReaction", false, 3, a, b, c, &d)
+	action.match(r.t, "CreateReaction", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) CreateWebhook(a objects.Snowflake, b *rest.CreateWebhookParams) (c *objects.Webhook, d error) {
+func (r *restTapePlayer) CreateWebhook(a context.Context, b objects.SnowflakeObject, c *rest.CreateWebhookParams) (d *objects.Webhook, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateWebhook at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CreateWebhook", false, 2, a, b, &c, &d)
+	action.match(r.t, "CreateWebhook", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) CrossPostMessage(a objects.Snowflake, b objects.Snowflake) (c *objects.Message, d error) {
+func (r *restTapePlayer) CrossPostMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.Message, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CrossPostMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "CrossPostMessage", false, 2, a, b, &c, &d)
+	action.match(r.t, "CrossPostMessage", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteAllReactions(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) DeleteAllReactions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteAllReactions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteAllReactions", false, 2, a, b, &c)
+	action.match(r.t, "DeleteAllReactions", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) DeleteChannel(a objects.Snowflake, b string) (c *objects.Channel, d error) {
+func (r *restTapePlayer) DeleteChannel(a context.Context, b objects.SnowflakeObject, c string) (d *objects.Channel, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteChannel at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteChannel", false, 2, a, b, &c, &d)
+	action.match(r.t, "DeleteChannel", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteChannelPermission(a objects.Snowflake, b objects.Snowflake, c string) (d error) {
+func (r *restTapePlayer) DeleteChannelPermission(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteChannelPermission at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteChannelPermission", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteChannelPermission", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteCommand(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) DeleteCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteCommand", false, 2, a, b, &c)
+	action.match(r.t, "DeleteCommand", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) DeleteEmojiReactions(a objects.Snowflake, b objects.Snowflake, c interface {}) (d error) {
+func (r *restTapePlayer) DeleteEmojiReactions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d interface {}) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteEmojiReactions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteEmojiReactions", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteEmojiReactions", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteFollowupMessage(a objects.Snowflake, b string, c objects.Snowflake) (d error) {
+func (r *restTapePlayer) DeleteFollowupMessage(a context.Context, b objects.SnowflakeObject, c string, d objects.SnowflakeObject) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteFollowupMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteFollowupMessage", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteFollowupMessage", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteGuild(a objects.Snowflake) (b error) {
+func (r *restTapePlayer) DeleteGuild(a context.Context, b objects.SnowflakeObject) (c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteGuild at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteGuild", false, 1, a, &b)
+	action.match(r.t, "DeleteGuild", false, 2, a, b, &c)
 	return
 }
 
-func (r *restTapePlayer) DeleteGuildCommand(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake) (d error) {
+func (r *restTapePlayer) DeleteGuildCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteGuildCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteGuildCommand", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteGuildCommand", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteGuildIntegration(a objects.Snowflake, b objects.Snowflake, c string) (d error) {
+func (r *restTapePlayer) DeleteGuildIntegration(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteGuildIntegration at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteGuildIntegration", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteGuildIntegration", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteGuildRole(a objects.Snowflake, b objects.Snowflake, c string) (d error) {
+func (r *restTapePlayer) DeleteGuildRole(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteGuildRole at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteGuildRole", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteGuildRole", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteGuildTemplate(a objects.Snowflake, b string, c string) (d *objects.Template, e error) {
+func (r *restTapePlayer) DeleteGuildScheduledEvent(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected DeleteGuildScheduledEvent at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "DeleteGuildScheduledEvent", false, 3, a, b, c, &d)
+	return
+}
+
+func (r *restTapePlayer) DeleteGuildSticker(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d ...string) (e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected DeleteGuildSticker at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "DeleteGuildSticker", true, 4, a, b, c, d, &e)
+	return
+}
+
+func (r *restTapePlayer) DeleteGuildTemplate(a context.Context, b objects.SnowflakeObject, c string, d string) (e *objects.Template, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteGuildTemplate at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteGuildTemplate", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "DeleteGuildTemplate", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) DeleteInvite(a string, b string) (c *objects.Invite, d error) {
+func (r *restTapePlayer) DeleteInvite(a context.Context, b string, c string) (d *objects.Invite, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteInvite at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteInvite", false, 2, a, b, &c, &d)
+	action.match(r.t, "DeleteInvite", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteMessage(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) DeleteMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteMessage", false, 2, a, b, &c)
+	action.match(r.t, "DeleteMessage", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) DeleteOriginalInteractionResponse(a objects.Snowflake, b string) (c error) {
+func (r *restTapePlayer) DeleteOriginalInteractionResponse(a context.Context, b objects.SnowflakeObject, c string) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteOriginalInteractionResponse at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteOriginalInteractionResponse", false, 2, a, b, &c)
+	action.match(r.t, "DeleteOriginalInteractionResponse", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) DeleteOwnReaction(a objects.Snowflake, b objects.Snowflake, c interface {}) (d error) {
+func (r *restTapePlayer) DeleteOwnReaction(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d interface {}) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteOwnReaction at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteOwnReaction", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteOwnReaction", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeletePinnedMessage(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) DeletePinnedMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeletePinnedMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeletePinnedMessage", false, 2, a, b, &c)
+	action.match(r.t, "DeletePinnedMessage", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) DeleteUserReaction(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake, d interface {}) (e error) {
+func (r *restTapePlayer) DeleteUserReaction(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject, e interface {}) (f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteUserReaction at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteUserReaction", false, 4, a, b, c, d, &e)
+	action.match(r.t, "DeleteUserReaction", false, 5, a, b, c, d, e, &f)
 	return
 }
 
-func (r *restTapePlayer) DeleteWebhook(a objects.Snowflake) (b error) {
+func (r *restTapePlayer) DeleteWebhook(a context.Context, b objects.SnowflakeObject) (c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteWebhook at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteWebhook", false, 1, a, &b)
+	action.match(r.t, "DeleteWebhook", false, 2, a, b, &c)
 	return
 }
 
-func (r *restTapePlayer) DeleteWebhookMessage(a objects.Snowflake, b objects.Snowflake, c string) (d error) {
+func (r *restTapePlayer) DeleteWebhookMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteWebhookMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteWebhookMessage", false, 3, a, b, c, &d)
+	action.match(r.t, "DeleteWebhookMessage", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) DeleteWebhookWithToken(a objects.Snowflake, b string) (c error) {
+func (r *restTapePlayer) DeleteWebhookWithToken(a context.Context, b objects.SnowflakeObject, c string) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected DeleteWebhookWithToken at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "DeleteWebhookWithToken", false, 2, a, b, &c)
+	action.match(r.t, "DeleteWebhookWithToken", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) EditApplicationCommandPermissions(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake, d []*objects.ApplicationCommandPermissions) (e *objects.GuildApplicationCommandPermissions, f error) {
+func (r *restTapePlayer) EditApplicationCommandPermissions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject, e []*objects.ApplicationCommandPermissions) (f *objects.GuildApplicationCommandPermissions, g error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected EditApplicationCommandPermissions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "EditApplicationCommandPermissions", false, 4, a, b, c, d, &e, &f)
+	action.match(r.t, "EditApplicationCommandPermissions", false, 5, a, b, c, d, e, &f, &g)
 	return
 }
 
-func (r *restTapePlayer) EditChannelPermissions(a objects.Snowflake, b objects.Snowflake, c *rest.EditChannelParams) (d error) {
+func (r *restTapePlayer) EditChannelPermissions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.EditChannelParams) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected EditChannelPermissions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "EditChannelPermissions", false, 3, a, b, c, &d)
+	action.match(r.t, "EditChannelPermissions", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) EditFollowupMessage(a objects.Snowflake, b string, c objects.Snowflake, d *rest.EditWebhookMessageParams) (e *objects.Message, f error) {
+func (r *restTapePlayer) EditFollowupMessage(a context.Context, b objects.SnowflakeObject, c string, d objects.SnowflakeObject, e *rest.EditWebhookMessageParams) (f *objects.Message, g error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected EditFollowupMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "EditFollowupMessage", false, 4, a, b, c, d, &e, &f)
+	action.match(r.t, "EditFollowupMessage", false, 5, a, b, c, d, e, &f, &g)
 	return
 }
 
-func (r *restTapePlayer) EditMessage(a objects.Snowflake, b objects.Snowflake, c *rest.EditMessageParams) (d *objects.Message, e error) {
+func (r *restTapePlayer) EditMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.EditMessageParams) (e *objects.Message, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected EditMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "EditMessage", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "EditMessage", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) EditOriginalInteractionResponse(a objects.Snowflake, b string, c *rest.EditWebhookMessageParams) (d *objects.Message, e error) {
+func (r *restTapePlayer) EditOriginalInteractionResponse(a context.Context, b objects.SnowflakeObject, c string, d *rest.EditWebhookMessageParams) (e *objects.Message, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected EditOriginalInteractionResponse at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "EditOriginalInteractionResponse", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "EditOriginalInteractionResponse", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) EditWebhookMessage(a objects.Snowflake, b objects.Snowflake, c string, d *rest.EditWebhookMessageParams) (e *objects.Message, f error) {
+func (r *restTapePlayer) EditWebhookMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string, e *rest.EditWebhookMessageParams) (f *objects.Message, g error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected EditWebhookMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "EditWebhookMessage", false, 4, a, b, c, d, &e, &f)
+	action.match(r.t, "EditWebhookMessage", false, 5, a, b, c, d, e, &f, &g)
 	return
 }
 
-func (r *restTapePlayer) ExecuteWebhook(a objects.Snowflake, b string, c *rest.ExecuteWebhookParams) (d *objects.Message, e error) {
+func (r *restTapePlayer) ExecuteWebhook(a context.Context, b objects.SnowflakeObject, c string, d *rest.ExecuteWebhookParams) (e *objects.Message, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ExecuteWebhook at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ExecuteWebhook", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "ExecuteWebhook", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) FollowNewsChannel(a objects.Snowflake) (b *objects.FollowedChannel, c error) {
+func (r *restTapePlayer) FollowNewsChannel(a context.Context, b objects.SnowflakeObject) (c *objects.FollowedChannel, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected FollowNewsChannel at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "FollowNewsChannel", false, 1, a, &b, &c)
+	action.match(r.t, "FollowNewsChannel", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) Gateway() (a *objects.Gateway, b error) {
+func (r *restTapePlayer) Gateway(a context.Context) (b *objects.Gateway, c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected Gateway at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "Gateway", false, 0, &a, &b)
+	action.match(r.t, "Gateway", false, 1, a, &b, &c)
 	return
 }
 
-func (r *restTapePlayer) GatewayBot() (a *objects.Gateway, b error) {
+func (r *restTapePlayer) GatewayBot(a context.Context) (b *objects.Gateway, c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GatewayBot at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GatewayBot", false, 0, &a, &b)
+	action.match(r.t, "GatewayBot", false, 1, a, &b, &c)
 	return
 }
 
-func (r *restTapePlayer) GetApplicationCommandPermissions(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake) (d *objects.GuildApplicationCommandPermissions, e error) {
+func (r *restTapePlayer) GetApplicationCommandPermissions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject) (e *objects.GuildApplicationCommandPermissions, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetApplicationCommandPermissions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetApplicationCommandPermissions", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "GetApplicationCommandPermissions", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) GetAuditLogs(a objects.Snowflake, b *rest.GetAuditLogParams) (c *objects.AuditLog, d error) {
+func (r *restTapePlayer) GetAuditLogs(a context.Context, b objects.SnowflakeObject, c *rest.GetAuditLogParams) (d *objects.AuditLog, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetAuditLogs at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetAuditLogs", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetAuditLogs", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetChannel(a objects.Snowflake) (b *objects.Channel, c error) {
+func (r *restTapePlayer) GetChannel(a context.Context, b objects.SnowflakeObject) (c *objects.Channel, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetChannel at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetChannel", false, 1, a, &b, &c)
+	action.match(r.t, "GetChannel", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetChannelInvites(a objects.Snowflake) (b []*objects.Invite, c error) {
+func (r *restTapePlayer) GetChannelInvites(a context.Context, b objects.SnowflakeObject) (c []*objects.Invite, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetChannelInvites at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetChannelInvites", false, 1, a, &b, &c)
+	action.match(r.t, "GetChannelInvites", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetChannelMessage(a objects.Snowflake, b objects.Snowflake) (c *objects.Message, d error) {
+func (r *restTapePlayer) GetChannelMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.Message, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetChannelMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetChannelMessage", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetChannelMessage", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetChannelMessages(a objects.Snowflake, b *rest.GetChannelMessagesParams) (c []*objects.Message, d error) {
+func (r *restTapePlayer) GetChannelMessages(a context.Context, b objects.SnowflakeObject, c *rest.GetChannelMessagesParams) (d []*objects.Message, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetChannelMessages at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetChannelMessages", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetChannelMessages", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetChannelWebhooks(a objects.Snowflake) (b []*objects.Webhook, c error) {
+func (r *restTapePlayer) GetChannelWebhooks(a context.Context, b objects.SnowflakeObject) (c []*objects.Webhook, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetChannelWebhooks at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetChannelWebhooks", false, 1, a, &b, &c)
+	action.match(r.t, "GetChannelWebhooks", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetCommand(a objects.Snowflake, b objects.Snowflake) (c *objects.ApplicationCommand, d error) {
+func (r *restTapePlayer) GetCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.ApplicationCommand, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetCommand", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetCommand", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetCommands(a objects.Snowflake) (b []*objects.ApplicationCommand, c error) {
+func (r *restTapePlayer) GetCommands(a context.Context, b objects.SnowflakeObject) (c []*objects.ApplicationCommand, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetCommands at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetCommands", false, 1, a, &b, &c)
+	action.match(r.t, "GetCommands", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetCurrentUser() (a *objects.User, b error) {
+func (r *restTapePlayer) GetCurrentUser(a context.Context) (b *objects.User, c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetCurrentUser at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetCurrentUser", false, 0, &a, &b)
+	action.match(r.t, "GetCurrentUser", false, 1, a, &b, &c)
 	return
 }
 
-func (r *restTapePlayer) GetCurrentUserGuilds(a *rest.CurrentUserGuildsParams) (b []*objects.Guild, c error) {
+func (r *restTapePlayer) GetCurrentUserGuildMember(a context.Context, b objects.SnowflakeObject) (c *objects.GuildMember, d error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetCurrentUserGuildMember at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetCurrentUserGuildMember", false, 2, a, b, &c, &d)
+	return
+}
+
+func (r *restTapePlayer) GetCurrentUserGuilds(a context.Context, b *rest.CurrentUserGuildsParams) (c []*objects.Guild, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetCurrentUserGuilds at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetCurrentUserGuilds", false, 1, a, &b, &c)
+	action.match(r.t, "GetCurrentUserGuilds", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetFollowupMessage(a objects.Snowflake, b string, c objects.Snowflake) (d *objects.Message, e error) {
+func (r *restTapePlayer) GetFollowupMessage(a context.Context, b objects.SnowflakeObject, c string, d objects.SnowflakeObject) (e *objects.Message, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetFollowupMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetFollowupMessage", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "GetFollowupMessage", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) GetGuild(a objects.Snowflake) (b *objects.Guild, c error) {
+func (r *restTapePlayer) GetGuild(a context.Context, b objects.SnowflakeObject) (c *objects.Guild, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuild at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuild", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuild", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildApplicationCommandPermissions(a objects.Snowflake, b objects.Snowflake) (c []*objects.GuildApplicationCommandPermissions, d error) {
+func (r *restTapePlayer) GetGuildApplicationCommandPermissions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d []*objects.GuildApplicationCommandPermissions, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildApplicationCommandPermissions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildApplicationCommandPermissions", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetGuildApplicationCommandPermissions", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetGuildBan(a objects.Snowflake, b objects.Snowflake) (c *objects.Ban, d error) {
+func (r *restTapePlayer) GetGuildBan(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.Ban, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildBan at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildBan", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetGuildBan", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetGuildBans(a objects.Snowflake) (b []*objects.Ban, c error) {
+func (r *restTapePlayer) GetGuildBans(a context.Context, b objects.SnowflakeObject) (c []*objects.Ban, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildBans at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildBans", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildBans", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildChannels(a objects.Snowflake) (b []*objects.Channel, c error) {
+func (r *restTapePlayer) GetGuildChannels(a context.Context, b objects.SnowflakeObject) (c []*objects.Channel, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildChannels at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildChannels", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildChannels", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildCommand(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake) (d *objects.ApplicationCommand, e error) {
+func (r *restTapePlayer) GetGuildCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject) (e *objects.ApplicationCommand, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildCommand", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "GetGuildCommand", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) GetGuildCommands(a objects.Snowflake, b objects.Snowflake) (c []*objects.ApplicationCommand, d error) {
+func (r *restTapePlayer) GetGuildCommands(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d []*objects.ApplicationCommand, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildCommands at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildCommands", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetGuildCommands", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetGuildIntegrations(a objects.Snowflake) (b []*objects.Integration, c error) {
+func (r *restTapePlayer) GetGuildIntegrations(a context.Context, b objects.SnowflakeObject) (c []*objects.Integration, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildIntegrations at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildIntegrations", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildIntegrations", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildInvites(a objects.Snowflake) (b []*objects.Invite, c error) {
+func (r *restTapePlayer) GetGuildInvites(a context.Context, b objects.SnowflakeObject) (c []*objects.Invite, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildInvites at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildInvites", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildInvites", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildMember(a objects.Snowflake, b objects.Snowflake) (c *objects.GuildMember, d error) {
+func (r *restTapePlayer) GetGuildMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.GuildMember, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildMember at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildMember", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetGuildMember", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetGuildPreview(a objects.Snowflake) (b *objects.GuildPreview, c error) {
+func (r *restTapePlayer) GetGuildPreview(a context.Context, b objects.SnowflakeObject) (c *objects.GuildPreview, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildPreview at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildPreview", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildPreview", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildPruneCount(a objects.Snowflake, b *rest.GetGuildPruneCountParams) (c int, d error) {
+func (r *restTapePlayer) GetGuildPruneCount(a context.Context, b objects.SnowflakeObject, c *rest.GetGuildPruneCountParams) (d int, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildPruneCount at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildPruneCount", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetGuildPruneCount", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetGuildRoles(a objects.Snowflake) (b []*objects.Role, c error) {
+func (r *restTapePlayer) GetGuildRoles(a context.Context, b objects.SnowflakeObject) (c []*objects.Role, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildRoles at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildRoles", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildRoles", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildTemplates(a objects.Snowflake) (b []*objects.Template, c error) {
+func (r *restTapePlayer) GetGuildScheduledEvent(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d ...*rest.GetGuildScheduledEventParams) (e *objects.GuildScheduledEvent, f error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetGuildScheduledEvent at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetGuildScheduledEvent", true, 4, a, b, c, d, &e, &f)
+	return
+}
+
+func (r *restTapePlayer) GetGuildScheduledEventUsers(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d ...*rest.GetGuildScheduledEventUsersParams) (e []*objects.GuildScheduledEventUser, f error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetGuildScheduledEventUsers at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetGuildScheduledEventUsers", true, 4, a, b, c, d, &e, &f)
+	return
+}
+
+func (r *restTapePlayer) GetGuildSticker(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.Sticker, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetGuildSticker at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetGuildSticker", false, 3, a, b, c, &d, &e)
+	return
+}
+
+func (r *restTapePlayer) GetGuildTemplates(a context.Context, b objects.SnowflakeObject) (c []*objects.Template, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildTemplates at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildTemplates", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildTemplates", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildVanityURL(a objects.Snowflake) (b *objects.Invite, c error) {
+func (r *restTapePlayer) GetGuildVanityURL(a context.Context, b objects.SnowflakeObject) (c *objects.Invite, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildVanityURL at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildVanityURL", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildVanityURL", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildVoiceRegions(a objects.Snowflake) (b []*objects.VoiceRegion, c error) {
+func (r *restTapePlayer) GetGuildVoiceRegions(a context.Context, b objects.SnowflakeObject) (c []*objects.VoiceRegion, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildVoiceRegions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildVoiceRegions", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildVoiceRegions", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildWebhooks(a objects.Snowflake) (b []*objects.Webhook, c error) {
+func (r *restTapePlayer) GetGuildWebhooks(a context.Context, b objects.SnowflakeObject) (c []*objects.Webhook, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildWebhooks at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildWebhooks", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildWebhooks", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildWelcomeScreen(a objects.Snowflake) (b *objects.MembershipScreening, c error) {
+func (r *restTapePlayer) GetGuildWelcomeScreen(a context.Context, b objects.SnowflakeObject) (c *objects.MembershipScreening, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildWelcomeScreen at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildWelcomeScreen", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildWelcomeScreen", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildWidget(a objects.Snowflake) (b *objects.GuildWidgetJSON, c error) {
+func (r *restTapePlayer) GetGuildWidget(a context.Context, b objects.SnowflakeObject) (c *objects.GuildWidgetJSON, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildWidget at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildWidget", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildWidget", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetGuildWidgetImage(a objects.Snowflake, b *rest.GuildWidgetImageParams) (c image.Image, d error) {
+func (r *restTapePlayer) GetGuildWidgetImage(a context.Context, b objects.SnowflakeObject, c *rest.GuildWidgetImageParams) (d image.Image, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildWidgetImage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildWidgetImage", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetGuildWidgetImage", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetGuildWidgetSettings(a objects.Snowflake) (b *objects.GuildWidget, c error) {
+func (r *restTapePlayer) GetGuildWidgetSettings(a context.Context, b objects.SnowflakeObject) (c *objects.GuildWidget, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetGuildWidgetSettings at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetGuildWidgetSettings", false, 1, a, &b, &c)
+	action.match(r.t, "GetGuildWidgetSettings", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetInvite(a string, b *rest.GetInviteParams) (c *objects.Invite, d error) {
+func (r *restTapePlayer) GetInvite(a context.Context, b string, c *rest.GetInviteParams) (d *objects.Invite, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetInvite at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetInvite", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetInvite", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetOriginalInteractionResponse(a objects.Snowflake, b string) (c *objects.Message, d error) {
+func (r *restTapePlayer) GetOriginalInteractionResponse(a context.Context, b objects.SnowflakeObject, c string) (d *objects.Message, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetOriginalInteractionResponse at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetOriginalInteractionResponse", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetOriginalInteractionResponse", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) GetPinnedMessages(a objects.Snowflake) (b []*objects.Message, c error) {
+func (r *restTapePlayer) GetPinnedMessages(a context.Context, b objects.SnowflakeObject) (c []*objects.Message, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetPinnedMessages at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetPinnedMessages", false, 1, a, &b, &c)
+	action.match(r.t, "GetPinnedMessages", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetReactions(a objects.Snowflake, b objects.Snowflake, c interface {}, d *rest.GetReactionsParams) (e []*objects.User, f error) {
+func (r *restTapePlayer) GetReactions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d interface {}, e *rest.GetReactionsParams) (f []*objects.User, g error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetReactions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetReactions", false, 4, a, b, c, d, &e, &f)
+	action.match(r.t, "GetReactions", false, 5, a, b, c, d, e, &f, &g)
 	return
 }
 
-func (r *restTapePlayer) GetTemplate(a string) (b *objects.Template, c error) {
+func (r *restTapePlayer) GetSticker(a context.Context, b objects.SnowflakeObject) (c *objects.Sticker, d error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetSticker at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetSticker", false, 2, a, b, &c, &d)
+	return
+}
+
+func (r *restTapePlayer) GetTemplate(a context.Context, b string) (c *objects.Template, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetTemplate at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetTemplate", false, 1, a, &b, &c)
+	action.match(r.t, "GetTemplate", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetUser(a objects.Snowflake) (b *objects.User, c error) {
+func (r *restTapePlayer) GetUser(a context.Context, b objects.SnowflakeObject) (c *objects.User, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetUser at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetUser", false, 1, a, &b, &c)
+	action.match(r.t, "GetUser", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetUserConnections() (a []*objects.Connection, b error) {
+func (r *restTapePlayer) GetUserConnections(a context.Context) (b []*objects.Connection, c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetUserConnections at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetUserConnections", false, 0, &a, &b)
+	action.match(r.t, "GetUserConnections", false, 1, a, &b, &c)
 	return
 }
 
-func (r *restTapePlayer) GetVoiceRegions() (a []*objects.VoiceRegion, b error) {
+func (r *restTapePlayer) GetVoiceRegions(a context.Context) (b []*objects.VoiceRegion, c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetVoiceRegions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetVoiceRegions", false, 0, &a, &b)
+	action.match(r.t, "GetVoiceRegions", false, 1, a, &b, &c)
 	return
 }
 
-func (r *restTapePlayer) GetWebhook(a objects.Snowflake) (b *objects.Webhook, c error) {
+func (r *restTapePlayer) GetWebhook(a context.Context, b objects.SnowflakeObject) (c *objects.Webhook, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetWebhook at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetWebhook", false, 1, a, &b, &c)
+	action.match(r.t, "GetWebhook", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) GetWebhookWithToken(a objects.Snowflake, b string) (c *objects.Webhook, d error) {
+func (r *restTapePlayer) GetWebhookWithToken(a context.Context, b objects.SnowflakeObject, c string) (d *objects.Webhook, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetWebhookWithToken at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "GetWebhookWithToken", false, 2, a, b, &c, &d)
+	action.match(r.t, "GetWebhookWithToken", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) JoinThread(a objects.Snowflake) (b error) {
+func (r *restTapePlayer) JoinThread(a context.Context, b objects.SnowflakeObject) (c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected JoinThread at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "JoinThread", false, 1, a, &b)
+	action.match(r.t, "JoinThread", false, 2, a, b, &c)
 	return
 }
 
-func (r *restTapePlayer) LeaveGuild(a objects.Snowflake) (b error) {
+func (r *restTapePlayer) LeaveGuild(a context.Context, b objects.SnowflakeObject) (c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected LeaveGuild at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "LeaveGuild", false, 1, a, &b)
+	action.match(r.t, "LeaveGuild", false, 2, a, b, &c)
 	return
 }
 
-func (r *restTapePlayer) LeaveThread(a objects.Snowflake) (b error) {
+func (r *restTapePlayer) LeaveThread(a context.Context, b objects.SnowflakeObject) (c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected LeaveThread at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "LeaveThread", false, 1, a, &b)
+	action.match(r.t, "LeaveThread", false, 2, a, b, &c)
 	return
 }
 
-func (r *restTapePlayer) ListActiveThreads(a objects.Snowflake) (b []*rest.ListThreadsResponse, c error) {
+func (r *restTapePlayer) ListActiveThreads(a context.Context, b objects.SnowflakeObject) (c []*rest.ListThreadsResponse, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ListActiveThreads at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ListActiveThreads", false, 1, a, &b, &c)
+	action.match(r.t, "ListActiveThreads", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) ListGuildMembers(a objects.Snowflake, b *rest.ListGuildMembersParams) (c []*objects.GuildMember, d error) {
+func (r *restTapePlayer) ListGuildMembers(a context.Context, b objects.SnowflakeObject, c *rest.ListGuildMembersParams) (d []*objects.GuildMember, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ListGuildMembers at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ListGuildMembers", false, 2, a, b, &c, &d)
+	action.match(r.t, "ListGuildMembers", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ListJoinedPrivateArchivedThreads(a objects.Snowflake, b ...*rest.ListThreadsParams) (c *rest.ListThreadsResponse, d error) {
+func (r *restTapePlayer) ListGuildStickers(a context.Context, b objects.SnowflakeObject) (c []*objects.Sticker, d error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected ListGuildStickers at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "ListGuildStickers", false, 2, a, b, &c, &d)
+	return
+}
+
+func (r *restTapePlayer) ListJoinedPrivateArchivedThreads(a context.Context, b objects.SnowflakeObject, c ...*rest.ListThreadsParams) (d *rest.ListThreadsResponse, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ListJoinedPrivateArchivedThreads at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ListJoinedPrivateArchivedThreads", true, 2, a, b, &c, &d)
+	action.match(r.t, "ListJoinedPrivateArchivedThreads", true, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ListPrivateArchivedThreads(a objects.Snowflake, b ...*rest.ListThreadsParams) (c *rest.ListThreadsResponse, d error) {
+func (r *restTapePlayer) ListNitroStickerPacks(a context.Context) (b []*objects.StickerPack, c error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected ListNitroStickerPacks at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "ListNitroStickerPacks", false, 1, a, &b, &c)
+	return
+}
+
+func (r *restTapePlayer) ListPrivateArchivedThreads(a context.Context, b objects.SnowflakeObject, c ...*rest.ListThreadsParams) (d *rest.ListThreadsResponse, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ListPrivateArchivedThreads at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ListPrivateArchivedThreads", true, 2, a, b, &c, &d)
+	action.match(r.t, "ListPrivateArchivedThreads", true, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ListPublicArchivedThreads(a objects.Snowflake, b ...*rest.ListThreadsParams) (c *rest.ListThreadsResponse, d error) {
+func (r *restTapePlayer) ListPublicArchivedThreads(a context.Context, b objects.SnowflakeObject, c ...*rest.ListThreadsParams) (d *rest.ListThreadsResponse, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ListPublicArchivedThreads at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ListPublicArchivedThreads", true, 2, a, b, &c, &d)
+	action.match(r.t, "ListPublicArchivedThreads", true, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ListThreadMembers(a objects.Snowflake) (b []*objects.ThreadMember, c error) {
+func (r *restTapePlayer) ListThreadMembers(a context.Context, b objects.SnowflakeObject) (c []*objects.ThreadMember, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ListThreadMembers at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ListThreadMembers", false, 1, a, &b, &c)
+	action.match(r.t, "ListThreadMembers", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) ModifyChannel(a objects.Snowflake, b *rest.ModifyChannelParams) (c *objects.Channel, d error) {
+func (r *restTapePlayer) ModifyChannel(a context.Context, b objects.SnowflakeObject, c *rest.ModifyChannelParams) (d *objects.Channel, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyChannel at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyChannel", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyChannel", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyCurrentUser(a *rest.ModifyCurrentUserParams) (b *objects.User, c error) {
+func (r *restTapePlayer) ModifyCurrentUser(a context.Context, b *rest.ModifyCurrentUserParams) (c *objects.User, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyCurrentUser at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyCurrentUser", false, 1, a, &b, &c)
+	action.match(r.t, "ModifyCurrentUser", false, 2, a, b, &c, &d)
 	return
 }
 
-func (r *restTapePlayer) ModifyCurrentUserNick(a objects.Snowflake, b *rest.ModifyCurrentUserNickParams) (c *rest.ModifyCurrentUserNickParams, d error) {
+func (r *restTapePlayer) ModifyCurrentUserNick(a context.Context, b objects.SnowflakeObject, c *rest.ModifyCurrentUserNickParams) (d *rest.ModifyCurrentUserNickParams, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyCurrentUserNick at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyCurrentUserNick", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyCurrentUserNick", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuild(a objects.Snowflake, b *rest.ModifyGuildParams) (c *objects.Guild, d error) {
+func (r *restTapePlayer) ModifyGuild(a context.Context, b objects.SnowflakeObject, c *rest.ModifyGuildParams) (d *objects.Guild, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuild at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuild", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyGuild", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildChannelPositions(a objects.Snowflake, b []*rest.ModifyChannelPositionParams, c string) (d error) {
+func (r *restTapePlayer) ModifyGuildChannelPositions(a context.Context, b objects.SnowflakeObject, c []*rest.ModifyChannelPositionParams, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildChannelPositions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildChannelPositions", false, 3, a, b, c, &d)
+	action.match(r.t, "ModifyGuildChannelPositions", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildMember(a objects.Snowflake, b objects.Snowflake, c *rest.ModifyGuildMemberParams) (d *objects.GuildMember, e error) {
+func (r *restTapePlayer) ModifyGuildMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.ModifyGuildMemberParams) (e *objects.GuildMember, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildMember at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildMember", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "ModifyGuildMember", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildRole(a objects.Snowflake, b objects.Snowflake, c *rest.ModifyGuildRoleParams) (d *objects.Role, e error) {
+func (r *restTapePlayer) ModifyGuildRole(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.ModifyGuildRoleParams) (e *objects.Role, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildRole at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildRole", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "ModifyGuildRole", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildRolePositions(a objects.Snowflake, b []*rest.ModifyGuildRolePositionsParams) (c []*objects.Role, d error) {
+func (r *restTapePlayer) ModifyGuildRolePositions(a context.Context, b objects.SnowflakeObject, c []*rest.ModifyGuildRolePositionsParams) (d []*objects.Role, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildRolePositions at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildRolePositions", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyGuildRolePositions", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildTemplate(a objects.Snowflake, b string, c *rest.ModifyGuildTemplateParams) (d *objects.Template, e error) {
+func (r *restTapePlayer) ModifyGuildScheduledEvent(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.ModifyGuildScheduledEventParams) (e *objects.GuildScheduledEvent, f error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected ModifyGuildScheduledEvent at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "ModifyGuildScheduledEvent", false, 4, a, b, c, d, &e, &f)
+	return
+}
+
+func (r *restTapePlayer) ModifyGuildSticker(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.BaseStickerParams) (e *objects.Sticker, f error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected ModifyGuildSticker at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "ModifyGuildSticker", false, 4, a, b, c, d, &e, &f)
+	return
+}
+
+func (r *restTapePlayer) ModifyGuildTemplate(a context.Context, b objects.SnowflakeObject, c string, d *rest.ModifyGuildTemplateParams) (e *objects.Template, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildTemplate at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildTemplate", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "ModifyGuildTemplate", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildWelcomeScreen(a objects.Snowflake, b *rest.ModifyGuildMembershipScreeningParams) (c *objects.MembershipScreening, d error) {
+func (r *restTapePlayer) ModifyGuildWelcomeScreen(a context.Context, b objects.SnowflakeObject, c *rest.ModifyGuildMembershipScreeningParams) (d *objects.MembershipScreening, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildWelcomeScreen at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildWelcomeScreen", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyGuildWelcomeScreen", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyGuildWidget(a objects.Snowflake, b *rest.GuildWidgetParams) (c *objects.GuildWidget, d error) {
+func (r *restTapePlayer) ModifyGuildWidget(a context.Context, b objects.SnowflakeObject, c *rest.GuildWidgetParams) (d *objects.GuildWidget, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyGuildWidget at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyGuildWidget", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyGuildWidget", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyWebhook(a objects.Snowflake, b *rest.ModifyWebhookParams) (c *objects.Webhook, d error) {
+func (r *restTapePlayer) ModifyWebhook(a context.Context, b objects.SnowflakeObject, c *rest.ModifyWebhookParams) (d *objects.Webhook, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyWebhook at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyWebhook", false, 2, a, b, &c, &d)
+	action.match(r.t, "ModifyWebhook", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) ModifyWebhookWithToken(a objects.Snowflake, b string, c *rest.ModifyWebhookWithTokenParams) (d *objects.Webhook, e error) {
+func (r *restTapePlayer) ModifyWebhookWithToken(a context.Context, b objects.SnowflakeObject, c string, d *rest.ModifyWebhookWithTokenParams) (e *objects.Webhook, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected ModifyWebhookWithToken at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "ModifyWebhookWithToken", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "ModifyWebhookWithToken", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) RemoveGuildBan(a objects.Snowflake, b objects.Snowflake, c string) (d error) {
+func (r *restTapePlayer) RemoveGuildBan(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected RemoveGuildBan at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "RemoveGuildBan", false, 3, a, b, c, &d)
+	action.match(r.t, "RemoveGuildBan", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) RemoveGuildMember(a objects.Snowflake, b objects.Snowflake, c string) (d error) {
+func (r *restTapePlayer) RemoveGuildMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected RemoveGuildMember at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "RemoveGuildMember", false, 3, a, b, c, &d)
+	action.match(r.t, "RemoveGuildMember", false, 4, a, b, c, d, &e)
 	return
 }
 
-func (r *restTapePlayer) RemoveGuildMemberRole(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake, d string) (e error) {
+func (r *restTapePlayer) RemoveGuildMemberRole(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject, e string) (f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected RemoveGuildMemberRole at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "RemoveGuildMemberRole", false, 4, a, b, c, d, &e)
+	action.match(r.t, "RemoveGuildMemberRole", false, 5, a, b, c, d, e, &f)
 	return
 }
 
-func (r *restTapePlayer) RemoveThreadMember(a objects.Snowflake, b objects.Snowflake) (c error) {
+func (r *restTapePlayer) RemoveThreadMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected RemoveThreadMember at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "RemoveThreadMember", false, 2, a, b, &c)
+	action.match(r.t, "RemoveThreadMember", false, 3, a, b, c, &d)
 	return
 }
 
-func (r *restTapePlayer) StartThread(a objects.Snowflake, b *rest.StartThreadParams) (c *objects.Channel, d error) {
+func (r *restTapePlayer) StartThread(a context.Context, b objects.SnowflakeObject, c *rest.StartThreadParams) (d *objects.Channel, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected StartThread at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "StartThread", false, 2, a, b, &c, &d)
+	action.match(r.t, "StartThread", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) StartThreadWithMessage(a objects.Snowflake, b objects.Snowflake, c *rest.StartThreadParams) (d *objects.Channel, e error) {
+func (r *restTapePlayer) StartThreadWithMessage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.StartThreadParams) (e *objects.Channel, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected StartThreadWithMessage at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "StartThreadWithMessage", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "StartThreadWithMessage", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) StartTyping(a objects.Snowflake) (b error) {
+func (r *restTapePlayer) StartTyping(a context.Context, b objects.SnowflakeObject) (c error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected StartTyping at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "StartTyping", false, 1, a, &b)
+	action.match(r.t, "StartTyping", false, 2, a, b, &c)
 	return
 }
 
-func (r *restTapePlayer) SyncGuildTemplate(a objects.Snowflake, b string) (c *objects.Template, d error) {
+func (r *restTapePlayer) SyncGuildTemplate(a context.Context, b objects.SnowflakeObject, c string) (d *objects.Template, e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected SyncGuildTemplate at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "SyncGuildTemplate", false, 2, a, b, &c, &d)
+	action.match(r.t, "SyncGuildTemplate", false, 3, a, b, c, &d, &e)
 	return
 }
 
-func (r *restTapePlayer) UpdateCommand(a objects.Snowflake, b objects.Snowflake, c *objects.ApplicationCommand) (d *objects.ApplicationCommand, e error) {
+func (r *restTapePlayer) UpdateCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *objects.ApplicationCommand) (e *objects.ApplicationCommand, f error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected UpdateCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "UpdateCommand", false, 3, a, b, c, &d, &e)
+	action.match(r.t, "UpdateCommand", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
-func (r *restTapePlayer) UpdateGuildCommand(a objects.Snowflake, b objects.Snowflake, c objects.Snowflake, d *objects.ApplicationCommand) (e *objects.ApplicationCommand, f error) {
+func (r *restTapePlayer) UpdateGuildCommand(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d objects.SnowflakeObject, e *objects.ApplicationCommand) (f *objects.ApplicationCommand, g error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected UpdateGuildCommand at end of tape")
 		return // Here for unit tests - in production this will never be hit.
 	}
 	action := r.tape[r.index]
 	r.index++
-	action.match(r.t, "UpdateGuildCommand", false, 4, a, b, c, d, &e, &f)
+	action.match(r.t, "UpdateGuildCommand", false, 5, a, b, c, d, e, &f, &g)
 	return
 }
