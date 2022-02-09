@@ -152,7 +152,6 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 					a.logger.Error().Err(err).Msg("failed to generate attachment")
 					continue
 				}
-				file.Close()
 				resp.Data.Attachments = append(resp.Data.Attachments, attach)
 			}
 
