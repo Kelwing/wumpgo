@@ -230,6 +230,11 @@ func (c textCommandBuilder) DoubleOption(name, description string, required bool
 	return c
 }
 
+func (c textCommandBuilder) AttachmentOption(name, description string, required bool) TextCommandBuilder {
+	c.commandBuilder.AttachmentOption(name, description, required)
+	return c
+}
+
 func (c textCommandBuilder) DefaultPermission() TextCommandBuilder {
 	c.commandBuilder.DefaultPermission()
 	return c
@@ -286,6 +291,11 @@ func (c subcommandBuilder) MentionableOption(name, description string, required 
 
 func (c subcommandBuilder) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) SubCommandBuilder {
 	c.commandBuilder.DoubleOption(name, description, required, choiceBuilder)
+	return c
+}
+
+func (c subcommandBuilder) AttachmentOption(name, description string, required bool) SubCommandBuilder {
+	c.commandBuilder.AttachmentOption(name, description, required)
 	return c
 }
 
@@ -369,6 +379,10 @@ type commandOptions interface {
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
 	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) CommandBuilder
+
+	// AttachmentOption is used to define an option of the type attachment.
+	// Maps to option type 11 (ATTACHMENT): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	AttachmentOption(name, description string, required bool) CommandBuilder
 }
 
 type subCommandOptions interface {
@@ -403,6 +417,10 @@ type subCommandOptions interface {
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
 	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) SubCommandBuilder
+
+	// AttachmentOption is used to define an option of the type attachment.
+	// Maps to option type 11 (ATTACHMENT): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	AttachmentOption(name, description string, required bool) SubCommandBuilder
 }
 
 type textCommandOptions interface {
@@ -437,4 +455,8 @@ type textCommandOptions interface {
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
 	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) TextCommandBuilder
+
+	// AttachmentOption is used to define an option of the type attachment.
+	// Maps to option type 11 (ATTACHMENT): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	AttachmentOption(name, description string, required bool) TextCommandBuilder
 }

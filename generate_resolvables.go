@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -55,7 +56,7 @@ func (r Resolvable{{ .Type }}) Resolve() *objects.{{ .Type }} {
 }`
 
 var types = []string{
-	"User", "Channel", "Role", "Message",
+	"User", "Channel", "Role", "Message", "Attachment",
 }
 
 func main() {

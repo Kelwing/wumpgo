@@ -133,3 +133,34 @@ func (r ResolvableMessage) Resolve() *objects.Message {
 	}
 	return &x
 }
+
+// ResolvableAttachment is used to define a Attachment in a command option that is potentially resolvable.
+type ResolvableAttachment struct {
+	id   string
+	data *objects.ApplicationCommandInteractionData
+}
+
+// Snowflake is used to return the ID as a snowflake.
+func (r ResolvableAttachment) Snowflake() objects.Snowflake {
+	n, _ := strconv.ParseUint(r.id, 10, 64)
+	return objects.Snowflake(n)
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+func (r ResolvableAttachment) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.id)
+}
+
+// String is used to return the ID as a string.
+func (r ResolvableAttachment) String() string {
+	return r.id
+}
+
+// Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
+func (r ResolvableAttachment) Resolve() *objects.Attachment {
+	x, ok := r.data.Resolved.Attachments[r.Snowflake()]
+	if !ok {
+		return nil
+	}
+	return &x
+}

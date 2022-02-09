@@ -122,6 +122,11 @@ func (c {{ .Struct }}) MentionableOption(name, description string, required bool
 func (c {{ .Struct }}) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) {{ .BuilderType }}Builder {
 	c.commandBuilder.DoubleOption(name, description, required, choiceBuilder)
 	return c
+}
+
+func (c {{ .Struct }}) AttachmentOption(name, description string, required bool) {{ .BuilderType }}Builder {
+	c.commandBuilder.AttachmentOption(name, description, required)
+	return c
 }{{ end }}
 
 func (c {{ .Struct }}) DefaultPermission() {{ .BuilderType }}Builder {
@@ -171,6 +176,10 @@ const optionInterface = `type {{ .OutputInterface }} interface {
 	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
 	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
 	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) {{ .InterfaceName }}
+
+	// AttachmentOption is used to define an option of the type attachment.
+	// Maps to option type 11 (ATTACHMENT): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	AttachmentOption(name, description string, required bool) {{ .InterfaceName }}
 }`
 
 var choiceTypes = []struct {

@@ -58,3 +58,7 @@ func (c *commandBuilder) RoleOption(name, description string, required bool) Com
 func (c *commandBuilder) MentionableOption(name, description string, required bool) CommandBuilder {
 	return c.appendOption(objects.TypeMentionable, name, description, required)
 }
+
+func (c *commandBuilder) AttachmentOption(name, description string, required bool) CommandBuilder {
+	return c.appendOption(objects.TypeAttachment, name, description, required)
+}

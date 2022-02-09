@@ -69,6 +69,10 @@ func TestResolvableMessage_Snowflake(t *testing.T) {
 	testSnowflake(t, &ResolvableMessage{})
 }
 
+func TestResolvableAttachment_Snowflake(t *testing.T) {
+	testSnowflake(t, &ResolvableAttachment{})
+}
+
 func testMarshalJSON(t *testing.T, resolvable interface{}) {
 	t.Helper()
 	setUnexportedField(reflect.Indirect(reflect.ValueOf(resolvable)).FieldByName("id"), "testing")
@@ -101,6 +105,10 @@ func TestResolvableRole_MarshalJSON(t *testing.T) {
 
 func TestResolvableMessage_MarshalJSON(t *testing.T) {
 	testMarshalJSON(t, &ResolvableMessage{})
+}
+
+func TestResolvableAttachment_MarshalJSON(t *testing.T) {
+	testMarshalJSON(t, &ResolvableAttachment{})
 }
 
 func testString(t *testing.T, resolvable interface{}) {
@@ -136,11 +144,15 @@ func TestResolvableMessage_String(t *testing.T) {
 	testString(t, &ResolvableMessage{})
 }
 
+func TestResolvableAttachment_String(t *testing.T) {
+	testString(t, &ResolvableAttachment{})
+}
+
 func TestResolvableUser_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandInteractionData
 		expected *objects.User
 	}{
 		{
@@ -149,8 +161,8 @@ func TestResolvableUser_Resolve(t *testing.T) {
 			expected: nil,
 		},
 		{
-			name:     "found",
-			data:     &objects.ApplicationCommandInteractionData{
+			name: "found",
+			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
 					Users: map[objects.Snowflake]objects.User{
 						1: {Email: "abc"},
@@ -172,7 +184,7 @@ func TestResolvableChannel_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandInteractionData
 		expected *objects.Channel
 	}{
 		{
@@ -181,8 +193,8 @@ func TestResolvableChannel_Resolve(t *testing.T) {
 			expected: nil,
 		},
 		{
-			name:     "found",
-			data:     &objects.ApplicationCommandInteractionData{
+			name: "found",
+			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
 					Channels: map[objects.Snowflake]objects.Channel{
 						1: {Name: "abc"},
@@ -204,7 +216,7 @@ func TestResolvableRole_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandInteractionData
 		expected *objects.Role
 	}{
 		{
@@ -213,8 +225,8 @@ func TestResolvableRole_Resolve(t *testing.T) {
 			expected: nil,
 		},
 		{
-			name:     "found",
-			data:     &objects.ApplicationCommandInteractionData{
+			name: "found",
+			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
 					Roles: map[objects.Snowflake]objects.Role{
 						1: {Name: "abc"},
@@ -236,7 +248,7 @@ func TestResolvableMessage_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandInteractionData
 		expected *objects.Message
 	}{
 		{
@@ -245,8 +257,8 @@ func TestResolvableMessage_Resolve(t *testing.T) {
 			expected: nil,
 		},
 		{
-			name:     "found",
-			data:     &objects.ApplicationCommandInteractionData{
+			name: "found",
+			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
 					Messages: map[objects.Snowflake]objects.Message{
 						1: {Content: "abc"},
@@ -259,6 +271,38 @@ func TestResolvableMessage_Resolve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := ResolvableMessage{id: "1", data: tt.data}
+			assert.Equal(t, tt.expected, r.Resolve())
+		})
+	}
+}
+
+func TestResolvableAttachment_Resolve(t *testing.T) {
+	tests := []struct {
+		name string
+
+		data     *objects.ApplicationCommandInteractionData
+		expected *objects.Attachment
+	}{
+		{
+			name:     "nil",
+			data:     &objects.ApplicationCommandInteractionData{},
+			expected: nil,
+		},
+		{
+			name: "found",
+			data: &objects.ApplicationCommandInteractionData{
+				Resolved: objects.ApplicationCommandInteractionDataResolved{
+					Attachments: map[objects.Snowflake]objects.Attachment{
+						1: {Filename: "abc"},
+					},
+				},
+			},
+			expected: &objects.Attachment{Filename: "abc"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := ResolvableAttachment{id: "1", data: tt.data}
 			assert.Equal(t, tt.expected, r.Resolve())
 		})
 	}

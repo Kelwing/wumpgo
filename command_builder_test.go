@@ -463,6 +463,21 @@ func Test_textCommandBuilder_DoubleOption(t *testing.T) {
 	}, b.(textCommandBuilder).cmd.Options)
 }
 
+func Test_textCommandBuilder_AttachmentOption(t *testing.T) {
+	var b TextCommandBuilder = textCommandBuilder{&commandBuilder{}}
+	assert.NoError(t, callBuilderFunction(
+		t, b, "AttachmentOption", "testing", "testing 123", true,
+	))
+	assert.Equal(t, []*objects.ApplicationCommandOption{
+		{
+			OptionType:  objects.TypeAttachment,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
+		},
+	}, b.(textCommandBuilder).cmd.Options)
+}
+
 func Test_textCommandBuilder_DefaultPermission(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder{}}
 	assert.NoError(t, callBuilderFunction(t, b, "DefaultPermission"))
@@ -616,6 +631,21 @@ func Test_subcommandBuilder_DoubleOption(t *testing.T) {
 				{Name: "a", Value: (float64)(123)},
 			},
 			Required: true,
+		},
+	}, b.(subcommandBuilder).cmd.Options)
+}
+
+func Test_subcommandBuilder_AttachmentOption(t *testing.T) {
+	var b SubCommandBuilder = subcommandBuilder{&commandBuilder{}}
+	assert.NoError(t, callBuilderFunction(
+		t, b, "AttachmentOption", "testing", "testing 123", true,
+	))
+	assert.Equal(t, []*objects.ApplicationCommandOption{
+		{
+			OptionType:  objects.TypeAttachment,
+			Name:        "testing",
+			Description: "testing 123",
+			Required:    true,
 		},
 	}, b.(subcommandBuilder).cmd.Options)
 }
