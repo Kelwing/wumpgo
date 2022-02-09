@@ -5,13 +5,21 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/textproto"
 	"strings"
 )
+
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
+}
 
 type DiscordFile struct {
 	*bytes.Buffer
 	Filename    string
 	Description string
+	ContentType string
 	Spoiler     bool
 }
 
@@ -40,8 +48,18 @@ func (f *DiscordFile) GenerateAttachment(index Snowflake, m *multipart.Writer) (
 		Filename:          f.Filename,
 		Description:       f.Description,
 	}
+	contentType := "application/octet-stream"
+	if f.ContentType != "" {
+		contentType = f.ContentType
+	}
 
-	w, err := m.CreateFormFile(fmt.Sprintf(formFieldNameFmt, index), f.Filename)
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition",
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+			escapeQuotes(fmt.Sprintf(formFieldNameFmt, index)), escapeQuotes(f.Filename)))
+	h.Set("Content-Type", contentType)
+
+	w, err := m.CreatePart(h)
 	if err != nil {
 		return nil, err
 	}
