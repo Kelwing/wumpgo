@@ -2,6 +2,8 @@ github.com/Postcord/objects v0.1.1 h1:Az8+G2c6LWAIW3UEKW1zFq4BYKzk5FBtyKtIiufczc
 github.com/Postcord/objects v0.1.1/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
 github.com/Postcord/objects v0.1.2-0.20220208220900-6d07594d962a h1:ZE1kOGMqpJ8BiSID42gZIjCN78KcaZGVziB0c+tAW5U=
 github.com/Postcord/objects v0.1.2-0.20220208220900-6d07594d962a/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
+github.com/Postcord/objects v0.1.2 h1:rC8KO1cwDHKpsgOvIkOes24yxt+yBMgfRM0MpCcRQbk=
+github.com/Postcord/objects v0.1.2/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/coreos/go-systemd/v22 v22.3.2/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
