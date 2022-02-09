@@ -63,6 +63,7 @@ var MismatchedOption = errors.New("mismatched interaction option")
 type commandExecutionOptions struct {
 	restClient       rest.RESTClient
 	exceptionHandler ErrorHandler
+	modalRouter      *ModalRouter
 	allowedMentions  *objects.AllowedMentions
 	interaction      *objects.Interaction
 	data             *objects.ApplicationCommandInteractionData
@@ -170,6 +171,7 @@ func (c *Command) execute(reqCtx context.Context, opts commandExecutionOptions, 
 	rctx := &CommandRouterCtx{
 		globalAllowedMentions: opts.allowedMentions,
 		errorHandler:          opts.exceptionHandler,
+		modalRouter:           opts.modalRouter,
 		Interaction:           opts.interaction,
 		Context:               reqCtx,
 		Command:               c,

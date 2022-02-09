@@ -368,7 +368,7 @@ walk: // outer loop for walking the tree
 					} else if len(n.children) == 1 {
 						// No handle found. Check if a handle for this path + a
 						// trailing slash exists for TSR recommendation
-						n = n.children[0]
+						n = n.children[0] //nolint:staticcheck
 					}
 
 					return
@@ -397,7 +397,7 @@ walk: // outer loop for walking the tree
 			// trailing slash exists for trailing slash recommendation
 			for i := 0; i < len(n.indices); i++ {
 				if n.indices[i] == '/' {
-					n = n.children[i]
+					n = n.children[i] //nolint:staticcheck
 					return
 				}
 			}

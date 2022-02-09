@@ -133,6 +133,14 @@ func (c *ComponentRouterCtx) ChannelMessageWithSource() *ComponentRouterCtx {
 	return c
 }
 
+// WithModalPath is used to set the response to the modal path specified.
+func (c *ComponentRouterCtx) WithModalPath(path string) error {
+	if c.modalRouter == nil {
+		return UnsetModalRouter
+	}
+	return c.modalRouter.SendModalResponse(c, path)
+}
+
 // SetEmbed is used to set the embed, overwriting any previously.
 func (c *CommandRouterCtx) SetEmbed(embed *objects.Embed) *CommandRouterCtx {
 	c.editEmbed(embed, false)
@@ -250,6 +258,135 @@ func (c *CommandRouterCtx) DeferredChannelMessageWithSource(f func(*CommandRoute
 
 // ChannelMessageWithSource is used to respond to the interaction with a message.
 func (c *CommandRouterCtx) ChannelMessageWithSource() *CommandRouterCtx {
+	c.respType = objects.ResponseChannelMessageWithSource
+	return c
+}
+
+// WithModalPath is used to set the response to the modal path specified.
+func (c *CommandRouterCtx) WithModalPath(path string) error {
+	if c.modalRouter == nil {
+		return UnsetModalRouter
+	}
+	return c.modalRouter.SendModalResponse(c, path)
+}
+
+// SetEmbed is used to set the embed, overwriting any previously.
+func (c *ModalRouterCtx) SetEmbed(embed *objects.Embed) *ModalRouterCtx {
+	c.editEmbed(embed, false)
+	return c
+}
+
+// AddEmbed is used to append the embed, joining any previously.
+func (c *ModalRouterCtx) AddEmbed(embed *objects.Embed) *ModalRouterCtx {
+	c.editEmbed(embed, true)
+	return c
+}
+
+// AddComponentRow is used to add a row of components.
+func (c *ModalRouterCtx) AddComponentRow(row []*objects.Component) *ModalRouterCtx {
+	component := &objects.Component{Type: objects.ComponentTypeActionRow, Components: row}
+	response := c.ResponseData()
+	response.Components = append(response.Components, component)
+	return c
+}
+
+// SetComponentRows is used to set rows of components.
+func (c *ModalRouterCtx) SetComponentRows(rows [][]*objects.Component) *ModalRouterCtx {
+	components := make([]*objects.Component, len(rows))
+	for i, v := range rows {
+		components[i] = &objects.Component{Type: objects.ComponentTypeActionRow, Components: v}
+	}
+	c.ResponseData().Components = components
+	return c
+}
+
+// ClearComponents is used to clear the components in a response.
+func (c *ModalRouterCtx) ClearComponents() *ModalRouterCtx {
+	c.ResponseData().Components = []*objects.Component{}
+	return c
+}
+
+// SetContent is used to set the content of a response.
+func (c *ModalRouterCtx) SetContent(content string) *ModalRouterCtx {
+	c.ResponseData().Content = content
+	return c
+}
+
+// SetContentf is used to set the content of a response using fmt.Sprintf.
+func (c *ModalRouterCtx) SetContentf(content string, args ...interface{}) *ModalRouterCtx {
+	c.ResponseData().Content = fmt.Sprintf(content, args...)
+	return c
+}
+
+// SetAllowedMentions is used to set the allowed mentions of a response. This will override your global configuration.
+func (c *ModalRouterCtx) SetAllowedMentions(config *objects.AllowedMentions) *ModalRouterCtx {
+	c.ResponseData().AllowedMentions = config
+	return c
+}
+
+// SetTTS is used to set the TTS configuration for your response.
+func (c *ModalRouterCtx) SetTTS(tts bool) *ModalRouterCtx {
+	c.ResponseData().TTS = tts
+	return c
+}
+
+// Ephemeral is used to set the response as ephemeral.
+func (c *ModalRouterCtx) Ephemeral() *ModalRouterCtx {
+	c.ResponseData().Flags = 64
+	return c
+}
+
+// AttachBytes adds a file attachment to the response from a byte array
+func (c *ModalRouterCtx) AttachBytes(data []byte, filename, description string) *ModalRouterCtx {
+	file := &objects.DiscordFile{
+		Buffer:			bytes.NewBuffer(data),
+		Filename:   	filename,
+		Description: 	description,
+	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c
+}
+
+// AttachFile adds a file attachment to the response from an *objects.DiscordFile
+func (c *ModalRouterCtx) AttachFile(file *objects.DiscordFile) *ModalRouterCtx {
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c
+}
+
+// UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
+func (c *ModalRouterCtx) UpdateLater(f func(*ModalRouterCtx) error) *ModalRouterCtx {
+	cpy := *c
+	cpy.responseBuilder = responseBuilder{}
+	go func() {
+		defer func() {
+			if errGeneric := recover(); errGeneric != nil {
+				cpy.errorHandler(ungenericError(errGeneric))
+			}
+		}()
+		var response *objects.InteractionResponse
+		if err := f(&cpy); err == nil {
+			response = cpy.buildResponse(false, cpy.errorHandler, cpy.globalAllowedMentions)
+		} else {
+			response = cpy.errorHandler(err)
+		}
+		// Need a better way to handle this context - the one on the RouterCtx will have been cancelled already
+		// and can't be used
+		processUpdateLaterResponse(context.Background(), cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+	}()
+	return c
+}
+
+// DeferredChannelMessageWithSource is used to handle updating the response later. The user sees a loading state.
+// Note that the chain does not continue after this since it is impossible to attach additional data.
+func (c *ModalRouterCtx) DeferredChannelMessageWithSource(f func(*ModalRouterCtx) error) {
+	c.respType = objects.ResponseDeferredChannelMessageWithSource
+	c.UpdateLater(f)
+}
+
+// ChannelMessageWithSource is used to respond to the interaction with a message.
+func (c *ModalRouterCtx) ChannelMessageWithSource() *ModalRouterCtx {
 	c.respType = objects.ResponseChannelMessageWithSource
 	return c
 }

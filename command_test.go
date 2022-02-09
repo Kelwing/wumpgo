@@ -1,6 +1,3 @@
-// NOTE: The extra underscore in this filename is intentional. This props it up when files are in alphabetical order.
-// This means that the test is always under the filename in my IDE.
-
 package router
 
 import (

@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"strconv"
+
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
 	"github.com/Postcord/router"
-	"os"
-	"strconv"
 )
 
 func builder() (*router.CommandRouter, *interactions.App, router.LoaderBuilder) {
@@ -185,27 +187,114 @@ func builder() (*router.CommandRouter, *interactions.App, router.LoaderBuilder) 
 		}).
 		MustBuild()
 
-	return commandRouter, app, router.RouterLoader().ComponentRouter(componentRouter).CommandRouter(commandRouter).Build(app)
+	// Defines a modal.
+	modalRouter := &router.ModalRouter{}
+	modalRouter.AddModal(&router.ModalContent{
+		Path: "/modal/:id",
+		Contents: func(ctx *router.ModalGenerationCtx) (name string, contents []router.ModalContentItem) {
+			return "path: " + ctx.Path, []router.ModalContentItem{
+				{
+					Short:       true,
+					Label:       "short text",
+					Key:         "short_text",
+					Placeholder: "short text here",
+					Value:       "",
+					Required:    false,
+					MinLength:   0,
+					MaxLength:   0,
+				},
+				{
+					Short:       false,
+					Label:       "long required text",
+					Key:         "long_required_text",
+					Placeholder: "long required text here",
+					Required:    true,
+				},
+				{
+					Short:       true,
+					Label:       "max length",
+					Key:         "max_length",
+					Placeholder: "max length 10 chars",
+					MaxLength:   10,
+				},
+				{
+					Short:       true,
+					Label:       "value prefilled",
+					Key:         "value_prefilled",
+					Placeholder: "value prefilled",
+					Value:       "hello",
+				},
+			}
+		},
+		Function: func(ctx *router.ModalRouterCtx) error {
+			ctx.SetContentf("modal items: %v, params: %v", ctx.ModalItems, ctx.Params)
+			return nil
+		},
+	})
+
+	// Add a modal command.
+	commandRouter.NewCommandBuilder("modal").
+		DefaultPermission().
+		Handler(func(ctx *router.CommandRouterCtx) error {
+			return modalRouter.SendModalResponse(ctx, "/modal/testingcmd")
+		}).
+		MustBuild()
+
+	// Add a modal component.
+	componentRouter.RegisterButton("/modal/testingcomponent", func(ctx *router.ComponentRouterCtx) error {
+		modalRouter.SendModalResponse(ctx, "/modal/testingcomponent")
+		return nil
+	})
+	commandRouter.NewCommandBuilder("modalcomponent").
+		DefaultPermission().
+		Handler(func(ctx *router.CommandRouterCtx) error {
+			ctx.SetContent("Hello World!").AddComponentRow([]*objects.Component{
+				{
+					Type:     objects.ComponentTypeButton,
+					Label:    "Call Modal",
+					Style:    objects.ButtonStylePrimary,
+					CustomID: "/modal/testingcomponent",
+				},
+			})
+			return nil
+		}).
+		MustBuild()
+
+	return commandRouter, app,
+		router.RouterLoader().ComponentRouter(componentRouter).CommandRouter(commandRouter).
+			ModalRouter(modalRouter).Build(app)
 }
 
 func main() {
 	// Dump the Discord commands if specified.
 	commandBuilder, app, _ := builder()
-	if os.Getenv("DUMP") == "1" {
+	if os.Getenv("DUMP") != "" {
 		commands := commandBuilder.FormulateDiscordCommands()
 		me, err := app.Rest().GetCurrentUser()
 		if err != nil {
 			panic(err)
 		}
-		if _, err := app.Rest().BulkOverwriteGlobalCommands(me.ID, commands); err != nil {
-			panic(err)
+		switch os.Getenv("DUMP") {
+		case "1":
+			if _, err := app.Rest().BulkOverwriteGlobalCommands(me.ID, commands); err != nil {
+				panic(err)
+			}
+		default:
+			x, err := strconv.ParseUint(os.Getenv("DUMP"), 10, 64)
+			if err != nil {
+				panic(err)
+			}
+			guildId := objects.Snowflake(x)
+			if _, err := app.Rest().BulkOverwriteGuildCommands(me.ID, guildId, commands); err != nil {
+				panic(err)
+			}
 		}
 		fmt.Println("Commands dumped.")
 		return
 	}
 
 	// Create the interactions router.
-	if err := app.Run(8000); err != nil {
+	if err := http.ListenAndServe(":8000", app.HTTPHandler()); err != nil {
 		panic(err)
 	}
 }

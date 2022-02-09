@@ -18,6 +18,9 @@ type CommandRouterCtx struct {
 	// Defines the error handler.
 	errorHandler ErrorHandler
 
+	// Defines the modal router.
+	modalRouter *ModalRouter
+
 	// Defines the global allowed mentions configuration.
 	globalAllowedMentions *objects.AllowedMentions
 
@@ -497,6 +500,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 					exceptionHandler: errHandler,
 					allowedMentions:  allowedMentions,
 					interaction:      interaction,
+					modalRouter:      loader.modalRouter,
 					data:             &rootData,
 					options:          options,
 				}, middlewareList)

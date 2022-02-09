@@ -163,7 +163,7 @@ func TestLoaderBuilder_CombinedRouter(t *testing.T) {
 }
 
 type fakeBuildHandlerAccepter struct {
-	componentHandler, commandHandler, autocompleteHandler interactions.HandlerFunc
+	componentHandler, commandHandler, modalHandler, autocompleteHandler interactions.HandlerFunc
 }
 
 func (f *fakeBuildHandlerAccepter) ComponentHandler(handler interactions.HandlerFunc) {
@@ -172,6 +172,10 @@ func (f *fakeBuildHandlerAccepter) ComponentHandler(handler interactions.Handler
 
 func (f *fakeBuildHandlerAccepter) CommandHandler(handler interactions.HandlerFunc) {
 	f.commandHandler = handler
+}
+
+func (f *fakeBuildHandlerAccepter) ModalHandler(handler interactions.HandlerFunc) {
+	f.modalHandler = handler
 }
 
 func (f *fakeBuildHandlerAccepter) AutocompleteHandler(handler interactions.HandlerFunc) {
@@ -189,6 +193,7 @@ func TestLoaderBuilder_Build(t *testing.T) {
 		allowedMentions *objects.AllowedMentions
 		components      *ComponentRouter
 		commands        *CommandRouter
+		modals          *ModalRouter
 		errHandler      ErrorHandler
 	}{
 		{
@@ -197,15 +202,23 @@ func TestLoaderBuilder_Build(t *testing.T) {
 		{
 			name:       "command router nil",
 			components: &ComponentRouter{},
+			modals:     &ModalRouter{},
 		},
 		{
 			name:     "component router nil",
 			commands: &CommandRouter{},
+			modals:   &ModalRouter{},
+		},
+		{
+			name:       "modal router nil",
+			components: &ComponentRouter{},
+			commands:   &CommandRouter{},
 		},
 		{
 			name:       "error handler present",
 			components: &ComponentRouter{},
 			commands:   &CommandRouter{},
+			modals:     &ModalRouter{},
 			errHandler: func(err error) *objects.InteractionResponse {
 				return nil
 			},
@@ -214,6 +227,7 @@ func TestLoaderBuilder_Build(t *testing.T) {
 			name:            "allowed mentions present",
 			components:      &ComponentRouter{},
 			commands:        &CommandRouter{},
+			modals:          &ModalRouter{},
 			allowedMentions: &objects.AllowedMentions{},
 		},
 	}
@@ -224,6 +238,7 @@ func TestLoaderBuilder_Build(t *testing.T) {
 				AllowedMentions(tt.allowedMentions).
 				ComponentRouter(tt.components).
 				CommandRouter(tt.commands).
+				ModalRouter(tt.modals).
 				ErrorHandler(tt.errHandler).
 				Build(app)
 			if tt.components == nil {
@@ -237,6 +252,11 @@ func TestLoaderBuilder_Build(t *testing.T) {
 			} else {
 				assert.NotNil(t, app.commandHandler)
 				assert.NotNil(t, app.autocompleteHandler)
+			}
+			if tt.modals == nil {
+				assert.Nil(t, app.modalHandler)
+			} else {
+				assert.NotNil(t, app.modalHandler)
 			}
 		})
 	}

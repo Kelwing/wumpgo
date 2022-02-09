@@ -25,6 +25,9 @@ type ComponentRouterCtx struct {
 	// Defines the global allowed mentions configuration.
 	globalAllowedMentions *objects.AllowedMentions
 
+	// Defines the modal router.
+	modalRouter *ModalRouter
+
 	// Defines the void ID generator.
 	voidGenerator
 
@@ -90,12 +93,12 @@ var NotSelectionMenu = errors.New("the data returned is not that of a selection 
 var NotButton = errors.New("the data returned is not that of a button")
 
 // Adds the argument context to the handler.
-type contextCallback func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse
+type contextCallback = func(context.Context, *objects.Interaction, *objects.ApplicationComponentInteractionData, map[string]string, rest.RESTClient, ErrorHandler) *objects.InteractionResponse
 
 // Defines the data for the context for the route.
 type routeContext struct {
-	cb contextCallback
-	r  string
+	i interface{}
+	r string
 }
 
 // Used to ungeneric an error.
@@ -113,12 +116,12 @@ func ungenericError(errGeneric interface{}) error {
 }
 
 // Used to build the component router by the parent.
-func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFunc {
+func (c *ComponentRouter) build(modalRouter *ModalRouter, loader loaderPassthrough) interactions.HandlerFunc {
 	// Build the router tree.
 	c.prep()
 	root := new(node)
 	root.addRoute("/_postcord/void/:number", &routeContext{
-		cb: func(reqCtx context.Context, ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
+		i: func(reqCtx context.Context, ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
 			// The point of this route is to just return the default handler.
 			rctx := &ComponentRouterCtx{
 				globalAllowedMentions: loader.globalAllowedMentions,
@@ -145,6 +148,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 				rctx := &ComponentRouterCtx{
 					errorHandler:          loader.errHandler,
 					globalAllowedMentions: loader.globalAllowedMentions,
+					modalRouter:           loader.modalRouter,
 					Interaction:           ctx,
 					Context:               reqCtx,
 					Params:                params,
@@ -174,6 +178,7 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 				rctx := &ComponentRouterCtx{
 					globalAllowedMentions: loader.globalAllowedMentions,
 					errorHandler:          loader.errHandler,
+					modalRouter:           loader.modalRouter,
 					Interaction:           ctx,
 					Context:               reqCtx,
 					Params:                params,
@@ -216,9 +221,26 @@ func (c *ComponentRouter) build(loader loaderPassthrough) interactions.HandlerFu
 		}
 		route := root.getValue(data.CustomID, params)
 		if route == nil {
+			if modalRouter != nil {
+				// Check the modal router. This will essentially just act as a proxy to the modal dispatcher.
+				b := &ComponentRouterCtx{
+					globalAllowedMentions: loader.globalAllowedMentions,
+					errorHandler:          loader.errHandler,
+					Interaction:           ctx,
+					Params:                params,
+					RESTClient:            loader.rest,
+				}
+				if err := modalRouter.SendModalResponse(b, data.CustomID); err != nil {
+					// There is only one error here, and it is when the modal is not found.
+					return nil
+				}
+				return b.buildResponse(false, loader.errHandler, loader.globalAllowedMentions)
+			}
 			return nil
 		}
-		resp := route.cb(reqCtx, ctx, &data, params, r, errHandler)
+
+		// Handle calling the route function.
+		resp := route.i.(contextCallback)(reqCtx, ctx, &data, params, r, errHandler)
 		if loader.generateFrames {
 			// Now we have all the data, we can generate the frame.
 			fr := frame{ctx, tape, returnedErr, resp}

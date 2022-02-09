@@ -32,7 +32,7 @@ type genericRunner interface {
 // TestComponent is used to run unit tests against the specified component.
 func TestComponent(t TestingT, b LoaderBuilder, path string) {
 	// Get everything we need from the loader.
-	r, _, errHandler, restOrigin, allowedMentions := b.CurrentChain()
+	r, _, _, errHandler, restOrigin, allowedMentions := b.CurrentChain()
 
 	// Get the Postcord regen env var.
 	regen := 0
@@ -109,9 +109,10 @@ func TestComponent(t TestingT, b LoaderBuilder, path string) {
 			}
 
 			// Create the components handler.
-			handler := r.build(loaderPassthrough{
-				rest:                  restClient,
-				errHandler:            errHandlerOverride,
+			handler := r.build(nil, loaderPassthrough{
+				rest:       restClient,
+				errHandler: errHandlerOverride,
+
 				globalAllowedMentions: allowedMentions,
 				generateFrames:        false,
 			})
@@ -165,7 +166,7 @@ func TestComponent(t TestingT, b LoaderBuilder, path string) {
 
 func testCommand(t TestingT, b LoaderBuilder, autocomplete bool, commandRoute ...string) {
 	// Get everything we need from the loader.
-	_, r, errHandler, restOrigin, allowedMentions := b.CurrentChain()
+	_, r, _, errHandler, restOrigin, allowedMentions := b.CurrentChain()
 
 	// Get the Postcord regen env var.
 	regen := 0
