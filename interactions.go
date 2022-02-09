@@ -107,81 +107,78 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.HTTPHandler()(w, r)
 }
 
+func FailUnknownError(w http.ResponseWriter, jr *json.Encoder) {
+	w.Header().Set("Content-Type", "application/json")
+	_ = jr.Encode(objects.InteractionResponse{
+		Type: objects.ResponseChannelMessageWithSource,
+		Data: &objects.InteractionApplicationCommandCallbackData{
+			Content: "An unknown error occurred",
+			Flags:   objects.MsgFlagEphemeral,
+		},
+	})
+}
+
 // HTTPHandler exposes a net/http handler to process incoming interactions
 func (a *App) HTTPHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jr := json.NewEncoder(w)
-		w.Header().Set("Content-Type", "application/json")
 		signature := r.Header.Get("X-Signature-Ed25519")
 		bodyBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			_ = jr.Encode(objects.InteractionResponse{
-				Type: objects.ResponseChannelMessageWithSource,
-				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content: "An unknown error occurred",
-					Flags:   objects.MsgFlagEphemeral,
-				},
-			})
+			FailUnknownError(w, jr)
 			return
 		}
 		body := append([]byte(r.Header.Get("X-Signature-Timestamp")), bodyBytes...)
 		if !verifyMessage(body, signature, a.pubKey) {
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		resp, err := a.ProcessRequest(a.logger.WithContext(r.Context()), bodyBytes)
 		if err != nil {
-			_ = jr.Encode(objects.InteractionResponse{
-				Type: objects.ResponseChannelMessageWithSource,
-				Data: &objects.InteractionApplicationCommandCallbackData{
-					Content: "An unknown error occurred",
-					Flags:   objects.MsgFlagEphemeral,
-				},
-			})
+			FailUnknownError(w, jr)
 			return
 		}
 
-		switch resp.Type {
-		case objects.ResponseChannelMessageWithSource, objects.ResponseUpdateMessage:
-			if len(resp.Data.Files) > 0 {
-				m := multipart.NewWriter(w)
-				for n, file := range resp.Data.Files {
-					a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
-					if err != nil {
-						continue
-					}
-					resp.Data.Attachments = append(resp.Data.Attachments, a)
+		if (resp.Type == objects.ResponseChannelMessageWithSource ||
+			resp.Type == objects.ResponseUpdateMessage) && len(resp.Data.Files) > 0 {
+			m := multipart.NewWriter(w)
+			w.Header().Set("Content-Type", m.FormDataContentType())
+			for n, file := range resp.Data.Files {
+				// Generate the attachment object, assign a number to it, and write it to the multipart writer
+				attach, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+				if err != nil {
+					a.logger.Error().Err(err).Msg("failed to generate attachment")
+					continue
 				}
+				file.Close()
+				resp.Data.Attachments = append(resp.Data.Attachments, attach)
+			}
 
-				if w, err := m.CreateFormField("payload_json"); err != nil {
-					break
-				} else {
-					if err := json.NewEncoder(w).Encode(resp); err != nil {
-						break
-					}
+			if field, err := m.CreateFormField("payload_json"); err != nil {
+				a.logger.Error().Err(err).Msg("failed to create payload_json form field")
+				FailUnknownError(w, jr)
+				return
+			} else {
+				if err := json.NewEncoder(field).Encode(resp); err != nil {
+					a.logger.Error().Err(err).Msg("failed to encode payload_json")
+					FailUnknownError(w, jr)
+					return
 				}
-				w.Header().Set("Content-Type", m.FormDataContentType())
-				if err := m.Close(); err != nil {
-					break
-				}
+			}
+			if err := m.Close(); err != nil {
+				a.logger.Error().Err(err).Msg("failed to close multipart writer")
+				FailUnknownError(w, jr)
 				return
 			}
-			fallthrough
-		default:
-			err = jr.Encode(resp)
-			if err != nil {
-				a.logger.Error().Err(err).Msg("failed to write response")
-			}
 			return
 		}
-		_ = jr.Encode(objects.InteractionResponse{
-			Type: objects.ResponseChannelMessageWithSource,
-			Data: &objects.InteractionApplicationCommandCallbackData{
-				Content: "An unknown error occurred",
-				Flags:   objects.MsgFlagEphemeral,
-			},
-		})
+		w.Header().Set("Content-Type", "application/json")
+		err = jr.Encode(resp)
+		if err != nil {
+			a.logger.Error().Err(err).Msg("failed to write response")
+		}
 	})
 }
 
