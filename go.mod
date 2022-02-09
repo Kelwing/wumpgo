@@ -3,7 +3,7 @@ module github.com/Postcord/router
 go 1.17
 
 require (
-	github.com/Postcord/interactions v0.1.4
+	github.com/Postcord/interactions v0.1.5
 	github.com/Postcord/objects v0.1.4
 	github.com/Postcord/rest v0.1.4
 	github.com/jimeh/go-golden v0.1.0

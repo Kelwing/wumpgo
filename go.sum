@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53/go.mod h1:+3IMCy2vIlbG1XG/0ggNQv0SvxCAIpPM5b1nCz56Xno=
 github.com/CloudyKit/jet/v3 v3.0.0/go.mod h1:HKQPgSJmdK8hdoAbKUUWajkHyHo4RaU5rMdUywE7VMo=
 github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKzY=
-github.com/Postcord/interactions v0.1.4 h1:vL2qtXHge2UsZ+seGzq+OGTKDEXTFx0sncdmNOWtNG4=
-github.com/Postcord/interactions v0.1.4/go.mod h1:gnavS+duWMdpmekhStxi0LQWmOmr11CKH7c3fsxBe4w=
+github.com/Postcord/interactions v0.1.5 h1:ugFKulTAWt/6FHnkllIX4CL8lAVNbRFqfW0W+HLqZuU=
+github.com/Postcord/interactions v0.1.5/go.mod h1:gnavS+duWMdpmekhStxi0LQWmOmr11CKH7c3fsxBe4w=
 github.com/Postcord/objects v0.1.4 h1:R6JFPcwblIGvLazwJOmtuA1oZVNM0hda28LEGKuJSPA=
 github.com/Postcord/objects v0.1.4/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
 github.com/Postcord/rest v0.1.4 h1:SHIKL3PNjII3AaximLa+ySdB9FPlQHyG0oCdmyQ33mg=
