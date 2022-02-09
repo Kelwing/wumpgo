@@ -15,9 +15,11 @@ type DiscordFile struct {
 	Spoiler     bool
 }
 
-func NewDiscordFile(r io.Reader) (*DiscordFile, error) {
+func NewDiscordFile(r io.Reader, filename, description string) (*DiscordFile, error) {
 	f := &DiscordFile{
-		Buffer: &bytes.Buffer{},
+		Buffer:      &bytes.Buffer{},
+		Filename:    filename,
+		Description: description,
 	}
 	_, err := io.Copy(f.Buffer, r)
 	if err != nil {
