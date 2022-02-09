@@ -5,6 +5,7 @@ package router
 //go:generate go run generate_response_builder.go
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/Postcord/objects"
@@ -73,6 +74,18 @@ func (c *ComponentRouterCtx) SetTTS(tts bool) *ComponentRouterCtx {
 // Ephemeral is used to set the response as ephemeral.
 func (c *ComponentRouterCtx) Ephemeral() *ComponentRouterCtx {
 	c.ResponseData().Flags = 64
+	return c
+}
+
+// Attach adds a file attachment to the response.
+func (c *ComponentRouterCtx) Attach(data []byte, filename, description string) *ComponentRouterCtx {
+	file := &objects.DiscordFile{
+		Buffer:			bytes.NewBuffer(data),
+		Filename:   	filename,
+		Description: 	description,
+	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
 	return c
 }
 
@@ -173,6 +186,18 @@ func (c *CommandRouterCtx) SetTTS(tts bool) *CommandRouterCtx {
 // Ephemeral is used to set the response as ephemeral.
 func (c *CommandRouterCtx) Ephemeral() *CommandRouterCtx {
 	c.ResponseData().Flags = 64
+	return c
+}
+
+// Attach adds a file attachment to the response.
+func (c *CommandRouterCtx) Attach(data []byte, filename, description string) *CommandRouterCtx {
+	file := &objects.DiscordFile{
+		Buffer:			bytes.NewBuffer(data),
+		Filename:   	filename,
+		Description: 	description,
+	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
 	return c
 }
 
