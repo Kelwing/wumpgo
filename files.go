@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -8,10 +9,22 @@ import (
 )
 
 type DiscordFile struct {
-	io.ReadCloser
+	*bytes.Buffer
 	Filename    string
 	Description string
 	Spoiler     bool
+}
+
+func NewDiscordFile(r io.Reader) (*DiscordFile, error) {
+	f := &DiscordFile{
+		Buffer: &bytes.Buffer{},
+	}
+	_, err := io.Copy(f.Buffer, r)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }
 
 const formFieldNameFmt = "files[%d]"
