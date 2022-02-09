@@ -8,7 +8,7 @@ import (
 )
 
 type DiscordFile struct {
-	io.Reader
+	io.ReadCloser
 	Filename    string
 	Description string
 	Spoiler     bool
