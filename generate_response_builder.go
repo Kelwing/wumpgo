@@ -18,6 +18,7 @@ package router
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 
 	"github.com/Postcord/objects"
@@ -126,7 +127,9 @@ func (c *{{ .Type }}) UpdateLater(f func(*{{ .Type }}) error) *{{ .Type }} {
 		} else {
 			response = cpy.errorHandler(err)
 		}
-		processUpdateLaterResponse(c.Context, cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
+		// Need a better way to handle this context - the one on the RouterCtx will have been cancelled already
+		// and can't be used
+		processUpdateLaterResponse(context.Background(), cpy.RESTClient, cpy.ApplicationID, cpy.Token, response)
 	}()
 	return c
 }
