@@ -91,13 +91,20 @@ func (c *{{ .Type }}) Ephemeral() *{{ .Type }} {
 	return c
 }
 
-// Attach adds a file attachment to the response.
-func (c *{{ .Type }}) Attach(data []byte, filename, description string) *{{ .Type }} {
+// AttachBytes adds a file attachment to the response from a byte array
+func (c *{{ .Type }}) AttachBytes(data []byte, filename, description string) *{{ .Type }} {
 	file := &objects.DiscordFile{
 		Buffer:			bytes.NewBuffer(data),
 		Filename:   	filename,
 		Description: 	description,
 	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c
+}
+
+// AttachFile adds a file attachment to the response from an *objects.DiscordFile
+func (c *{{ .Type }}) AttachFile(file *objects.DiscordFile) *{{ .Type }} {
 	response := c.ResponseData()
 	response.Files = append(response.Files, file)
 	return c

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/Postcord/objects"
@@ -435,6 +436,36 @@ func TestComponentRouterCtx_Ephemeral(t *testing.T) {
 	x := &ComponentRouterCtx{}
 	assert.NoError(t, callBuilderFunction(t, x, "Ephemeral"))
 	assert.Equal(t, (objects.MessageFlag)(64), x.responseBuilder.ResponseData().Flags)
+}
+
+func TestCommandRouterCtx_AttachBytes(t *testing.T) {
+	x := &CommandRouterCtx{}
+	assert.NoError(t, callBuilderFunction(t, x, "AttachBytes", []byte("a"), "file.txt", ""))
+	assert.Equal(t, "file.txt", x.responseBuilder.ResponseData().Files[0].Filename)
+}
+
+func TestCommandRouterCtx_AttachFile(t *testing.T) {
+	x := &CommandRouterCtx{}
+	assert.NoError(t, callBuilderFunction(t, x, "AttachFile", &objects.DiscordFile{
+		Buffer:   bytes.NewBuffer([]byte("a")),
+		Filename: "file.txt",
+	}))
+	assert.Equal(t, "file.txt", x.responseBuilder.ResponseData().Files[0].Filename)
+}
+
+func TestComponentRouterCtx_AttachBytes(t *testing.T) {
+	x := &ComponentRouterCtx{}
+	assert.NoError(t, callBuilderFunction(t, x, "AttachBytes", []byte("a"), "file.txt", ""))
+	assert.Equal(t, "file.txt", x.responseBuilder.ResponseData().Files[0].Filename)
+}
+
+func TestComponentRouterCtx_AttachFile(t *testing.T) {
+	x := &ComponentRouterCtx{}
+	assert.NoError(t, callBuilderFunction(t, x, "AttachFile", &objects.DiscordFile{
+		Buffer:   bytes.NewBuffer([]byte("a")),
+		Filename: "file.txt",
+	}))
+	assert.Equal(t, "file.txt", x.responseBuilder.ResponseData().Files[0].Filename)
 }
 
 func TestCommandRouterCtx_ChannelMessageWithSource(t *testing.T) {

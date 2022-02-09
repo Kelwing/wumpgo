@@ -77,13 +77,20 @@ func (c *ComponentRouterCtx) Ephemeral() *ComponentRouterCtx {
 	return c
 }
 
-// Attach adds a file attachment to the response.
-func (c *ComponentRouterCtx) Attach(data []byte, filename, description string) *ComponentRouterCtx {
+// AttachBytes adds a file attachment to the response from a byte array
+func (c *ComponentRouterCtx) AttachBytes(data []byte, filename, description string) *ComponentRouterCtx {
 	file := &objects.DiscordFile{
 		Buffer:			bytes.NewBuffer(data),
 		Filename:   	filename,
 		Description: 	description,
 	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c
+}
+
+// AttachFile adds a file attachment to the response from an *objects.DiscordFile
+func (c *ComponentRouterCtx) AttachFile(file *objects.DiscordFile) *ComponentRouterCtx {
 	response := c.ResponseData()
 	response.Files = append(response.Files, file)
 	return c
@@ -189,13 +196,20 @@ func (c *CommandRouterCtx) Ephemeral() *CommandRouterCtx {
 	return c
 }
 
-// Attach adds a file attachment to the response.
-func (c *CommandRouterCtx) Attach(data []byte, filename, description string) *CommandRouterCtx {
+// AttachBytes adds a file attachment to the response from a byte array
+func (c *CommandRouterCtx) AttachBytes(data []byte, filename, description string) *CommandRouterCtx {
 	file := &objects.DiscordFile{
 		Buffer:			bytes.NewBuffer(data),
 		Filename:   	filename,
 		Description: 	description,
 	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c
+}
+
+// AttachFile adds a file attachment to the response from an *objects.DiscordFile
+func (c *CommandRouterCtx) AttachFile(file *objects.DiscordFile) *CommandRouterCtx {
 	response := c.ResponseData()
 	response.Files = append(response.Files, file)
 	return c
