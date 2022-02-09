@@ -3,8 +3,8 @@ module github.com/Postcord/interactions
 go 1.17
 
 require (
-	github.com/Postcord/objects v0.1.2-0.20220208220900-6d07594d962a
-	github.com/Postcord/rest v0.1.2-0.20220208224348-e8eba7748754
+	github.com/Postcord/objects v0.1.2
+	github.com/Postcord/rest v0.1.2
 	github.com/aws/aws-lambda-go v1.28.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.12.0
 	github.com/rs/zerolog v1.26.1
