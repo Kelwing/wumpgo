@@ -34,6 +34,7 @@ const (
 	TypeRole
 	TypeMentionable
 	TypeNumber
+	TypeAttachment
 )
 
 // ApplicationCommand types
@@ -162,11 +163,12 @@ type ApplicationCommandInteractionData struct {
 }
 
 type ApplicationCommandInteractionDataResolved struct {
-	Users    map[Snowflake]User        `json:"users"`
-	Members  map[Snowflake]GuildMember `json:"members"`
-	Roles    map[Snowflake]Role        `json:"roles"`
-	Channels map[Snowflake]Channel     `json:"channels"`
-	Messages map[Snowflake]Message     `json:"messages"`
+	Users       map[Snowflake]User        `json:"users"`
+	Members     map[Snowflake]GuildMember `json:"members"`
+	Roles       map[Snowflake]Role        `json:"roles"`
+	Channels    map[Snowflake]Channel     `json:"channels"`
+	Messages    map[Snowflake]Message     `json:"messages"`
+	Attachments map[Snowflake]Attachment  `json:"attachments"`
 }
 
 type Interaction struct {
