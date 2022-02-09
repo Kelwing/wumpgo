@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,6 +23,9 @@ type DefaultHTTPClient struct {
 }
 
 func (c *DefaultHTTPClient) Request(req *request) (*DiscordResponse, error) {
+	if req.ctx == nil {
+		req.ctx = context.Background()
+	}
 	l := zerolog.Ctx(req.ctx)
 	var reader io.Reader = nil
 	if req.body != nil {

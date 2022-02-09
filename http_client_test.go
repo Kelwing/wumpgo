@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -41,6 +42,7 @@ func TestDefaultHTTPClient_Request(t *testing.T) {
 				method:      http.MethodGet,
 				body:        []byte(`test request body`),
 				contentType: JsonContentType,
+				ctx:         context.Background(),
 			},
 			wantResponse: &DiscordResponse{
 				StatusCode: 200,
