@@ -195,7 +195,7 @@ func (a *App) ProcessRequest(ctx context.Context, data []byte) (resp *objects.In
 
 	l := zerolog.Ctx(ctx)
 	newLogger := l.With().Int("interaction_type", int(req.Type)).Int("interaction_id", int(req.ID)).Logger()
-	newLogger.WithContext(ctx)
+	ctx = newLogger.WithContext(ctx)
 
 	l.Debug().Msg("received request")
 
