@@ -32,7 +32,6 @@ func (c *Client) GetInvite(ctx context.Context, code string, params *GetInvitePa
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(u.String()).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(invite).
 		Send(c)
@@ -46,7 +45,6 @@ func (c *Client) DeleteInvite(ctx context.Context, code, reason string) (*object
 		Method(http.MethodDelete).
 		WithContext(ctx).
 		Path(fmt.Sprintf(InviteFmt, code)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(invite).
 		Send(c)

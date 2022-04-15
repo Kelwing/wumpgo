@@ -60,7 +60,6 @@ func (c *Client) CreateGuildScheduledEvent(ctx context.Context, guildID objects.
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(event).
 		Send(c)
 
@@ -88,7 +87,6 @@ func (c *Client) GetGuildScheduledEvent(ctx context.Context, guildID objects.Sno
 		WithContext(ctx).
 		Path(u.String()).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(event).
 		Send(c)
 
@@ -115,7 +113,6 @@ func (c *Client) ModifyGuildScheduledEvent(ctx context.Context, guildID objects.
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(event).
 		Send(c)
 
@@ -128,7 +125,6 @@ func (c *Client) DeleteGuildScheduledEvent(ctx context.Context, guildID objects.
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildScheduledEventFmt, guildID.GetID(), id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -153,7 +149,6 @@ func (c *Client) GetGuildScheduledEventUsers(ctx context.Context, guildID object
 		WithContext(ctx).
 		Path(u.String()).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(users).
 		Send(c)
 

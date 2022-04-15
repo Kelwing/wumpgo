@@ -66,7 +66,6 @@ func (c *Client) GetOriginalInteractionResponse(ctx context.Context, application
 		WithContext(ctx).
 		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
 		Bind(msg).
-		Expect(http.StatusOK).
 		OmitAuth().
 		Send(c)
 	return msg, err
@@ -96,7 +95,6 @@ func (c *Client) DeleteOriginalInteractionResponse(ctx context.Context, applicat
 		Method(http.MethodDelete).
 		WithContext(ctx).
 		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
-		Expect(http.StatusNoContent).
 		OmitAuth().
 		Send(c)
 }
@@ -168,7 +166,6 @@ func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID object
 		Path(u.String()).
 		ContentType(contentType).
 		Body(body).
-		Expect(http.StatusOK, http.StatusNoContent).
 		Bind(msg).
 		OmitAuth().Send(c)
 
@@ -182,7 +179,6 @@ func (c *Client) GetFollowupMessage(ctx context.Context, applicationID objects.S
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
 		Bind(msg).
-		Expect(http.StatusOK).
 		OmitAuth().
 		Send(c)
 	return msg, err
@@ -200,7 +196,6 @@ func (c *Client) EditFollowupMessage(ctx context.Context, applicationID objects.
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
 		Body(data).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(msg).
 		OmitAuth().
@@ -213,7 +208,6 @@ func (c *Client) DeleteFollowupMessage(ctx context.Context, applicationID object
 		Method(http.MethodDelete).
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
-		Expect(http.StatusNoContent).
 		OmitAuth().
 		Send(c)
 }

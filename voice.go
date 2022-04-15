@@ -14,7 +14,6 @@ func (c *Client) GetVoiceRegions(ctx context.Context) ([]*objects.VoiceRegion, e
 		WithContext(ctx).
 		Path(VoiceRegions).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&regions).
 		Send(c)
 

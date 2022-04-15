@@ -36,7 +36,6 @@ func (c *Client) GetAuditLogs(ctx context.Context, guild objects.SnowflakeObject
 		Path(u.String()).
 		ContentType(JsonContentType).
 		Bind(entries).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return entries, err

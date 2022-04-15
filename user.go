@@ -17,7 +17,6 @@ func (c *Client) GetCurrentUser(ctx context.Context) (*objects.User, error) {
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(UsersMeFmt).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(user).
 		Send(c)
@@ -31,7 +30,6 @@ func (c *Client) GetUser(ctx context.Context, user objects.SnowflakeObject) (*ob
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(fmt.Sprintf(UserFmt, user.GetID())).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(u).
 		Send(c)
@@ -60,7 +58,6 @@ func (c *Client) ModifyCurrentUser(ctx context.Context, params *ModifyCurrentUse
 		Method(http.MethodPatch).
 		WithContext(ctx).
 		Path(UsersMeFmt).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -94,7 +91,6 @@ func (c *Client) GetCurrentUserGuilds(ctx context.Context, params *CurrentUserGu
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(u.String()).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(&guilds).
 		Send(c)
@@ -107,7 +103,6 @@ func (c *Client) GetCurrentUserGuildMember(ctx context.Context, guild objects.Sn
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(fmt.Sprintf(UsersMeGuildMember, guild.GetID())).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(member).
 		Send(c)
@@ -121,7 +116,6 @@ func (c *Client) LeaveGuild(ctx context.Context, guild objects.SnowflakeObject) 
 		WithContext(ctx).
 		Path(fmt.Sprintf(UsersMeGuild, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -146,7 +140,6 @@ func (c *Client) CreateDM(ctx context.Context, params *CreateDMParams) (*objects
 		Method(http.MethodPost).
 		WithContext(ctx).
 		Path(UsersMeChannels).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -178,7 +171,6 @@ func (c *Client) CreateGroupDM(ctx context.Context, params *CreateGroupDMParams)
 		Method(http.MethodPost).
 		WithContext(ctx).
 		Path(UsersMeChannels).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -194,7 +186,6 @@ func (c *Client) GetUserConnections(ctx context.Context) ([]*objects.Connection,
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(UserConnections).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(&connections).
 		Send(c)

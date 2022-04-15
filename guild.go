@@ -50,7 +50,6 @@ func (c *Client) CreateGuild(ctx context.Context, params *CreateGuildParams) (*o
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(guild).
 		Send(c)
 
@@ -64,7 +63,6 @@ func (c *Client) GetGuild(ctx context.Context, id objects.SnowflakeObject) (*obj
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildBaseFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(guild).
 		Send(c)
 
@@ -78,7 +76,6 @@ func (c *Client) GetGuildPreview(ctx context.Context, id objects.SnowflakeObject
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildPreviewFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(preview).
 		Send(c)
 
@@ -123,7 +120,6 @@ func (c *Client) ModifyGuild(ctx context.Context, id objects.SnowflakeObject, pa
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(guild).
 		Send(c)
 
@@ -136,7 +132,6 @@ func (c *Client) DeleteGuild(ctx context.Context, id objects.SnowflakeObject) er
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildBaseFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -147,7 +142,6 @@ func (c *Client) GetGuildChannels(ctx context.Context, id objects.SnowflakeObjec
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildChannelsFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&channels).
 		Send(c)
 
@@ -187,7 +181,6 @@ func (c *Client) CreateGuildChannel(ctx context.Context, id objects.SnowflakeObj
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK, http.StatusCreated).
 		Bind(channel).
 		Send(c)
 
@@ -212,7 +205,6 @@ func (c *Client) ModifyGuildChannelPositions(ctx context.Context, id objects.Sno
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -223,7 +215,6 @@ func (c *Client) ListActiveThreads(ctx context.Context, id objects.SnowflakeObje
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildThreadsFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&channels).
 		Send(c)
 
@@ -237,7 +228,6 @@ func (c *Client) GetGuildMember(ctx context.Context, guild, user objects.Snowfla
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildMemberFmt, guild.GetID(), user.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(member).
 		Send(c)
 
@@ -267,7 +257,6 @@ func (c *Client) ListGuildMembers(ctx context.Context, guild objects.SnowflakeOb
 		WithContext(ctx).
 		Path(u.String()).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&members).
 		Send(c)
 
@@ -302,7 +291,6 @@ func (c *Client) AddGuildMember(ctx context.Context, guild, user objects.Snowfla
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusCreated, http.StatusNoContent).
 		Bind(member).
 		Send(c)
 
@@ -337,7 +325,6 @@ func (c *Client) ModifyGuildMember(ctx context.Context, guild, member objects.Sn
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(m).
 		Send(c)
 
@@ -368,7 +355,6 @@ func (c *Client) ModifyCurrentUserNick(ctx context.Context, guild objects.Snowfl
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(newNick).
 		Send(c)
 
@@ -382,7 +368,6 @@ func (c *Client) AddGuildMemberRole(ctx context.Context, guild, user, role objec
 		Path(fmt.Sprintf(GuildMemberRoleFmt, guild.GetID(), user.GetID(), role.GetID())).
 		ContentType(JsonContentType).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -393,7 +378,6 @@ func (c *Client) RemoveGuildMemberRole(ctx context.Context, guild, user, role ob
 		Path(fmt.Sprintf(GuildMemberRoleFmt, guild.GetID(), user.GetID(), role.GetID())).
 		ContentType(JsonContentType).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -404,7 +388,6 @@ func (c *Client) RemoveGuildMember(ctx context.Context, guild, user objects.Snow
 		Path(fmt.Sprintf(GuildMemberFmt, guild.GetID(), user.GetID())).
 		ContentType(JsonContentType).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -415,7 +398,6 @@ func (c *Client) GetGuildBans(ctx context.Context, guild objects.SnowflakeObject
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildBansFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&bans).
 		Send(c)
 
@@ -429,7 +411,6 @@ func (c *Client) GetGuildBan(ctx context.Context, guild, user objects.SnowflakeO
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildBanUserFmt, guild.GetID(), user.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(ban).
 		Send(c)
 
@@ -453,7 +434,6 @@ func (c *Client) CreateBan(ctx context.Context, guild, user objects.SnowflakeObj
 		Path(fmt.Sprintf(GuildBanUserFmt, guild.GetID(), user.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -464,7 +444,6 @@ func (c *Client) RemoveGuildBan(ctx context.Context, guild, user objects.Snowfla
 		Path(fmt.Sprintf(GuildBanUserFmt, guild.GetID(), user.GetID())).
 		ContentType(JsonContentType).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -475,7 +454,6 @@ func (c *Client) GetGuildRoles(ctx context.Context, guild objects.SnowflakeObjec
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildRolesFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&roles).
 		Send(c)
 	return roles, err
@@ -509,7 +487,6 @@ func (c *Client) CreateGuildRole(ctx context.Context, guild objects.SnowflakeObj
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(role).
 		Send(c)
 	return role, err
@@ -532,7 +509,6 @@ func (c *Client) ModifyGuildRolePositions(ctx context.Context, guild objects.Sno
 		Path(fmt.Sprintf(GuildRolesFmt, guild.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
-		Expect(http.StatusOK).
 		Bind(&roles).
 		Send(c)
 
@@ -567,7 +543,6 @@ func (c *Client) ModifyGuildRole(ctx context.Context, guild, role objects.Snowfl
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(r).
 		Send(c)
 	return r, err
@@ -580,7 +555,6 @@ func (c *Client) DeleteGuildRole(ctx context.Context, guild, role objects.Snowfl
 		Path(fmt.Sprintf(GuildRoleFmt, guild.GetID(), role.GetID())).
 		ContentType(JsonContentType).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -610,7 +584,6 @@ func (c *Client) GetGuildPruneCount(ctx context.Context, guild objects.Snowflake
 		WithContext(ctx).
 		Path(u.String()).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(pruned).
 		Send(c)
 	return pruned.Pruned, err
@@ -646,7 +619,6 @@ func (c *Client) BeginGuildPrune(ctx context.Context, guild objects.SnowflakeObj
 		Body(body).
 		Reason(reason).
 		Bind(pruned).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return pruned.Pruned, err
@@ -659,7 +631,6 @@ func (c *Client) GetGuildVoiceRegions(ctx context.Context, guild objects.Snowfla
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildVoiceRegionsFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&regions).
 		Send(c)
 
@@ -673,7 +644,6 @@ func (c *Client) GetGuildInvites(ctx context.Context, guild objects.SnowflakeObj
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildInvitesFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&invites).
 		Send(c)
 
@@ -687,7 +657,6 @@ func (c *Client) GetGuildIntegrations(ctx context.Context, guild objects.Snowfla
 		WithContext(ctx).
 		Path(fmt.Sprintf(IntegrationsBaseFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&integrations).
 		Send(c)
 
@@ -701,7 +670,6 @@ func (c *Client) DeleteGuildIntegration(ctx context.Context, guild, integration 
 		Path(fmt.Sprintf(IntegrationBaseFmt, guild.GetID(), integration.GetID())).
 		ContentType(JsonContentType).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -712,7 +680,6 @@ func (c *Client) GetGuildWidgetSettings(ctx context.Context, guild objects.Snowf
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildWidgetFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(widget).
 		Send(c)
 	return widget, err
@@ -744,7 +711,6 @@ func (c *Client) ModifyGuildWidget(ctx context.Context, guild objects.SnowflakeO
 		Body(data).
 		Reason(reason).
 		Bind(widget).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return widget, err
@@ -757,7 +723,6 @@ func (c *Client) GetGuildWidget(ctx context.Context, guild objects.SnowflakeObje
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildWidgetJSONFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(widget).
 		Send(c)
 	return widget, err
@@ -770,7 +735,6 @@ func (c *Client) GetGuildVanityURL(ctx context.Context, guild objects.SnowflakeO
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildVanityURLFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(invite).
 		Send(c)
 	return invite, err
@@ -798,7 +762,6 @@ func (c *Client) GetGuildWidgetImage(ctx context.Context, guild objects.Snowflak
 		WithContext(ctx).
 		Path(u.String()).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		SendRaw(c)
 
 	if err != nil {
@@ -820,7 +783,6 @@ func (c *Client) GetGuildWelcomeScreen(ctx context.Context, guild objects.Snowfl
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildMembershipScreeningFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(screening).
 		Send(c)
 	return screening, err
@@ -853,7 +815,6 @@ func (c *Client) ModifyGuildWelcomeScreen(ctx context.Context, guild objects.Sno
 		Body(data).
 		Reason(reason).
 		Bind(screening).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return screening, err

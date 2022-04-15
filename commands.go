@@ -18,7 +18,6 @@ func (c *Client) GetCommands(ctx context.Context, app objects.SnowflakeObject) (
 		WithContext(ctx).
 		Path(fmt.Sprintf(GlobalApplicationsFmt, app.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&commands).
 		Send(c)
 
@@ -38,7 +37,6 @@ func (c *Client) CreateCommand(ctx context.Context, app objects.SnowflakeObject,
 		WithContext(ctx).
 		Path(fmt.Sprintf(GlobalApplicationsFmt, app.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusCreated).
 		Bind(cmd).
 		Body(data).
 		Send(c)
@@ -53,7 +51,6 @@ func (c *Client) GetCommand(ctx context.Context, app, commandID objects.Snowflak
 		WithContext(ctx).
 		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app.GetID(), commandID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(cmd).
 		Send(c)
 
@@ -73,7 +70,6 @@ func (c *Client) UpdateCommand(ctx context.Context, app, commandID objects.Snowf
 		WithContext(ctx).
 		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app.GetID(), commandID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(cmd).
 		Body(data).
 		Send(c)
@@ -87,7 +83,6 @@ func (c *Client) DeleteCommand(ctx context.Context, app, commandID objects.Snowf
 		WithContext(ctx).
 		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app.GetID(), commandID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -104,7 +99,6 @@ func (c *Client) BulkOverwriteGlobalCommands(ctx context.Context, app objects.Sn
 		WithContext(ctx).
 		Path(fmt.Sprintf(GlobalApplicationsFmt, app.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&cmds).
 		Body(data).
 		Send(c)
@@ -121,7 +115,6 @@ func (c *Client) GetGuildCommands(ctx context.Context, app, guild objects.Snowfl
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationsFmt, app.GetID(), guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&commands).
 		Send(c)
 
@@ -140,7 +133,6 @@ func (c *Client) AddGuildCommand(ctx context.Context, app, guild objects.Snowfla
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationsFmt, app.GetID(), guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(cmd).
 		Body(data).
 		Send(c)
@@ -155,7 +147,6 @@ func (c *Client) GetGuildCommand(ctx context.Context, app, guild, commandID obje
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app.GetID(), guild.GetID(), commandID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(cmd).
 		Send(c)
 
@@ -174,7 +165,6 @@ func (c *Client) UpdateGuildCommand(ctx context.Context, app, guild, commandID o
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app.GetID(), guild.GetID(), commandID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(cmd).
 		Body(data).
 		Send(c)
@@ -188,7 +178,6 @@ func (c *Client) DeleteGuildCommand(ctx context.Context, app, guild, commandID o
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app.GetID(), guild.GetID(), commandID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -205,7 +194,6 @@ func (c *Client) BulkOverwriteGuildCommands(ctx context.Context, application, gu
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationsFmt, application.GetID(), guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Body(data).
 		Bind(&cmds).
 		Send(c)
@@ -220,7 +208,6 @@ func (c *Client) GetGuildApplicationCommandPermissions(ctx context.Context, app,
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app.GetID(), guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&commands).
 		Send(c)
 
@@ -234,7 +221,6 @@ func (c *Client) GetApplicationCommandPermissions(ctx context.Context, app, guil
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app.GetID(), guild.GetID(), cmd.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&command).
 		Send(c)
 
@@ -256,7 +242,6 @@ func (c *Client) EditApplicationCommandPermissions(ctx context.Context, app, gui
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app.GetID(), guild.GetID(), cmd.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent, http.StatusOK).
 		Body(data).
 		Bind(&perms).
 		Send(c)
@@ -276,7 +261,6 @@ func (c *Client) BatchEditApplicationCommandPermissions(ctx context.Context, app
 		Method(http.MethodPut).
 		Path(fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app.GetID(), guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Body(data).
 		Bind(&perms).
 		Send(c)

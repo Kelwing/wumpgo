@@ -23,7 +23,6 @@ func (c *Client) GetChannel(ctx context.Context, id objects.SnowflakeObject) (*o
 		Path(fmt.Sprintf(ChannelBaseFmt, id.GetID())).
 		ContentType(JsonContentType).
 		Bind(channel).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return channel, err
@@ -62,7 +61,6 @@ func (c *Client) ModifyChannel(ctx context.Context, id objects.SnowflakeObject, 
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(channel).
 		Send(c)
 
@@ -77,7 +75,6 @@ func (c *Client) DeleteChannel(ctx context.Context, id objects.SnowflakeObject, 
 		Path(fmt.Sprintf(ChannelBaseFmt, id.GetID())).
 		Reason(reason).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(channel).
 		Send(c)
 
@@ -109,7 +106,6 @@ func (c *Client) GetChannelMessages(ctx context.Context, id objects.SnowflakeObj
 		Path(u.String()).
 		ContentType(JsonContentType).
 		Bind(&messages).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return messages, err
@@ -123,7 +119,6 @@ func (c *Client) GetChannelMessage(ctx context.Context, channel, message objects
 		Path(fmt.Sprintf(ChannelMessageFmt, channel.GetID(), message.GetID())).
 		ContentType(JsonContentType).
 		Bind(msg).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return msg, err
@@ -137,7 +132,6 @@ func (c *Client) CrossPostMessage(ctx context.Context, channel, message objects.
 		Path(fmt.Sprintf(CrosspostMessageFmt, channel.GetID(), message.GetID())).
 		ContentType(JsonContentType).
 		Bind(msg).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return msg, err
@@ -149,7 +143,6 @@ func (c *Client) DeleteMessage(ctx context.Context, channel, message objects.Sno
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelMessageFmt, channel.GetID(), message.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -169,7 +162,6 @@ func (c *Client) BulkDeleteMessages(ctx context.Context, channel objects.Snowfla
 		Path(fmt.Sprintf(BulkDeleteMessagesFmt, channel.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -198,7 +190,6 @@ func (c *Client) EditChannelPermissions(ctx context.Context, channel, overwrite 
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -209,7 +200,6 @@ func (c *Client) DeleteChannelPermission(ctx context.Context, channel, overwrite
 		Path(fmt.Sprintf(ChannelPermissionsFmt, channel.GetID(), overwrite.GetID())).
 		Reason(reason).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -221,7 +211,6 @@ func (c *Client) GetChannelInvites(ctx context.Context, channel objects.Snowflak
 		Path(fmt.Sprintf(ChannelInvitesFmt, channel.GetID())).
 		ContentType(JsonContentType).
 		Bind(&invites).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return invites, err
@@ -259,7 +248,6 @@ func (c *Client) CreateChannelInvite(ctx context.Context, channel objects.Snowfl
 		Body(data).
 		Reason(reason).
 		Bind(invite).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return invite, err
@@ -293,7 +281,6 @@ func (c *Client) CreateReaction(ctx context.Context, channel, message objects.Sn
 		WithContext(ctx).
 		Path(fmt.Sprintf(ReactionFmt, channel.GetID(), message.GetID(), url.QueryEscape(react), "@me")).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -308,7 +295,6 @@ func (c *Client) DeleteOwnReaction(ctx context.Context, channel, message objects
 		WithContext(ctx).
 		Path(fmt.Sprintf(ReactionFmt, channel.GetID(), message.GetID(), url.QueryEscape(react), "@me")).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -323,7 +309,6 @@ func (c *Client) DeleteUserReaction(ctx context.Context, channel, message, user 
 		WithContext(ctx).
 		Path(fmt.Sprintf(ReactionUserFmt, channel.GetID(), message.GetID(), url.QueryEscape(react), user.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -357,7 +342,6 @@ func (c *Client) GetReactions(ctx context.Context, channel, message objects.Snow
 		Path(u.String()).
 		ContentType(JsonContentType).
 		Bind(&users).
-		Expect(http.StatusOK).
 		Send(c)
 	return users, err
 }
@@ -368,7 +352,6 @@ func (c *Client) DeleteAllReactions(ctx context.Context, channel, message object
 		WithContext(ctx).
 		Path(fmt.Sprintf(ReactionsBaseFmt, channel.GetID(), message.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -383,7 +366,6 @@ func (c *Client) DeleteEmojiReactions(ctx context.Context, channel, message obje
 		WithContext(ctx).
 		Path(fmt.Sprintf(ReactionsFmt, channel.GetID(), message.GetID(), reaction)).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -395,7 +377,6 @@ func (c *Client) GetPinnedMessages(ctx context.Context, channel objects.Snowflak
 		Path(fmt.Sprintf(ChannelPinsFmt, channel.GetID())).
 		ContentType(JsonContentType).
 		Bind(&messages).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return messages, err
@@ -407,7 +388,6 @@ func (c *Client) AddPinnedMessage(ctx context.Context, channel, message objects.
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelPinnedFmt, channel.GetID(), message.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -417,7 +397,6 @@ func (c *Client) DeletePinnedMessage(ctx context.Context, channel, message objec
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelPinnedFmt, channel.GetID(), message.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -479,7 +458,6 @@ func (c *Client) CreateMessage(ctx context.Context, channel objects.SnowflakeObj
 		ContentType(contentType).
 		Body(body).
 		Bind(msg).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return msg, err
@@ -507,7 +485,6 @@ func (c *Client) EditMessage(ctx context.Context, channel, message objects.Snowf
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(msg).
-		Expect(http.StatusOK).
 		Send(c)
 	return msg, err
 }
@@ -520,7 +497,6 @@ func (c *Client) FollowNewsChannel(ctx context.Context, channel objects.Snowflak
 		Path(fmt.Sprintf(ChannelFollowersFmt, channel.GetID())).
 		ContentType(JsonContentType).
 		Bind(followedChannel).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return followedChannel, err
@@ -532,7 +508,6 @@ func (c *Client) StartTyping(ctx context.Context, channel objects.SnowflakeObjec
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelTypingFmt, channel.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -557,7 +532,6 @@ func (c *Client) StartThreadWithMessage(ctx context.Context, channel, message ob
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(thread).
-		Expect(http.StatusOK, http.StatusCreated).
 		Send(c)
 	return thread, err
 }
@@ -576,7 +550,6 @@ func (c *Client) StartThread(ctx context.Context, channel objects.SnowflakeObjec
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(thread).
-		Expect(http.StatusOK, http.StatusCreated).
 		Send(c)
 	return thread, err
 }
@@ -587,7 +560,6 @@ func (c *Client) JoinThread(ctx context.Context, thread objects.SnowflakeObject)
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -597,7 +569,6 @@ func (c *Client) AddThreadMember(ctx context.Context, thread, user objects.Snowf
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread.GetID(), user.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -607,7 +578,6 @@ func (c *Client) LeaveThread(ctx context.Context, thread objects.SnowflakeObject
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -617,7 +587,6 @@ func (c *Client) RemoveThreadMember(ctx context.Context, thread, user objects.Sn
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread.GetID(), user.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -628,7 +597,6 @@ func (c *Client) ListThreadMembers(ctx context.Context, thread objects.Snowflake
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelThreadMembersFmt, thread.GetID())).
 		Bind(&members).
-		Expect(http.StatusOK).
 		Send(c)
 	return members, err
 }
@@ -660,7 +628,6 @@ func (c *Client) ListPublicArchivedThreads(ctx context.Context, channel objects.
 		WithContext(ctx).
 		Path(u.String()).
 		Bind(threads).
-		Expect(http.StatusOK).
 		Send(c)
 	return threads, err
 }
@@ -681,7 +648,6 @@ func (c *Client) ListPrivateArchivedThreads(ctx context.Context, channel objects
 		WithContext(ctx).
 		Path(u.String()).
 		Bind(threads).
-		Expect(http.StatusOK).
 		Send(c)
 	return threads, err
 }
@@ -702,7 +668,6 @@ func (c *Client) ListJoinedPrivateArchivedThreads(ctx context.Context, channel o
 		WithContext(ctx).
 		Path(u.String()).
 		Bind(threads).
-		Expect(http.StatusOK).
 		Send(c)
 	return threads, err
 }

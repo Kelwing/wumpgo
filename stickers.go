@@ -34,7 +34,6 @@ func (c *Client) GetSticker(ctx context.Context, id objects.SnowflakeObject) (*o
 		Path(fmt.Sprintf(StickerFmt, id.GetID())).
 		ContentType(JsonContentType).
 		Bind(sticker).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return sticker, err
@@ -48,7 +47,6 @@ func (c *Client) ListNitroStickerPacks(ctx context.Context) ([]*objects.StickerP
 		Path(NitroStickerFmt).
 		ContentType(JsonContentType).
 		Bind(&packs).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return packs, err
@@ -62,7 +60,6 @@ func (c *Client) ListGuildStickers(ctx context.Context, guildID objects.Snowflak
 		Path(fmt.Sprintf(GuildStickersFmt, guildID.GetID())).
 		ContentType(JsonContentType).
 		Bind(&stickers).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return stickers, err
@@ -76,7 +73,6 @@ func (c *Client) GetGuildSticker(ctx context.Context, guildID objects.SnowflakeO
 		Path(fmt.Sprintf(GuildStickerFmt, guildID.GetID(), stickerID.GetID())).
 		ContentType(JsonContentType).
 		Bind(sticker).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return sticker, err
@@ -126,7 +122,6 @@ func (c *Client) CreateGuildSticker(ctx context.Context, guildID objects.Snowfla
 		Body(buffer.Bytes()).
 		Bind(sticker).
 		Reason(params.Reason).
-		Expect(http.StatusCreated).
 		Send(c)
 
 	return sticker, err
@@ -151,7 +146,6 @@ func (c *Client) ModifyGuildSticker(ctx context.Context, guildID, id objects.Sno
 		Bind(sticker).
 		Body(data).
 		Reason(params.Reason).
-		Expect(http.StatusOK).
 		Send(c)
 
 	return sticker, err
@@ -162,8 +156,7 @@ func (c *Client) DeleteGuildSticker(ctx context.Context, guildID, id objects.Sno
 		Method(http.MethodDelete).
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildStickerFmt, guildID.GetID(), id.GetID())).
-		ContentType(JsonContentType).
-		Expect(http.StatusNoContent)
+		ContentType(JsonContentType)
 
 	if len(reason) > 0 {
 		req.Reason(reason[0])

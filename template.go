@@ -15,7 +15,6 @@ func (c *Client) GetTemplate(ctx context.Context, code string) (*objects.Templat
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(fmt.Sprintf(TemplateFmt, code)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(template).
 		Send(c)
@@ -29,7 +28,6 @@ func (c *Client) CreateGuildFromTemplate(ctx context.Context, code string, reaso
 		Method(http.MethodPost).
 		WithContext(ctx).
 		Path(fmt.Sprintf(TemplateFmt, code)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(guild).
 		Reason(reason).
@@ -43,7 +41,6 @@ func (c *Client) GetGuildTemplates(ctx context.Context, guild objects.SnowflakeO
 		Method(http.MethodGet).
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildTemplateFmt, guild)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(&templates).
 		Send(c)
@@ -72,7 +69,6 @@ func (c *Client) CreateGuildTemplate(ctx context.Context, guild objects.Snowflak
 		Method(http.MethodPost).
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildTemplateFmt, guild.GetID())).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(template).
 		Reason(reason).
@@ -86,7 +82,6 @@ func (c *Client) SyncGuildTemplate(ctx context.Context, guild objects.SnowflakeO
 	err := NewRequest().
 		Method(http.MethodPut).
 		Path(fmt.Sprintf(GuildTemplatesFmt, guild.GetID(), code)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Bind(template).
 		Send(c)
@@ -116,7 +111,6 @@ func (c *Client) ModifyGuildTemplate(ctx context.Context, guild objects.Snowflak
 		Method(http.MethodPatch).
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildTemplatesFmt, guild.GetID(), code)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Reason(reason).
 		Body(data).
@@ -132,7 +126,6 @@ func (c *Client) DeleteGuildTemplate(ctx context.Context, guild objects.Snowflak
 		Method(http.MethodDelete).
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildTemplatesFmt, guild.GetID(), code)).
-		Expect(http.StatusOK).
 		ContentType(JsonContentType).
 		Reason(reason).
 		Bind(template).

@@ -14,7 +14,6 @@ func (c *Client) Gateway(ctx context.Context) (*objects.Gateway, error) {
 		Method(http.MethodGet).
 		Path(GatewayFmt).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&gateway).
 		Send(c)
 
@@ -28,7 +27,6 @@ func (c *Client) GatewayBot(ctx context.Context) (*objects.Gateway, error) {
 		WithContext(ctx).
 		Path(GatewayBotFmt).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&gateway).
 		Send(c)
 

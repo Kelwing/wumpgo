@@ -38,7 +38,6 @@ func (c *Client) CreateWebhook(ctx context.Context, channel objects.SnowflakeObj
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(webhook).
 		Send(c)
 
@@ -52,7 +51,6 @@ func (c *Client) GetChannelWebhooks(ctx context.Context, channel objects.Snowfla
 		WithContext(ctx).
 		Path(fmt.Sprintf(ChannelWebhookFmt, channel.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&webhooks).
 		Send(c)
 
@@ -66,7 +64,6 @@ func (c *Client) GetGuildWebhooks(ctx context.Context, guild objects.SnowflakeOb
 		WithContext(ctx).
 		Path(fmt.Sprintf(GuildWebhookFmt, guild.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(&webhooks).
 		Send(c)
 
@@ -80,7 +77,6 @@ func (c *Client) GetWebhook(ctx context.Context, id objects.SnowflakeObject) (*o
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(webhook).
 		Send(c)
 
@@ -94,7 +90,6 @@ func (c *Client) GetWebhookWithToken(ctx context.Context, id objects.SnowflakeOb
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookWithTokenFmt, id.GetID(), token)).
 		ContentType(JsonContentType).
-		Expect(http.StatusOK).
 		Bind(webhook).
 		OmitAuth().
 		Send(c)
@@ -128,7 +123,6 @@ func (c *Client) ModifyWebhook(ctx context.Context, id objects.SnowflakeObject, 
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(webhook).
 		Send(c)
 
@@ -160,7 +154,6 @@ func (c *Client) ModifyWebhookWithToken(ctx context.Context, id objects.Snowflak
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
-		Expect(http.StatusOK).
 		Bind(webhook).
 		OmitAuth().
 		Send(c)
@@ -173,7 +166,6 @@ func (c *Client) DeleteWebhook(ctx context.Context, id objects.SnowflakeObject) 
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookFmt, id.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		Send(c)
 }
 
@@ -183,7 +175,6 @@ func (c *Client) DeleteWebhookWithToken(ctx context.Context, id objects.Snowflak
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookWithTokenFmt, id.GetID(), token)).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		OmitAuth().
 		Send(c)
 }
@@ -260,7 +251,6 @@ func (c *Client) ExecuteWebhook(ctx context.Context, id objects.SnowflakeObject,
 		Path(u.String()).
 		ContentType(contentType).
 		Body(body).
-		Expect(http.StatusOK, http.StatusNoContent).
 		Bind(msg).
 		OmitAuth().Send(c)
 
@@ -287,7 +277,6 @@ func (c *Client) EditWebhookMessage(ctx context.Context, messageID, webhookID ob
 		Path(fmt.Sprintf(WebhookMessageFmt, webhookID.GetID(), token, messageID.GetID())).
 		ContentType(JsonContentType).
 		Body(data).
-		Expect(http.StatusOK).
 		Bind(msg).
 		OmitAuth().
 		Send(c)
@@ -301,7 +290,6 @@ func (c *Client) DeleteWebhookMessage(ctx context.Context, messageID, webhookID 
 		WithContext(ctx).
 		Path(fmt.Sprintf(WebhookMessageFmt, webhookID.GetID(), token, messageID.GetID())).
 		ContentType(JsonContentType).
-		Expect(http.StatusNoContent).
 		OmitAuth().
 		Send(c)
 }
