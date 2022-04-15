@@ -28,8 +28,9 @@ func (r *DiscordResponse) JSON(v interface{}) error {
 
 func (r *DiscordResponse) ExpectsStatus(statusCode int) error {
 	if r.StatusCode != statusCode {
+		j := string(r.Body)
 		return &ErrorREST{
-			Message: fmt.Sprintf("expected %d, got %d", statusCode, r.StatusCode),
+			Message: fmt.Sprintf("expected %d, got %d (%s)", statusCode, r.StatusCode, j),
 			Status:  r.StatusCode,
 			Body:    r.Body,
 		}
@@ -44,8 +45,9 @@ func (r *DiscordResponse) ExpectAnyStatus(statusCodes ...int) error {
 		}
 	}
 
+	j := string(r.Body)
 	return &ErrorREST{
-		Message: fmt.Sprintf("expected one of %d, got %d", statusCodes, r.StatusCode),
+		Message: fmt.Sprintf("expected %v, got %d (%s)", statusCodes, r.StatusCode, j),
 		Status:  r.StatusCode,
 		Body:    r.Body,
 	}
