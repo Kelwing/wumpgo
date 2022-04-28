@@ -112,7 +112,7 @@ type ApplicationCommand struct {
 	// Options are the parameters for the command, max 25, only valid for CHAT_INPUT commands
 	Options []ApplicationCommandOption `json:"options"`
 	// Set of permissions represented as a bit set
-	DefaultPermissions permissions.PermissionBit `json:"default_member_permissions"`
+	DefaultPermissions *permissions.PermissionBit `json:"default_member_permissions,omitempty"`
 	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
 	AllowUseInDMs bool `json:"dm_permission"`
 	// DefaultPermission is whether the command is enabled by default when the app is added to a guild
