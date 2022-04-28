@@ -128,27 +128,44 @@ func (c *CommandGroup) Use(f MiddlewareFunc) {
 // GroupNestedTooDeep is thrown when the sub-command group would be nested too deep.
 var GroupNestedTooDeep = errors.New("sub-command group would be nested too deep")
 
+type CommandGroupOptions struct {
+	DefaultPermissions permissions.PermissionBit
+	UseInDMs           bool
+}
+
 // NewCommandGroup is used to create a sub-command group.
-func (c *CommandGroup) NewCommandGroup(name, description string, defaultPermission bool) (*CommandGroup, error) {
+func (c *CommandGroup) NewCommandGroup(name, description string, opts *CommandGroupOptions) (*CommandGroup, error) {
 	nextLevel := c.level + 1
 	if nextLevel > 2 {
 		return nil, GroupNestedTooDeep
 	}
-	// TODO: Validate name + description.
-	g := &CommandGroup{
-		level:             nextLevel,
-		Description:       description,
-		DefaultPermission: defaultPermission,
-		Subcommands:       map[string]interface{}{},
+	var g *CommandGroup
+	if opts != nil {
+		// TODO: Validate name + description.
+		g = &CommandGroup{
+			level:              nextLevel,
+			Description:        description,
+			DefaultPermissions: &opts.DefaultPermissions,
+			UseInDMs:           &opts.UseInDMs,
+			Subcommands:        map[string]interface{}{},
+		}
+	} else {
+		// TODO: Validate name + description.
+		g = &CommandGroup{
+			level:       nextLevel,
+			Description: description,
+			Subcommands: map[string]interface{}{},
+		}
 	}
+
 	g.parent = c
 	c.Subcommands[name] = g
 	return g, nil
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
-func (c *CommandGroup) MustNewCommandGroup(name, description string, defaultPermission bool) *CommandGroup {
-	x, err := c.NewCommandGroup(name, description, defaultPermission)
+func (c *CommandGroup) MustNewCommandGroup(name, description string, opts *CommandGroupOptions) *CommandGroup {
+	x, err := c.NewCommandGroup(name, description, opts)
 	if err != nil {
 		panic(err)
 	}
@@ -167,11 +184,11 @@ func (c *CommandRouter) Use(f MiddlewareFunc) {
 }
 
 // NewCommandGroup is used to create a sub-command group. Works the same as CommandGroup.NewCommandGroup.
-func (c *CommandRouter) NewCommandGroup(name, description string, defaultPermission bool) (*CommandGroup, error) {
+func (c *CommandRouter) NewCommandGroup(name, description string) (*CommandGroup, error) {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
-	g, err := c.roots.NewCommandGroup(name, description, defaultPermission)
+	g, err := c.roots.NewCommandGroup(name, description, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -180,8 +197,8 @@ func (c *CommandRouter) NewCommandGroup(name, description string, defaultPermiss
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
-func (c *CommandRouter) MustNewCommandGroup(name, description string, defaultPermission bool) *CommandGroup {
-	x, err := c.NewCommandGroup(name, description, defaultPermission)
+func (c *CommandRouter) MustNewCommandGroup(name, description string) *CommandGroup {
+	x, err := c.NewCommandGroup(name, description)
 	if err != nil {
 		panic(err)
 	}
