@@ -8,6 +8,8 @@ github.com/Postcord/interactions v0.1.5 h1:ugFKulTAWt/6FHnkllIX4CL8lAVNbRFqfW0W+
 github.com/Postcord/interactions v0.1.5/go.mod h1:gnavS+duWMdpmekhStxi0LQWmOmr11CKH7c3fsxBe4w=
 github.com/Postcord/objects v0.1.4 h1:R6JFPcwblIGvLazwJOmtuA1oZVNM0hda28LEGKuJSPA=
 github.com/Postcord/objects v0.1.4/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
+github.com/Postcord/objects v0.1.6 h1:KmSG2hpTQRkT8cWNmPtfk7lxwG/cz2WSw416HWRio5Y=
+github.com/Postcord/objects v0.1.6/go.mod h1:us6+Mmn+7oaoFaKVczduWg174LtgModEOpgCXyB0JF0=
 github.com/Postcord/rest v0.1.4 h1:SHIKL3PNjII3AaximLa+ySdB9FPlQHyG0oCdmyQ33mg=
 github.com/Postcord/rest v0.1.4/go.mod h1:sq15JaA+yQ0+g/mn3HCIi23ro4CTTRgpGGGxQnkZIOw=
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398/go.mod h1:a1uqRtAwp2Xwc6WNPJEufxJ7fx3npB4UV/JOLmbu5I0=

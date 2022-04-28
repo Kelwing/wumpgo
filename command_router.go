@@ -10,6 +10,7 @@ import (
 
 	"github.com/Postcord/interactions"
 	"github.com/Postcord/objects"
+	"github.com/Postcord/objects/permissions"
 	"github.com/Postcord/rest"
 )
 
@@ -105,6 +106,12 @@ type CommandGroup struct {
 
 	// Description is the description for the command group.
 	Description string `json:"description"`
+
+	// DefaultPermissions indicates which users should be allowed to use this command based on their permissions.  Set to 0 to disable by default. (default: all allowed)
+	DefaultPermissions *permissions.PermissionBit `json:"default_member_permissions,omitempty"`
+
+	// UseInDMs determines if the command should be usable in DMs (default: true)
+	UseInDMs *bool `json:"dm_permission,omitempty"`
 
 	// AllowedMentions is used to set a group level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions"`
@@ -647,18 +654,27 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 	for k, v := range c.roots.Subcommands {
 		// Create the command.
 		description := ""
-		defaultPermission := false
 		commandType := objects.CommandTypeChatInput
+
+		cmd := &objects.ApplicationCommand{
+			Name:        k,
+			Description: description,
+			Options:     getOptions(v),
+			Type:        &commandType,
+		}
+
 		switch x := v.(type) {
 		case *Command:
-			description = x.Description
-			defaultPermission = x.DefaultPermission
+			cmd.Description = x.Description
+			cmd.DefaultPermissions = x.DefaultPermissions
+			cmd.AllowUseInDMs = x.UseInDMs
 			if x.commandType != 0 {
 				commandType = objects.ApplicationCommandType(x.commandType)
 			}
 		case *CommandGroup:
 			description = x.Description
-			defaultPermission = x.DefaultPermission
+			cmd.DefaultPermissions = x.DefaultPermissions
+			cmd.AllowUseInDMs = x.UseInDMs
 		}
 
 		if description == "" {
@@ -671,13 +687,7 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 			description = ""
 		}
 
-		cmds[i] = &objects.ApplicationCommand{
-			Name:              k,
-			Description:       description,
-			Options:           getOptions(v),
-			DefaultPermission: defaultPermission,
-			Type:              &commandType,
-		}
+		cmds[i] = cmd
 
 		// Add to the index.
 		i++

@@ -1,6 +1,9 @@
 package router
 
-import "github.com/Postcord/objects"
+import (
+	"github.com/Postcord/objects"
+	"github.com/Postcord/objects/permissions"
+)
 
 type commandBuilder struct {
 	map_ map[string]interface{}
@@ -9,6 +12,17 @@ type commandBuilder struct {
 
 func (c *commandBuilder) Description(description string) CommandBuilder {
 	c.cmd.Description = description
+	return c
+}
+
+func (c *commandBuilder) DefaultPermissions(perms permissions.PermissionBit) CommandBuilder {
+	c.cmd.DefaultPermissions = &perms
+	return c
+}
+
+func (c *commandBuilder) GuildCommand() CommandBuilder {
+	tmp := false
+	c.cmd.UseInDMs = &tmp
 	return c
 }
 

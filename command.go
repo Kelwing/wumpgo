@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/Postcord/objects"
+	"github.com/Postcord/objects/permissions"
 	"github.com/Postcord/rest"
 )
 
@@ -30,7 +31,14 @@ type Command struct {
 	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions"`
 
-	// DefaultPermission is used to define if the permissions of the command are default.
+	// DefaultPermissions indicates which users should be allowed to use this command based on their permissions.  Set to 0 to disable by default. (default: all allowed)
+	DefaultPermissions *permissions.PermissionBit `json:"default_member_permissions,omitempty"`
+
+	// UseInDMs determines if the command should be usable in DMs (default: true)
+	UseInDMs *bool `json:"dm_permission,omitempty"`
+
+	// DefaultPermission Indicates whether the command is enabled by default when the app is added to a guild, defaults to false
+	// Deprecated: Not recommended for use as field will soon be deprecated.
 	DefaultPermission bool `json:"default_permission"`
 
 	// Options defines the options which are required for a command.
