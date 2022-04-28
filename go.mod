@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-lambda-go v1.28.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.12.0
 	github.com/rs/zerolog v1.26.1
-	github.com/valyala/fasthttp v1.33.0
+	github.com/valyala/fasthttp v1.36.0
 )
 
 require (
@@ -20,7 +20,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/klauspost/compress v1.14.2 // indirect
+	github.com/klauspost/compress v1.15.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
 )
