@@ -114,9 +114,9 @@ type ApplicationCommand struct {
 	// Set of permissions represented as a bit set
 	DefaultPermissions *permissions.PermissionBit `json:"default_member_permissions,omitempty"`
 	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
-	AllowUseInDMs bool `json:"dm_permission"`
+	AllowUseInDMs *bool `json:"dm_permission,omitempty"`
 	// DefaultPermission is whether the command is enabled by default when the app is added to a guild
-	DefaultPermission bool `json:"default_permission"`
+	DefaultPermission *bool `json:"default_permission,omitempty"`
 	// Version is an autoincrementing version identifier updated during substantial record changes
 	Version Snowflake `json:"version,omitempty"`
 }
