@@ -18,11 +18,12 @@ func _() {
 	_ = x[TypeRole-8]
 	_ = x[TypeMentionable-9]
 	_ = x[TypeNumber-10]
+	_ = x[TypeAttachment-11]
 }
 
-const _ApplicationCommandOptionType_name = "TypeSubCommandTypeSubCommandGroupTypeStringTypeIntegerTypeBooleanTypeUserTypeChannelTypeRoleTypeMentionableTypeNumber"
+const _ApplicationCommandOptionType_name = "TypeSubCommandTypeSubCommandGroupTypeStringTypeIntegerTypeBooleanTypeUserTypeChannelTypeRoleTypeMentionableTypeNumberTypeAttachment"
 
-var _ApplicationCommandOptionType_index = [...]uint8{0, 14, 33, 43, 54, 65, 73, 84, 92, 107, 117}
+var _ApplicationCommandOptionType_index = [...]uint8{0, 14, 33, 43, 54, 65, 73, 84, 92, 107, 117, 131}
 
 func (i ApplicationCommandOptionType) String() string {
 	i -= 1

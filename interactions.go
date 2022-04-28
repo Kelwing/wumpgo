@@ -2,7 +2,11 @@ package objects
 
 //go:generate stringer -type=ApplicationCommandOptionType,InteractionType,ResponseType,ApplicationCommandType,ButtonStyle,ComponentType,TextStyle,ApplicationCommandPermissionType -output interactions_string.go
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/Postcord/objects/permissions"
+)
 
 var _ SnowflakeObject = (*ApplicationCommand)(nil)
 var _ SnowflakeObject = (*Interaction)(nil)
@@ -107,6 +111,10 @@ type ApplicationCommand struct {
 	Description string `json:"description,omitempty"`
 	// Options are the parameters for the command, max 25, only valid for CHAT_INPUT commands
 	Options []ApplicationCommandOption `json:"options"`
+	// Set of permissions represented as a bit set
+	DefaultPermissions permissions.PermissionBit `json:"default_member_permissions"`
+	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
+	AllowUseInDMs bool `json:"dm_permission"`
 	// DefaultPermission is whether the command is enabled by default when the app is added to a guild
 	DefaultPermission bool `json:"default_permission"`
 	// Version is an autoincrementing version identifier updated during substantial record changes
