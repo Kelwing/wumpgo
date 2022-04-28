@@ -401,7 +401,7 @@ func TestCommandRouter_Use(t *testing.T) {
 
 func TestCommandRouter_NewCommandGroup(t *testing.T) {
 	r := &CommandRouter{}
-	group, err := r.NewCommandGroup("abc", "def")
+	group, err := r.NewCommandGroup("abc", "def", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &CommandGroup{
 		level:             1,
@@ -511,9 +511,9 @@ func makeMockFullCommandRouter(injectAllowedMentions *objects.AllowedMentions) (
 	r.Use(middleware1)
 	r.Use(middleware2)
 
-	root3 := r.MustNewCommandGroup("root3", "")
+	root3 := r.MustNewCommandGroup("root3", "", nil)
 	root3.AllowedMentions = injectAllowedMentions
-	root4 := r.MustNewCommandGroup("root4", "")
+	root4 := r.MustNewCommandGroup("root4", "", nil)
 	sub3 := root4.MustNewCommandGroup("sub3", "", nil)
 
 	cmds := map[string]*Command{
@@ -1670,14 +1670,14 @@ func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
 					MustBuild()
 
 				// Defines a command group with commands in the group.
-				g := r.MustNewCommandGroup("group1", "group 1")
+				g := r.MustNewCommandGroup("group1", "group 1", nil)
 				g.NewCommandBuilder("cmd1").Description("first command in group").
 					StringOption("test", "testing", true, nil).
 					MustBuild()
 				g.NewCommandBuilder("cmd2").Description("second command in group").MustBuild()
 
 				// Defines a command group with sub-groups.
-				g = r.MustNewCommandGroup("group2", "group 2")
+				g = r.MustNewCommandGroup("group2", "group 2", nil)
 				g.MustNewCommandGroup("subgroup1", "subgroup 1", nil).
 					NewCommandBuilder("subcmd1").Description("first command in subgroup").MustBuild()
 				s := g.MustNewCommandGroup("subgroup1", "subgroup 1", nil)

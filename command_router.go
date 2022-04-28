@@ -184,7 +184,7 @@ func (c *CommandRouter) Use(f MiddlewareFunc) {
 }
 
 // NewCommandGroup is used to create a sub-command group. Works the same as CommandGroup.NewCommandGroup.
-func (c *CommandRouter) NewCommandGroup(name, description string) (*CommandGroup, error) {
+func (c *CommandRouter) NewCommandGroup(name, description string, opts *CommandGroupOptions) (*CommandGroup, error) {
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
@@ -197,8 +197,8 @@ func (c *CommandRouter) NewCommandGroup(name, description string) (*CommandGroup
 }
 
 // MustNewCommandGroup calls NewCommandGroup but must succeed. If not, it will panic.
-func (c *CommandRouter) MustNewCommandGroup(name, description string) *CommandGroup {
-	x, err := c.NewCommandGroup(name, description)
+func (c *CommandRouter) MustNewCommandGroup(name, description string, opts *CommandGroupOptions) *CommandGroup {
+	x, err := c.NewCommandGroup(name, description, opts)
 	if err != nil {
 		panic(err)
 	}
