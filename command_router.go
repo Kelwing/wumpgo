@@ -188,7 +188,7 @@ func (c *CommandRouter) NewCommandGroup(name, description string, opts *CommandG
 	if c.roots.Subcommands == nil {
 		c.roots.Subcommands = map[string]interface{}{}
 	}
-	g, err := c.roots.NewCommandGroup(name, description, nil)
+	g, err := c.roots.NewCommandGroup(name, description, opts)
 	if err != nil {
 		return nil, err
 	}
