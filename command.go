@@ -37,10 +37,6 @@ type Command struct {
 	// UseInDMs determines if the command should be usable in DMs (default: true)
 	UseInDMs *bool `json:"dm_permission,omitempty"`
 
-	// DefaultPermission Indicates whether the command is enabled by default when the app is added to a guild, defaults to false
-	// Deprecated: Not recommended for use as field will soon be deprecated.
-	DefaultPermission bool `json:"default_permission"`
-
 	// Options defines the options which are required for a command.
 	Options []*objects.ApplicationCommandOption `json:"options"`
 

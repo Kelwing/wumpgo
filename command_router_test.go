@@ -1650,7 +1650,7 @@ func TestCommandRouter_FormulateDiscordCommands(t *testing.T) {
 
 				// Defines the root command with no arguments.
 				r.NewCommandBuilder("rootnoargs").
-					DefaultPermission().
+					DefaultPermissions(permissions.Administrator).
 					Description("root with no arguments").
 					MustBuild()
 

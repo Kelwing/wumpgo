@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/Postcord/objects/permissions"
 	"testing"
 
 	"github.com/Postcord/objects"
@@ -81,7 +82,7 @@ func Test_commandBuilder_StringOption(t *testing.T) {
 					}
 				}
 			}
-			err := callBuilderFunction(t, b, "StringOption", "testing", "testing 123", true, f)
+			err := callBuilderFunction(t, b, true, "StringOption", "testing", "testing 123", true, f)
 			if tt.wantErr == "" {
 				assert.NoError(t, err)
 				var discordifiedChoices []objects.ApplicationCommandOptionChoice
@@ -187,7 +188,7 @@ func Test_commandBuilder_IntOption(t *testing.T) {
 					}
 				}
 			}
-			err := callBuilderFunction(t, b, "IntOption", "testing", "testing 123", true, f)
+			err := callBuilderFunction(t, b, true, "IntOption", "testing", "testing 123", true, f)
 			if tt.wantErr == "" {
 				assert.NoError(t, err)
 				var discordifiedChoices []objects.ApplicationCommandOptionChoice
@@ -293,7 +294,7 @@ func Test_commandBuilder_DoubleOption(t *testing.T) {
 					}
 				}
 			}
-			err := callBuilderFunction(t, b, "DoubleOption", "testing", "testing 123", true, f)
+			err := callBuilderFunction(t, b, true, "DoubleOption", "testing", "testing 123", true, f)
 			if tt.wantErr == "" {
 				assert.NoError(t, err)
 				var discordifiedChoices []objects.ApplicationCommandOptionChoice
@@ -328,7 +329,7 @@ func Test_commandBuilder_DoubleOption(t *testing.T) {
 func Test_textCommandBuilder_StringOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "StringOption", "testing", "testing 123", true,
+		t, b, true, "StringOption", "testing", "testing 123", true,
 		StringStaticChoicesBuilder([]StringChoice{
 			{Name: "a", Value: "b"},
 		}),
@@ -349,7 +350,7 @@ func Test_textCommandBuilder_StringOption(t *testing.T) {
 func Test_textCommandBuilder_IntOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "IntOption", "testing", "testing 123", true,
+		t, b, true, "IntOption", "testing", "testing 123", true,
 		IntStaticChoicesBuilder([]IntChoice{
 			{Name: "a", Value: 123},
 		}),
@@ -370,7 +371,7 @@ func Test_textCommandBuilder_IntOption(t *testing.T) {
 func Test_textCommandBuilder_BoolOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "BoolOption", "testing", "testing 123", true,
+		t, b, true, "BoolOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -385,7 +386,7 @@ func Test_textCommandBuilder_BoolOption(t *testing.T) {
 func Test_textCommandBuilder_UserOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "UserOption", "testing", "testing 123", true,
+		t, b, true, "UserOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -400,7 +401,7 @@ func Test_textCommandBuilder_UserOption(t *testing.T) {
 func Test_textCommandBuilder_ChannelOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "ChannelOption", "testing", "testing 123", true,
+		t, b, true, "ChannelOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -415,7 +416,7 @@ func Test_textCommandBuilder_ChannelOption(t *testing.T) {
 func Test_textCommandBuilder_RoleOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "RoleOption", "testing", "testing 123", true,
+		t, b, true, "RoleOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -430,7 +431,7 @@ func Test_textCommandBuilder_RoleOption(t *testing.T) {
 func Test_textCommandBuilder_MentionableOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "MentionableOption", "testing", "testing 123", true,
+		t, b, true, "MentionableOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -445,7 +446,7 @@ func Test_textCommandBuilder_MentionableOption(t *testing.T) {
 func Test_textCommandBuilder_DoubleOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "DoubleOption", "testing", "testing 123", true,
+		t, b, true, "DoubleOption", "testing", "testing 123", true,
 		DoubleStaticChoicesBuilder([]DoubleChoice{
 			{Name: "a", Value: (float64)(123)},
 		}),
@@ -466,7 +467,7 @@ func Test_textCommandBuilder_DoubleOption(t *testing.T) {
 func Test_textCommandBuilder_AttachmentOption(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "AttachmentOption", "testing", "testing 123", true,
+		t, b, true, "AttachmentOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -478,16 +479,10 @@ func Test_textCommandBuilder_AttachmentOption(t *testing.T) {
 	}, b.(textCommandBuilder).cmd.Options)
 }
 
-func Test_textCommandBuilder_DefaultPermission(t *testing.T) {
-	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "DefaultPermission"))
-	assert.True(t, b.(textCommandBuilder).cmd.DefaultPermission)
-}
-
 func Test_textCommandBuilder_AllowedMentions(t *testing.T) {
 	x := &objects.AllowedMentions{}
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "AllowedMentions", x))
+	assert.NoError(t, callBuilderFunction(t, b, true, "AllowedMentions", x))
 	assert.Same(t, x, b.(textCommandBuilder).cmd.AllowedMentions)
 }
 
@@ -500,7 +495,7 @@ func Test_commandBuilder_TextCommand(t *testing.T) {
 func Test_subcommandBuilder_StringOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "StringOption", "testing", "testing 123", true,
+		t, b, true, "StringOption", "testing", "testing 123", true,
 		StringStaticChoicesBuilder([]StringChoice{
 			{Name: "a", Value: "b"},
 		}),
@@ -521,7 +516,7 @@ func Test_subcommandBuilder_StringOption(t *testing.T) {
 func Test_subcommandBuilder_IntOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "IntOption", "testing", "testing 123", true,
+		t, b, true, "IntOption", "testing", "testing 123", true,
 		IntStaticChoicesBuilder([]IntChoice{
 			{Name: "a", Value: 123},
 		}),
@@ -542,7 +537,7 @@ func Test_subcommandBuilder_IntOption(t *testing.T) {
 func Test_subcommandBuilder_BoolOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "BoolOption", "testing", "testing 123", true,
+		t, b, true, "BoolOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -557,7 +552,7 @@ func Test_subcommandBuilder_BoolOption(t *testing.T) {
 func Test_subcommandBuilder_UserOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "UserOption", "testing", "testing 123", true,
+		t, b, true, "UserOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -572,7 +567,7 @@ func Test_subcommandBuilder_UserOption(t *testing.T) {
 func Test_subcommandBuilder_ChannelOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "ChannelOption", "testing", "testing 123", true,
+		t, b, true, "ChannelOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -587,7 +582,7 @@ func Test_subcommandBuilder_ChannelOption(t *testing.T) {
 func Test_subcommandBuilder_RoleOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "RoleOption", "testing", "testing 123", true,
+		t, b, true, "RoleOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -602,7 +597,7 @@ func Test_subcommandBuilder_RoleOption(t *testing.T) {
 func Test_subcommandBuilder_MentionableOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "MentionableOption", "testing", "testing 123", true,
+		t, b, true, "MentionableOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -617,7 +612,7 @@ func Test_subcommandBuilder_MentionableOption(t *testing.T) {
 func Test_subcommandBuilder_DoubleOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "DoubleOption", "testing", "testing 123", true,
+		t, b, true, "DoubleOption", "testing", "testing 123", true,
 		DoubleStaticChoicesBuilder([]DoubleChoice{
 			{Name: "a", Value: (float64)(123)},
 		}),
@@ -638,7 +633,7 @@ func Test_subcommandBuilder_DoubleOption(t *testing.T) {
 func Test_subcommandBuilder_AttachmentOption(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
 	assert.NoError(t, callBuilderFunction(
-		t, b, "AttachmentOption", "testing", "testing 123", true,
+		t, b, true, "AttachmentOption", "testing", "testing 123", true,
 	))
 	assert.Equal(t, []*objects.ApplicationCommandOption{
 		{
@@ -650,29 +645,31 @@ func Test_subcommandBuilder_AttachmentOption(t *testing.T) {
 	}, b.(subcommandBuilder).cmd.Options)
 }
 
-func Test_subcommandBuilder_DefaultPermission(t *testing.T) {
-	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "DefaultPermission"))
-	assert.True(t, b.(subcommandBuilder).cmd.DefaultPermission)
-}
-
 func Test_subcommandBuilder_AllowedMentions(t *testing.T) {
 	x := &objects.AllowedMentions{}
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "AllowedMentions", x))
+	assert.NoError(t, callBuilderFunction(t, b, true, "AllowedMentions", x))
 	assert.Same(t, x, b.(subcommandBuilder).cmd.AllowedMentions)
 }
 
-func Test_messageCommandBuilder_DefaultPermission(t *testing.T) {
+func Test_messageCommandBuilder_DefaultPermissions(t *testing.T) {
 	var b MessageCommandBuilder = messageCommandBuilder{&commandBuilder[MessageCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "DefaultPermission"))
-	assert.True(t, b.(messageCommandBuilder).cmd.DefaultPermission)
+	assert.NoError(t, callBuilderFunction(t, b, true, "DefaultPermissions", permissions.PermissionBit(69)))
+	x := permissions.PermissionBit(69)
+	assert.Equal(t, &x, b.(messageCommandBuilder).cmd.DefaultPermissions)
+}
+
+func Test_messageCommandBuilder_GuildCommand(t *testing.T) {
+	var b MessageCommandBuilder = messageCommandBuilder{&commandBuilder[MessageCommandBuilder]{}}
+	assert.NoError(t, callBuilderFunction(t, b, true, "GuildCommand"))
+	x := false
+	assert.Equal(t, &x, b.(messageCommandBuilder).cmd.UseInDMs)
 }
 
 func Test_messageCommandBuilder_AllowedMentions(t *testing.T) {
 	x := &objects.AllowedMentions{}
 	var b MessageCommandBuilder = messageCommandBuilder{&commandBuilder[MessageCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "AllowedMentions", x))
+	assert.NoError(t, callBuilderFunction(t, b, true, "AllowedMentions", x))
 	assert.Same(t, x, b.(messageCommandBuilder).cmd.AllowedMentions)
 }
 
@@ -682,16 +679,24 @@ func Test_commandBuilder_MessageCommand(t *testing.T) {
 	assert.NotNil(t, res.(messageCommandBuilder).commandBuilder)
 }
 
-func Test_userCommandBuilder_DefaultPermission(t *testing.T) {
+func Test_userCommandBuilder_DefaultPermissions(t *testing.T) {
 	var b UserCommandBuilder = userCommandBuilder{&commandBuilder[UserCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "DefaultPermission"))
-	assert.True(t, b.(userCommandBuilder).cmd.DefaultPermission)
+	assert.NoError(t, callBuilderFunction(t, b, true, "DefaultPermissions", permissions.PermissionBit(69)))
+	x := permissions.PermissionBit(69)
+	assert.Equal(t, &x, b.(userCommandBuilder).cmd.DefaultPermissions)
+}
+
+func Test_userCommandBuilder_GuildCommand(t *testing.T) {
+	var b UserCommandBuilder = userCommandBuilder{&commandBuilder[UserCommandBuilder]{}}
+	assert.NoError(t, callBuilderFunction(t, b, true, "GuildCommand"))
+	x := false
+	assert.Equal(t, &x, b.(userCommandBuilder).cmd.UseInDMs)
 }
 
 func Test_userCommandBuilder_AllowedMentions(t *testing.T) {
 	x := &objects.AllowedMentions{}
 	var b UserCommandBuilder = userCommandBuilder{&commandBuilder[UserCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "AllowedMentions", x))
+	assert.NoError(t, callBuilderFunction(t, b, true, "AllowedMentions", x))
 	assert.Same(t, x, b.(userCommandBuilder).cmd.AllowedMentions)
 }
 
@@ -702,41 +707,63 @@ func Test_userCommandBuilder_MessageCommand(t *testing.T) {
 }
 
 func Test_commandBuilder_Description(t *testing.T) {
-	base := &commandBuilder[CommandBuilder]{}
-	assert.NoError(t, callBuilderFunction(t, base, "Description", "testing"))
-	assert.Equal(t, "testing", base.cmd.Description)
+	var base CommandBuilder = &commandBuilder[CommandBuilder]{}
+	assert.NoError(t, callBuilderFunction(t, base, true, "Description", "testing"))
+	assert.Equal(t, "testing", base.(*commandBuilder[CommandBuilder]).cmd.Description)
 }
 
-func Test_commandBuilder_DefaultPermission(t *testing.T) {
-	base := &commandBuilder[CommandBuilder]{}
-	assert.NoError(t, callBuilderFunction(t, base, "DefaultPermission"))
-	assert.True(t, base.cmd.DefaultPermission)
+func Test_commandBuilder_DefaultPermissions(t *testing.T) {
+	var base CommandBuilder = &commandBuilder[CommandBuilder]{}
+	assert.NoError(t, callBuilderFunction(t, base, true, "DefaultPermissions", permissions.PermissionBit(69)))
+	x := permissions.PermissionBit(69)
+	assert.Equal(t, &x, base.(*commandBuilder[CommandBuilder]).cmd.DefaultPermissions)
+}
+
+func Test_commandBuilder_GuildCommand(t *testing.T) {
+	var base CommandBuilder = &commandBuilder[CommandBuilder]{}
+	assert.NoError(t, callBuilderFunction(t, base, true, "GuildCommand"))
+	x := false
+	assert.Equal(t, &x, base.(*commandBuilder[CommandBuilder]).cmd.UseInDMs)
 }
 
 func Test_commandBuilder_AllowedMentions(t *testing.T) {
 	x := &objects.AllowedMentions{}
-	base := &commandBuilder[CommandBuilder]{}
-	assert.NoError(t, callBuilderFunction(t, base, "AllowedMentions", x))
-	assert.Same(t, x, base.cmd.AllowedMentions)
+	var base CommandBuilder = &commandBuilder[CommandBuilder]{}
+	assert.NoError(t, callBuilderFunction(t, base, true, "AllowedMentions", x))
+	assert.Same(t, x, base.(*commandBuilder[CommandBuilder]).cmd.AllowedMentions)
 }
 
 func Test_commandBuilder_Handler(t *testing.T) {
-	base := &commandBuilder[CommandBuilder]{}
-	assert.NoError(t, callBuilderFunction(t, base, "Handler", func(ctx *CommandRouterCtx) error {
+	var base CommandBuilder = &commandBuilder[CommandBuilder]{}
+	assert.NoError(t, callBuilderFunction(t, base, true, "Handler", func(ctx *CommandRouterCtx) error {
 		return nil
 	}))
-	assert.NotNil(t, base.cmd.Function)
+	assert.NotNil(t, base.(*commandBuilder[CommandBuilder]).cmd.Function)
 }
 
 func Test_textCommandBuilder_Description(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "Description", "testing"))
+	assert.NoError(t, callBuilderFunction(t, b, true, "Description", "testing"))
 	assert.Equal(t, "testing", b.(textCommandBuilder).cmd.Description)
+}
+
+func Test_textCommandBuilder_DefaultPermissions(t *testing.T) {
+	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
+	assert.NoError(t, callBuilderFunction(t, b, true, "DefaultPermissions", permissions.PermissionBit(69)))
+	x := permissions.PermissionBit(69)
+	assert.Equal(t, &x, b.(textCommandBuilder).cmd.DefaultPermissions)
+}
+
+func Test_textCommandBuilder_GuildCommand(t *testing.T) {
+	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
+	assert.NoError(t, callBuilderFunction(t, b, true, "GuildCommand"))
+	x := false
+	assert.Equal(t, &x, b.(textCommandBuilder).cmd.UseInDMs)
 }
 
 func Test_textCommandBuilder_Handler(t *testing.T) {
 	var b TextCommandBuilder = textCommandBuilder{&commandBuilder[TextCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "Handler", func(ctx *CommandRouterCtx) error {
+	assert.NoError(t, callBuilderFunction(t, b, true, "Handler", func(ctx *CommandRouterCtx) error {
 		return nil
 	}))
 	assert.NotNil(t, b.(textCommandBuilder).cmd.Function)
@@ -744,13 +771,13 @@ func Test_textCommandBuilder_Handler(t *testing.T) {
 
 func Test_subcommandBuilder_Description(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "Description", "testing"))
+	assert.NoError(t, callBuilderFunction(t, b, true, "Description", "testing"))
 	assert.Equal(t, "testing", b.(subcommandBuilder).cmd.Description)
 }
 
 func Test_subcommandBuilder_Handler(t *testing.T) {
 	var b SubCommandBuilder = subcommandBuilder{&commandBuilder[SubCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "Handler", func(ctx *CommandRouterCtx) error {
+	assert.NoError(t, callBuilderFunction(t, b, true, "Handler", func(ctx *CommandRouterCtx) error {
 		return nil
 	}))
 	assert.NotNil(t, b.(subcommandBuilder).cmd.Function)
@@ -758,7 +785,7 @@ func Test_subcommandBuilder_Handler(t *testing.T) {
 
 func Test_messageCommandBuilder_Handler(t *testing.T) {
 	var b MessageCommandBuilder = messageCommandBuilder{&commandBuilder[MessageCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "Handler", func(ctx *CommandRouterCtx, msg *objects.Message) error {
+	assert.NoError(t, callBuilderFunction(t, b, true, "Handler", func(ctx *CommandRouterCtx, msg *objects.Message) error {
 		return nil
 	}))
 	assert.NotNil(t, b.(messageCommandBuilder).cmd.Function)
@@ -766,7 +793,7 @@ func Test_messageCommandBuilder_Handler(t *testing.T) {
 
 func Test_userCommandBuilder_Handler(t *testing.T) {
 	var b UserCommandBuilder = userCommandBuilder{&commandBuilder[UserCommandBuilder]{}}
-	assert.NoError(t, callBuilderFunction(t, b, "Handler", func(ctx *CommandRouterCtx, user *objects.GuildMember) error {
+	assert.NoError(t, callBuilderFunction(t, b, true, "Handler", func(ctx *CommandRouterCtx, user *objects.GuildMember) error {
 		return nil
 	}))
 	assert.NotNil(t, b.(userCommandBuilder).cmd.Function)

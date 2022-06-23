@@ -3,7 +3,8 @@
     "type": 1,
     "name": "rootnoargs",
     "description": "root with no arguments",
-    "options": []
+    "options": [],
+    "default_member_permissions": "8"
   },
   {
     "type": 1,

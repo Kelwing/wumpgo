@@ -26,11 +26,6 @@ func (c *commandBuilder[T]) GuildCommand() T {
 	return builderWrapify(c)
 }
 
-func (c *commandBuilder[T]) DefaultPermission() T {
-	c.cmd.DefaultPermission = true
-	return builderWrapify(c)
-}
-
 func (c *commandBuilder[T]) AllowedMentions(config *objects.AllowedMentions) T {
 	c.cmd.AllowedMentions = config
 	return builderWrapify(c)

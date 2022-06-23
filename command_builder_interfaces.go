@@ -1,6 +1,9 @@
 package router
 
-import "github.com/Postcord/objects"
+import (
+	"github.com/Postcord/objects"
+	"github.com/Postcord/objects/permissions"
+)
 
 // commandOptions is a struct that contains the options for a command.
 type commandOptions[T any] interface {
@@ -45,11 +48,14 @@ type commandOptions[T any] interface {
 type TextCommandBuilder interface {
 	commandOptions[TextCommandBuilder]
 
+	// DefaultPermissions is used to set the default command permissions for this command.
+	DefaultPermissions(permissions.PermissionBit) TextCommandBuilder
+
+	// GuildCommand is used to forbid this from running in DMs.
+	GuildCommand() TextCommandBuilder
+
 	// Description is used to define the commands description.
 	Description(string) TextCommandBuilder
-
-	// DefaultPermission is used to define if the command should have default permissions. Note this does nothing if the command is in a group.
-	DefaultPermission() TextCommandBuilder
 
 	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions(*objects.AllowedMentions) TextCommandBuilder
@@ -86,8 +92,11 @@ type SubCommandBuilder interface {
 
 // MessageCommandBuilder is used to define a builder for a Message object where the type is a user command.
 type MessageCommandBuilder interface {
-	// DefaultPermission is used to define if the command should have default permissions. Note this does nothing if the command is in a group.
-	DefaultPermission() MessageCommandBuilder
+	// DefaultPermissions is used to set the default command permissions for this command.
+	DefaultPermissions(permissions.PermissionBit) MessageCommandBuilder
+
+	// GuildCommand is used to forbid this from running in DMs.
+	GuildCommand() MessageCommandBuilder
 
 	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions(*objects.AllowedMentions) MessageCommandBuilder
@@ -104,8 +113,11 @@ type MessageCommandBuilder interface {
 
 // UserCommandBuilder is used to define a builder for a Command object where the type is a user command.
 type UserCommandBuilder interface {
-	// DefaultPermission is used to define if the command should have default permissions. Note this does nothing if the command is in a group.
-	DefaultPermission() UserCommandBuilder
+	// DefaultPermissions is used to set the default command permissions for this command.
+	DefaultPermissions(permissions.PermissionBit) UserCommandBuilder
+
+	// GuildCommand is used to forbid this from running in DMs.
+	GuildCommand() UserCommandBuilder
 
 	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions(*objects.AllowedMentions) UserCommandBuilder
@@ -124,6 +136,12 @@ type UserCommandBuilder interface {
 type CommandBuilder interface {
 	commandOptions[CommandBuilder]
 
+	// DefaultPermissions is used to set the default command permissions for this command.
+	DefaultPermissions(permissions.PermissionBit) CommandBuilder
+
+	// GuildCommand is used to forbid this from running in DMs.
+	GuildCommand() CommandBuilder
+
 	// Description is used to define the commands description.
 	Description(string) CommandBuilder
 
@@ -135,9 +153,6 @@ type CommandBuilder interface {
 
 	// UserCommand is used to define that this should be a message command builder.
 	UserCommand() UserCommandBuilder
-
-	// DefaultPermission is used to define if the command should have default permissions. Note this does nothing if the command is in a group.
-	DefaultPermission() CommandBuilder
 
 	// AllowedMentions is used to set a command level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions(*objects.AllowedMentions) CommandBuilder

@@ -102,9 +102,6 @@ type CommandGroup struct {
 	// Middleware defines all of the groups middleware.
 	Middleware []MiddlewareFunc `json:"middleware"`
 
-	// DefaultPermission defines if this is the default permission.
-	DefaultPermission bool `json:"default_permission"`
-
 	// Description is the description for the command group.
 	Description string `json:"description"`
 

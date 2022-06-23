@@ -15,13 +15,13 @@ import (
 
 func TestComponentRouterCtx_DeferredMessageUpdate(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	assert.NoError(t, callBuilderFunction(t, x, "DeferredMessageUpdate"))
+	assert.NoError(t, callBuilderFunction(t, x, false, "DeferredMessageUpdate"))
 	assert.Equal(t, objects.ResponseDeferredMessageUpdate, x.respType)
 }
 
 func TestComponentRouterCtx_UpdateMessage(t *testing.T) {
 	x := &ComponentRouterCtx{}
-	assert.NoError(t, callBuilderFunction(t, x, "UpdateMessage"))
+	assert.NoError(t, callBuilderFunction(t, x, false, "UpdateMessage"))
 	assert.Equal(t, objects.ResponseUpdateMessage, x.respType)
 }
 
