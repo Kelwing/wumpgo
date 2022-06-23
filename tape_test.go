@@ -15,10 +15,10 @@ type testingTTapeItemMatch struct {
 	*testing.T
 
 	format string
-	args   []interface{}
+	args   []any
 }
 
-func (t *testingTTapeItemMatch) Fatalf(format string, args ...interface{}) {
+func (t *testingTTapeItemMatch) Fatalf(format string, args ...any) {
 	t.format = format
 	t.args = args
 }
@@ -74,7 +74,7 @@ func Test_tape_write(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			items := []interface{}{
+			items := []any{
 				"a", "b", "c", []string{"d", "e"},
 			}
 			tapeObj := tape{}
@@ -116,7 +116,7 @@ func Test_tapeItem_end(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create the params.
-			params := []interface{}{"a", "b", "c"}
+			params := []any{"a", "b", "c"}
 			if tt.restError != nil {
 				params = append(params, tt.restError)
 			} else if tt.genericError != "" {

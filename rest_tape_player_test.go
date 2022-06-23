@@ -3,10 +3,11 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/Postcord/rest"
 )
@@ -18,7 +19,7 @@ type restTapePlayerTestStoreFatal struct {
 	fatal string
 }
 
-func (t *restTapePlayerTestStoreFatal) Fatal(args ...interface{}) {
+func (t *restTapePlayerTestStoreFatal) Fatal(args ...any) {
 	t.fatal = fmt.Sprint(args...)
 }
 

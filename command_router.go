@@ -16,6 +16,10 @@ import (
 
 // CommandRouterCtx is used to define the commands context from the router.
 type CommandRouterCtx struct {
+	// Defines the response builder. THIS MUST ALWAYS BE THE FIRST FIELD IN THE STRUCT.
+	// SEE THE RESPONSE BUILDER FOR MORE INFORMATION.
+	publicResponseBuilder[*CommandRouterCtx]
+
 	// Defines the error handler.
 	errorHandler ErrorHandler
 
@@ -28,9 +32,6 @@ type CommandRouterCtx struct {
 	// Defines the void ID generator.
 	voidGenerator
 
-	// Defines the response builder.
-	responseBuilder
-
 	// Defines the interaction which started this.
 	*objects.Interaction
 
@@ -42,7 +43,7 @@ type CommandRouterCtx struct {
 
 	// Options is used to define any options that were set in the context. Note that if an option is unset from Discord, it will not be in the map.
 	// Note that for User, Channel, Role, and Mentionable from Discord; a "*Resolvable<option type>" type is used. This will allow you to get the ID as a Snowflake, string, or attempt to get from resolved.
-	Options map[string]interface{} `json:"options"`
+	Options map[string]any `json:"options"`
 
 	// RESTClient is used to define the REST client.
 	RESTClient rest.RESTClient `json:"rest_client"`
@@ -50,7 +51,7 @@ type CommandRouterCtx struct {
 
 // TargetMessage is used to try and get the target message. If this was not targeted at a message, returns nil.
 func (c *CommandRouterCtx) TargetMessage() *objects.Message {
-	message, _ := c.Options["/target"].(*ResolvableMessage)
+	message, _ := c.Options["/target"].(ResolvableMessage)
 	if message == nil {
 		return nil
 	}
@@ -59,7 +60,7 @@ func (c *CommandRouterCtx) TargetMessage() *objects.Message {
 
 // TargetMember is used to try and get the target member. If this was not targeted at a member, returns nil.
 func (c *CommandRouterCtx) TargetMember() *objects.GuildMember {
-	member, _ := c.Options["/target"].(*ResolvableUser)
+	member, _ := c.Options["/target"].(ResolvableUser)
 	if member == nil {
 		return nil
 	}
@@ -116,8 +117,8 @@ type CommandGroup struct {
 	// AllowedMentions is used to set a group level rule on allowed mentions. If this is not nil, it overrides the last configuration.
 	AllowedMentions *objects.AllowedMentions `json:"allowed_mentions"`
 
-	// Subcommands is a map of all of the subcommands. It is a interface{} since it can be *Command or *CommandGroup. DO NOT ADD TO THIS! USE THE ATTACHED FUNCTIONS!
-	Subcommands map[string]interface{} `json:"subcommands"`
+	// Subcommands is a map of all of the subcommands. It is a any since it can be *Command or *CommandGroup. DO NOT ADD TO THIS! USE THE ATTACHED FUNCTIONS!
+	Subcommands map[string]any `json:"subcommands"`
 }
 
 // Use is used to add middleware to the group.
@@ -147,14 +148,14 @@ func (c *CommandGroup) NewCommandGroup(name, description string, opts *CommandGr
 			Description:        description,
 			DefaultPermissions: &opts.DefaultPermissions,
 			UseInDMs:           &opts.UseInDMs,
-			Subcommands:        map[string]interface{}{},
+			Subcommands:        map[string]any{},
 		}
 	} else {
 		// TODO: Validate name + description.
 		g = &CommandGroup{
 			level:       nextLevel,
 			Description: description,
-			Subcommands: map[string]interface{}{},
+			Subcommands: map[string]any{},
 		}
 	}
 
@@ -186,7 +187,7 @@ func (c *CommandRouter) Use(f MiddlewareFunc) {
 // NewCommandGroup is used to create a sub-command group. Works the same as CommandGroup.NewCommandGroup.
 func (c *CommandRouter) NewCommandGroup(name, description string, opts *CommandGroupOptions) (*CommandGroup, error) {
 	if c.roots.Subcommands == nil {
-		c.roots.Subcommands = map[string]interface{}{}
+		c.roots.Subcommands = map[string]any{}
 	}
 	g, err := c.roots.NewCommandGroup(name, description, opts)
 	if err != nil {
@@ -208,15 +209,15 @@ func (c *CommandRouter) MustNewCommandGroup(name, description string, opts *Comm
 // NewCommandBuilder is used to create a builder for a *Command object.
 func (c *CommandRouter) NewCommandBuilder(name string) CommandBuilder {
 	if c.roots.Subcommands == nil {
-		c.roots.Subcommands = map[string]interface{}{}
+		c.roots.Subcommands = map[string]any{}
 	}
-	return &commandBuilder{cmd: Command{Name: name}, map_: c.roots.Subcommands}
+	return &commandBuilder[CommandBuilder]{cmd: Command{Name: name}, map_: c.roots.Subcommands}
 }
 
 // MarshalJSON implements the json.Marshaler interface.
 func (c *CommandRouter) MarshalJSON() ([]byte, error) {
 	if c.roots.Subcommands == nil {
-		c.roots.Subcommands = map[string]interface{}{}
+		c.roots.Subcommands = map[string]any{}
 	}
 	return json.Marshal(c.roots.Subcommands)
 }
@@ -249,7 +250,7 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough) interactio
 		// Get the map of (sub-)commands.
 		m := c.roots.Subcommands
 		if m == nil {
-			m = map[string]interface{}{}
+			m = map[string]any{}
 		}
 
 		// Handle the traversal.
@@ -423,7 +424,7 @@ func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough) interactio
 }
 
 type dataWrapper interface {
-	type_() interface{}
+	type_() any
 	name() string
 }
 
@@ -431,7 +432,7 @@ type rootDataWrapper struct {
 	root *objects.ApplicationCommandInteractionData
 }
 
-func (r rootDataWrapper) type_() interface{} {
+func (r rootDataWrapper) type_() any {
 	return r.root.Type
 }
 
@@ -443,7 +444,7 @@ type optionDataWrapper struct {
 	option *objects.ApplicationCommandInteractionDataOption
 }
 
-func (r optionDataWrapper) type_() interface{} {
+func (r optionDataWrapper) type_() any {
 	return r.option.Type
 }
 
@@ -483,7 +484,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 		// Get the map of (sub-)commands.
 		m := c.roots.Subcommands
 		if m == nil {
-			m = map[string]interface{}{}
+			m = map[string]any{}
 		}
 
 		// Create the rest tape if this is wanted.
@@ -589,7 +590,7 @@ func (c *CommandRouter) build(loader loaderPassthrough) (interactions.HandlerFun
 }
 
 // Get the options for a command or category.
-func getOptions(cmdOrCat interface{}) []objects.ApplicationCommandOption {
+func getOptions(cmdOrCat any) []objects.ApplicationCommandOption {
 	switch x := cmdOrCat.(type) {
 	case *Command:
 		unptr := make([]objects.ApplicationCommandOption, len(x.Options))
@@ -716,7 +717,7 @@ func (c *CommandRouter) FormulateDiscordCommands() []*objects.ApplicationCommand
 const selectorTagName = "discord"
 
 // Bind allows you to bind the option values to a struct for easy access
-func (c *CommandRouterCtx) Bind(data interface{}) error {
+func (c *CommandRouterCtx) Bind(data any) error {
 	structType := reflect.TypeOf(data)
 	if structType.Kind() != reflect.Ptr {
 		return errors.New("data must be a pointer")
@@ -791,18 +792,16 @@ func (c *CommandRouterCtx) Bind(data interface{}) error {
 			fmt.Printf("setting %s to %t\n", field.Name, optionVal.Bool())
 			fieldPointer.Set(optionVal)
 		case objects.TypeChannel, objects.TypeRole, objects.TypeUser, objects.TypeMentionable:
-			if kind != reflect.Ptr {
-				return fmt.Errorf("option %s is a Resolvable type, but the struct type is not a pointer to a Resolvable", tagValue)
+			if kind != reflect.Interface {
+				return fmt.Errorf("option %s is a Resolvable type, but the interface type is not a Resolvable", tagValue)
 			}
 
-			resElem := optionVal.Elem()
-			if resElem.Kind() != reflect.Struct {
-				return fmt.Errorf("option %s is a Resolvable type, but the struct type is not a pointer to a Resolvable", tagValue)
+			if optionVal.Kind() == reflect.Ptr && optionVal.IsNil() {
+				return fmt.Errorf("option %s is a Resolvable type, but the value is nil", tagValue)
 			}
 
-			resField := resElem.FieldByName("id")
-			if resField.IsZero() {
-				return fmt.Errorf("option %s is a Resolvable type, but the struct type is not a pointer to a Resolvable", tagValue)
+			if optionVal.IsZero() {
+				return fmt.Errorf("option %s is a Resolvable type, but the type is not a Resolvable", tagValue)
 			}
 
 			fmt.Printf("setting %s to %s\n", field.Name, optionVal.String())

@@ -22,6 +22,10 @@ type ModalGenerationCtx struct {
 
 // ModalRouterCtx is used to define the context for the modal event.
 type ModalRouterCtx struct {
+	// Defines the response builder. THIS MUST ALWAYS BE THE FIRST FIELD IN THE STRUCT.
+	// SEE THE RESPONSE BUILDER FOR MORE INFORMATION.
+	publicResponseBuilder[*ModalRouterCtx]
+
 	// Defines the error handler.
 	errorHandler ErrorHandler
 
@@ -30,9 +34,6 @@ type ModalRouterCtx struct {
 
 	// Defines the void ID generator.
 	voidGenerator
-
-	// Defines the response builder.
-	responseBuilder
 
 	// Context is a context.Context passed from the HTTP handler.
 	Context context.Context

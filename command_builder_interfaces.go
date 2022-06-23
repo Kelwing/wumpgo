@@ -2,9 +2,48 @@ package router
 
 import "github.com/Postcord/objects"
 
+// commandOptions is a struct that contains the options for a command.
+type commandOptions[T any] interface {
+	// StringOption is used to define an option of the type string. Note that choices is ignored if it's nil or length 0.
+	// Maps to option type 3 (STRING): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) T
+
+	// IntOption is used to define an option of the type int. Note that choices is ignored if it's nil or length 0.
+	// Maps to option type 4 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) T
+
+	// BoolOption is used to define an option of the type bool.
+	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	BoolOption(name, description string, required bool) T
+
+	// UserOption is used to define an option of the type user.
+	// Maps to option type 6 (USER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	UserOption(name, description string, required bool) T
+
+	// ChannelOption is used to define an option of the type channel.
+	// Maps to option type 7 (CHANNEL): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	ChannelOption(name, description string, required bool) T
+
+	// RoleOption is used to define an option of the type role.
+	// Maps to option type 8 (ROLE): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	RoleOption(name, description string, required bool) T
+
+	// MentionableOption is used to define an option of the type mentionable.
+	// Maps to option type 9 (MENTIONABLE): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	MentionableOption(name, description string, required bool) T
+
+	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
+	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) T
+
+	// AttachmentOption is used to define an option of the type attachment.
+	// Maps to option type 11 (ATTACHMENT): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
+	AttachmentOption(name, description string, required bool) T
+}
+
 // TextCommandBuilder is used to define a builder for a Command object where the type is a text command.
 type TextCommandBuilder interface {
-	textCommandOptions
+	commandOptions[TextCommandBuilder]
 
 	// Description is used to define the commands description.
 	Description(string) TextCommandBuilder
@@ -27,7 +66,7 @@ type TextCommandBuilder interface {
 
 // SubCommandBuilder is similar to TextCommandBuilder but doesn't allow default permissions to be set.
 type SubCommandBuilder interface {
-	subCommandOptions
+	commandOptions[SubCommandBuilder]
 
 	// Description is used to define the commands description.
 	Description(string) SubCommandBuilder
@@ -83,7 +122,7 @@ type UserCommandBuilder interface {
 
 // CommandBuilder is used to define a builder for a Command object where the type isn't known.
 type CommandBuilder interface {
-	commandOptions
+	commandOptions[CommandBuilder]
 
 	// Description is used to define the commands description.
 	Description(string) CommandBuilder

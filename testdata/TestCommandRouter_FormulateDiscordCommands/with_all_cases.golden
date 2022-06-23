@@ -3,8 +3,7 @@
     "type": 1,
     "name": "rootnoargs",
     "description": "root with no arguments",
-    "options": [],
-    "default_permission": true
+    "options": []
   },
   {
     "type": 1,
@@ -102,8 +101,7 @@
         "name": "optional_user_option",
         "description": "the optional user option"
       }
-    ],
-    "default_permission": false
+    ]
   },
   {
     "type": 1,
@@ -128,8 +126,7 @@
         "name": "cmd2",
         "description": "second command in group"
       }
-    ],
-    "default_permission": true
+    ]
   },
   {
     "type": 1,
@@ -153,7 +150,6 @@
           }
         ]
       }
-    ],
-    "default_permission": false
+    ]
   }
 ]

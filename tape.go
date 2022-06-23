@@ -3,9 +3,10 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
+
 	"github.com/Postcord/rest"
 	"github.com/stretchr/testify/require"
-	"reflect"
 )
 
 type tapeItem struct {
@@ -19,7 +20,7 @@ type tapeItem struct {
 	RESTError    *rest.ErrorREST   `json:"rest_error,omitempty"`
 }
 
-func mustMarshal(t TestingT, indent bool, item interface{}) []byte {
+func mustMarshal(t TestingT, indent bool, item any) []byte {
 	var b []byte
 	var err error
 	if indent {
@@ -31,7 +32,7 @@ func mustMarshal(t TestingT, indent bool, item interface{}) []byte {
 	return b
 }
 
-func (i *tapeItem) match(t TestingT, funcName string, isVard bool, inCount int, items ...interface{}) {
+func (i *tapeItem) match(t TestingT, funcName string, isVard bool, inCount int, items ...any) {
 	// Check the right function is called.
 	if funcName != i.FuncName {
 		t.Fatalf("wrong function called: expected %s, got %s", i.FuncName, funcName)
@@ -89,7 +90,7 @@ func (i *tapeItem) match(t TestingT, funcName string, isVard bool, inCount int, 
 
 type tape []*tapeItem
 
-func (t *tape) write(funcName string, isVard bool, params ...interface{}) *tapeItem {
+func (t *tape) write(funcName string, isVard bool, params ...any) *tapeItem {
 	undynamicLen := len(params)
 	if isVard {
 		undynamicLen--
@@ -128,7 +129,7 @@ func (t *tape) write(funcName string, isVard bool, params ...interface{}) *tapeI
 	return x
 }
 
-func (i *tapeItem) end(items ...interface{}) {
+func (i *tapeItem) end(items ...any) {
 	// Check if the last type is an error and if so split it from the items.
 	var err error
 	var ok bool

@@ -76,7 +76,9 @@ func TestResolvableUser_ResolveMember(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resolvable := ResolvableUser{id: "1", data: tt.data}
+			resolvable := resolvableUser{resolvable: resolvable[objects.User]{
+				id: "1", data: tt.data,
+			}}
 			assert.Equal(t, tt.member, resolvable.ResolveMember())
 		})
 	}

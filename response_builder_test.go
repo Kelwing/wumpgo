@@ -3,8 +3,9 @@ package router
 import (
 	"bytes"
 	"context"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/Postcord/objects"
 	"github.com/stretchr/testify/assert"
@@ -551,7 +552,7 @@ func TestModalRouterCtx_ChannelMessageWithSource(t *testing.T) {
 	assert.Equal(t, x.respType, objects.ResponseChannelMessageWithSource)
 }
 
-func buildWithModalRouter(r interface{}, mount bool, setError func(e error) *objects.InteractionResponse, app HandlerAccepter) {
+func buildWithModalRouter(r any, mount bool, setError func(e error) *objects.InteractionResponse, app HandlerAccepter) {
 	modalRouter := &ModalRouter{}
 	modalRouter.AddModal(&ModalContent{
 		Path: "/test/:content",

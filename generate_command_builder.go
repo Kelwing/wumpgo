@@ -16,7 +16,11 @@ package router
 
 //go:generate go run generate_command_builder.go
 
-import "github.com/Postcord/objects"
+import (
+	"fmt"
+
+	"github.com/Postcord/objects"
+)
 
 `
 
@@ -43,7 +47,7 @@ func {{ .TypeName }}AutoCompleteFuncBuilder(f {{ .TypeName }}AutoCompleteFunc) {
 	}
 }
 
-func (c *commandBuilder) {{ .TypeName }}Option(name, description string, required bool, choiceBuilder {{ .TypeName }}ChoiceBuilder) CommandBuilder {
+func (c *commandBuilder[T]) {{ .TypeName }}Option(name, description string, required bool, choiceBuilder {{ .TypeName }}ChoiceBuilder) T {
 	var discordifiedChoices []objects.ApplicationCommandOptionChoice
 	var f {{ .TypeName }}AutoCompleteFunc
 	if choiceBuilder != nil {
@@ -73,113 +77,32 @@ func (c *commandBuilder) {{ .TypeName }}Option(name, description string, require
 	})
 	if f != nil {
 		if c.cmd.autocomplete == nil {
-			c.cmd.autocomplete = map[string]interface{}{}
+			c.cmd.autocomplete = map[string]any{}
 		}
 		c.cmd.autocomplete[name] = f
 	}
-	return c
+	return builderWrapify(c)
 }`
 
 const builderShared = `type {{ .Struct }} struct {
-	*commandBuilder
-}{{ if .AddOptions }}
-
-func (c {{ .Struct }}) StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) {{ .BuilderType }}Builder {
-	c.commandBuilder.StringOption(name, description, required, choiceBuilder)
-	return c
-}
-
-func (c {{ .Struct }}) IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) {{ .BuilderType }}Builder {
-	c.commandBuilder.IntOption(name, description, required, choiceBuilder)
-	return c
-}
-
-func (c {{ .Struct }}) BoolOption(name, description string, required bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.BoolOption(name, description, required)
-	return c
-}
-
-func (c {{ .Struct }}) UserOption(name, description string, required bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.UserOption(name, description, required)
-	return c
-}
-
-func (c {{ .Struct }}) ChannelOption(name, description string, required bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.ChannelOption(name, description, required)
-	return c
-}
-
-func (c {{ .Struct }}) RoleOption(name, description string, required bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.RoleOption(name, description, required)
-	return c
-}
-
-func (c {{ .Struct }}) MentionableOption(name, description string, required bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.MentionableOption(name, description, required)
-	return c
-}
-
-func (c {{ .Struct }}) DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) {{ .BuilderType }}Builder {
-	c.commandBuilder.DoubleOption(name, description, required, choiceBuilder)
-	return c
-}
-
-func (c {{ .Struct }}) AttachmentOption(name, description string, required bool) {{ .BuilderType }}Builder {
-	c.commandBuilder.AttachmentOption(name, description, required)
-	return c
-}{{ end }}
-
-func (c {{ .Struct }}) DefaultPermission() {{ .BuilderType }}Builder {
-	c.commandBuilder.DefaultPermission()
-	return c
-}
-
-func (c {{ .Struct }}) AllowedMentions(config *objects.AllowedMentions) {{ .BuilderType }}Builder {
-	c.commandBuilder.AllowedMentions(config)
-	return c
+	*commandBuilder[{{ .BuilderType }}Builder]
 }{{ if not .DoNotHook }}
 
-func (c *commandBuilder) {{ .BuilderType }}() {{ .BuilderType }}Builder {
+func (c *commandBuilder[T]) {{ .BuilderType }}() {{ .BuilderType }}Builder {
 	c.cmd.commandType = int({{ .CommandType }})
-	return {{ .Struct }}{c}
+	return {{ .Struct }}{(*commandBuilder[{{ .BuilderType }}Builder])(c)}
 }{{ end }}`
 
-const optionInterface = `type {{ .OutputInterface }} interface {
-	// StringOption is used to define an option of the type string. Note that choices is ignored if it's nil or length 0.
-	// Maps to option type 3 (STRING): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	StringOption(name, description string, required bool, choiceBuilder StringChoiceBuilder) {{ .InterfaceName }}
-
-	// IntOption is used to define an option of the type int. Note that choices is ignored if it's nil or length 0.
-	// Maps to option type 4 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	IntOption(name, description string, required bool, choiceBuilder IntChoiceBuilder) {{ .InterfaceName }}
-
-	// IntOption is used to define an option of the type bool.
-	// Maps to option type 5 (BOOLEAN): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	BoolOption(name, description string, required bool) {{ .InterfaceName }}
-
-	// IntOption is used to define an option of the type user.
-	// Maps to option type 6 (USER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	UserOption(name, description string, required bool) {{ .InterfaceName }}
-
-	// ChannelOption is used to define an option of the type channel.
-	// Maps to option type 7 (CHANNEL): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	ChannelOption(name, description string, required bool) {{ .InterfaceName }}
-
-	// RoleOption is used to define an option of the type role.
-	// Maps to option type 8 (ROLE): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	RoleOption(name, description string, required bool) {{ .InterfaceName }}
-
-	// MentionableOption is used to define an option of the type mentionable.
-	// Maps to option type 9 (MENTIONABLE): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	MentionableOption(name, description string, required bool) {{ .InterfaceName }}
-
-	// DoubleOption is used to define an option of the type double. Note that choices is ignored if it's nil or length 0.
-	// Maps to option type 10 (INTEGER): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	DoubleOption(name, description string, required bool, choiceBuilder DoubleChoiceBuilder) {{ .InterfaceName }}
-
-	// AttachmentOption is used to define an option of the type attachment.
-	// Maps to option type 11 (ATTACHMENT): https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-	AttachmentOption(name, description string, required bool) {{ .InterfaceName }}
+const builderWrapify = `func builderWrapify[T any](c *commandBuilder[T]) T {
+	var ptr *T
+	switch (any)(ptr).(type) {
+		case *CommandBuilder:
+			return (any)(c).(T){{range $val := .}}{{ if ne $val.BuilderType "CommandBuilder" }}
+		case *{{ $val.BuilderType }}Builder:
+			return (any)({{ $val.Struct }}{(any)(c).(*commandBuilder[{{ $val.BuilderType }}Builder])}).(T){{ end }}{{ end }}
+		default:
+			panic(fmt.Errorf("unknown handler: %T", ptr))
+	}
 }`
 
 var choiceTypes = []struct {
@@ -209,20 +132,17 @@ var builderTypes = []struct {
 	BuilderType string
 	CommandType string
 	DoNotHook   bool
-	AddOptions  bool
 }{
 	{
 		Struct:      "textCommandBuilder",
 		BuilderType: "TextCommand",
 		CommandType: "objects.CommandTypeChatInput",
-		AddOptions:  true,
 	},
 	{
 		Struct:      "subcommandBuilder",
 		BuilderType: "SubCommand",
 		CommandType: "objects.CommandTypeChatInput",
 		DoNotHook:   true,
-		AddOptions:  true,
 	},
 	{
 		Struct:      "messageCommandBuilder",
@@ -236,18 +156,9 @@ var builderTypes = []struct {
 	},
 }
 
-var interfaceTypes = []struct {
-	InterfaceName   string
-	OutputInterface string
-}{
-	{InterfaceName: "CommandBuilder", OutputInterface: "commandOptions"},
-	{InterfaceName: "SubCommandBuilder", OutputInterface: "subCommandOptions"},
-	{InterfaceName: "TextCommandBuilder", OutputInterface: "textCommandOptions"},
-}
-
 func main() {
 	file := start
-	parts := make([]string, len(choiceTypes)+len(builderTypes)+len(interfaceTypes))
+	parts := make([]string, len(choiceTypes)+len(builderTypes)+1)
 	t, err := template.New("_").Parse(choiceBuilder)
 	if err != nil {
 		panic(err)
@@ -270,17 +181,15 @@ func main() {
 		}
 		parts[i+len(choiceTypes)] = buf.String()
 	}
-	t, err = template.New("_").Parse(optionInterface)
+	t, err = template.New("_").Parse(builderWrapify)
 	if err != nil {
 		panic(err)
 	}
-	for i, v := range interfaceTypes {
-		buf := &bytes.Buffer{}
-		if err := t.Execute(buf, v); err != nil {
-			panic(err)
-		}
-		parts[i+len(choiceTypes)+len(builderTypes)] = buf.String()
+	buf := &bytes.Buffer{}
+	if err := t.Execute(buf, builderTypes); err != nil {
+		panic(err)
 	}
+	parts[len(builderTypes)+len(choiceTypes)] = buf.String()
 	file += strings.Join(parts, "\n\n") + "\n"
 	if err := ioutil.WriteFile("command_builder_gen.go", []byte(file), 0666); err != nil {
 		panic(err)

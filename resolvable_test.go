@@ -9,13 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setUnexportedField(field reflect.Value, value interface{}) {
+func setUnexportedField(field reflect.Value, value any) {
 	reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).
 		Elem().
 		Set(reflect.ValueOf(value))
 }
 
-func testSnowflake(t *testing.T, resolvable interface{}) {
+func testSnowflake(t *testing.T, resolvable any) {
 	t.Helper()
 	tests := []struct {
 		name string
@@ -54,26 +54,26 @@ func testSnowflake(t *testing.T, resolvable interface{}) {
 }
 
 func TestResolvableUser_Snowflake(t *testing.T) {
-	testSnowflake(t, &ResolvableUser{})
+	testSnowflake(t, &resolvableUser{})
 }
 
 func TestResolvableChannel_Snowflake(t *testing.T) {
-	testSnowflake(t, &ResolvableChannel{})
+	testSnowflake(t, &resolvable[objects.Channel]{})
 }
 
 func TestResolvableRole_Snowflake(t *testing.T) {
-	testSnowflake(t, &ResolvableRole{})
+	testSnowflake(t, &resolvable[objects.Role]{})
 }
 
 func TestResolvableMessage_Snowflake(t *testing.T) {
-	testSnowflake(t, &ResolvableMessage{})
+	testSnowflake(t, &resolvable[objects.Message]{})
 }
 
 func TestResolvableAttachment_Snowflake(t *testing.T) {
-	testSnowflake(t, &ResolvableAttachment{})
+	testSnowflake(t, &resolvable[objects.Attachment]{})
 }
 
-func testMarshalJSON(t *testing.T, resolvable interface{}) {
+func testMarshalJSON(t *testing.T, resolvable any) {
 	t.Helper()
 	setUnexportedField(reflect.Indirect(reflect.ValueOf(resolvable)).FieldByName("id"), "testing")
 	r := reflect.ValueOf(resolvable).MethodByName("MarshalJSON")
@@ -92,26 +92,26 @@ func testMarshalJSON(t *testing.T, resolvable interface{}) {
 }
 
 func TestResolvableUser_MarshalJSON(t *testing.T) {
-	testMarshalJSON(t, &ResolvableUser{})
+	testMarshalJSON(t, &resolvableUser{})
 }
 
 func TestResolvableChannel_MarshalJSON(t *testing.T) {
-	testMarshalJSON(t, &ResolvableChannel{})
+	testMarshalJSON(t, &resolvable[objects.Channel]{})
 }
 
 func TestResolvableRole_MarshalJSON(t *testing.T) {
-	testMarshalJSON(t, &ResolvableRole{})
+	testMarshalJSON(t, &resolvable[objects.Role]{})
 }
 
 func TestResolvableMessage_MarshalJSON(t *testing.T) {
-	testMarshalJSON(t, &ResolvableMessage{})
+	testMarshalJSON(t, &resolvable[objects.Message]{})
 }
 
 func TestResolvableAttachment_MarshalJSON(t *testing.T) {
-	testMarshalJSON(t, &ResolvableAttachment{})
+	testMarshalJSON(t, &resolvable[objects.Attachment]{})
 }
 
-func testString(t *testing.T, resolvable interface{}) {
+func testString(t *testing.T, resolvable any) {
 	t.Helper()
 	setUnexportedField(reflect.Indirect(reflect.ValueOf(resolvable)).FieldByName("id"), "testing")
 	r := reflect.ValueOf(resolvable).MethodByName("String")
@@ -129,23 +129,23 @@ func testString(t *testing.T, resolvable interface{}) {
 }
 
 func TestResolvableUser_String(t *testing.T) {
-	testString(t, &ResolvableUser{})
+	testString(t, &resolvableUser{})
 }
 
 func TestResolvableChannel_String(t *testing.T) {
-	testString(t, &ResolvableChannel{})
+	testString(t, &resolvable[objects.Channel]{})
 }
 
 func TestResolvableRole_String(t *testing.T) {
-	testString(t, &ResolvableRole{})
+	testString(t, &resolvable[objects.Role]{})
 }
 
 func TestResolvableMessage_String(t *testing.T) {
-	testString(t, &ResolvableMessage{})
+	testString(t, &resolvable[objects.Message]{})
 }
 
 func TestResolvableAttachment_String(t *testing.T) {
-	testString(t, &ResolvableAttachment{})
+	testString(t, &resolvable[objects.Attachment]{})
 }
 
 func TestResolvableUser_Resolve(t *testing.T) {
@@ -174,7 +174,7 @@ func TestResolvableUser_Resolve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := ResolvableUser{id: "1", data: tt.data}
+			r := resolvable[objects.User]{id: "1", data: tt.data}
 			assert.Equal(t, tt.expected, r.Resolve())
 		})
 	}
@@ -206,7 +206,7 @@ func TestResolvableChannel_Resolve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := ResolvableChannel{id: "1", data: tt.data}
+			r := resolvable[objects.Channel]{id: "1", data: tt.data}
 			assert.Equal(t, tt.expected, r.Resolve())
 		})
 	}
@@ -238,7 +238,7 @@ func TestResolvableRole_Resolve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := ResolvableRole{id: "1", data: tt.data}
+			r := resolvable[objects.Role]{id: "1", data: tt.data}
 			assert.Equal(t, tt.expected, r.Resolve())
 		})
 	}
@@ -270,7 +270,7 @@ func TestResolvableMessage_Resolve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := ResolvableMessage{id: "1", data: tt.data}
+			r := resolvable[objects.Message]{id: "1", data: tt.data}
 			assert.Equal(t, tt.expected, r.Resolve())
 		})
 	}
@@ -302,7 +302,91 @@ func TestResolvableAttachment_Resolve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := ResolvableAttachment{id: "1", data: tt.data}
+			r := resolvable[objects.Attachment]{id: "1", data: tt.data}
+			assert.Equal(t, tt.expected, r.Resolve())
+		})
+	}
+}
+
+func TestResolvableMentionable_Snowflake(t *testing.T) {
+	testSnowflake(t, &resolvableMentionable{})
+}
+
+func TestResolvableMentionable_MarshalJSON(t *testing.T) {
+	testMarshalJSON(t, &resolvableMentionable{})
+}
+
+func TestResolvableMentionable_String(t *testing.T) {
+	testString(t, &resolvableMentionable{})
+}
+
+func TestResolvableMentionable_Resolve(t *testing.T) {
+	tests := []struct {
+		name string
+
+		data     *objects.ApplicationCommandInteractionData
+		expected any
+	}{
+		{
+			name: "nil result",
+		},
+		{
+			name: "channel",
+			data: &objects.ApplicationCommandInteractionData{
+				Resolved: objects.ApplicationCommandInteractionDataResolved{
+					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
+					Roles:    map[objects.Snowflake]objects.Role{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 123}}},
+					Channels: map[objects.Snowflake]objects.Channel{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 123}}},
+				},
+			},
+			expected: &objects.Channel{DiscordBaseObject: objects.DiscordBaseObject{ID: 123}},
+		},
+		{
+			name: "role",
+			data: &objects.ApplicationCommandInteractionData{
+				Resolved: objects.ApplicationCommandInteractionDataResolved{
+					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
+					Roles:    map[objects.Snowflake]objects.Role{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 123}}},
+					Channels: map[objects.Snowflake]objects.Channel{},
+				},
+			},
+			expected: &objects.Role{DiscordBaseObject: objects.DiscordBaseObject{ID: 123}},
+		},
+		{
+			name: "member",
+			data: &objects.ApplicationCommandInteractionData{
+				Resolved: objects.ApplicationCommandInteractionDataResolved{
+					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
+					Roles:    map[objects.Snowflake]objects.Role{},
+					Channels: map[objects.Snowflake]objects.Channel{},
+				},
+			},
+			expected: &objects.GuildMember{Nick: "abc", User: &objects.User{DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+		},
+		{
+			name: "user",
+			data: &objects.ApplicationCommandInteractionData{
+				Resolved: objects.ApplicationCommandInteractionDataResolved{
+					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Members:  map[objects.Snowflake]objects.GuildMember{},
+					Roles:    map[objects.Snowflake]objects.Role{},
+					Channels: map[objects.Snowflake]objects.Channel{},
+				},
+			},
+			expected: &objects.User{DiscordBaseObject: objects.DiscordBaseObject{ID: 1}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.data == nil {
+				tt.data = &objects.ApplicationCommandInteractionData{}
+			}
+			r := resolvableMentionable{
+				resolvable: resolvable[any]{id: "1", data: tt.data},
+			}
 			assert.Equal(t, tt.expected, r.Resolve())
 		})
 	}

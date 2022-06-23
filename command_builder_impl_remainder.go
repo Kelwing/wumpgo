@@ -5,48 +5,48 @@ import (
 	"github.com/Postcord/objects/permissions"
 )
 
-type commandBuilder struct {
-	map_ map[string]interface{}
+type commandBuilder[T any] struct {
+	map_ map[string]any
 	cmd  Command
 }
 
-func (c *commandBuilder) Description(description string) CommandBuilder {
+func (c *commandBuilder[T]) Description(description string) T {
 	c.cmd.Description = description
-	return c
+	return builderWrapify(c)
 }
 
-func (c *commandBuilder) DefaultPermissions(perms permissions.PermissionBit) CommandBuilder {
+func (c *commandBuilder[T]) DefaultPermissions(perms permissions.PermissionBit) T {
 	c.cmd.DefaultPermissions = &perms
-	return c
+	return builderWrapify(c)
 }
 
-func (c *commandBuilder) GuildCommand() CommandBuilder {
+func (c *commandBuilder[T]) GuildCommand() T {
 	tmp := false
 	c.cmd.UseInDMs = &tmp
-	return c
+	return builderWrapify(c)
 }
 
-func (c *commandBuilder) DefaultPermission() CommandBuilder {
+func (c *commandBuilder[T]) DefaultPermission() T {
 	c.cmd.DefaultPermission = true
-	return c
+	return builderWrapify(c)
 }
 
-func (c *commandBuilder) AllowedMentions(config *objects.AllowedMentions) CommandBuilder {
+func (c *commandBuilder[T]) AllowedMentions(config *objects.AllowedMentions) T {
 	c.cmd.AllowedMentions = config
-	return c
+	return builderWrapify(c)
 }
 
-func (c *commandBuilder) Handler(handler func(*CommandRouterCtx) error) CommandBuilder {
+func (c *commandBuilder[T]) Handler(handler func(*CommandRouterCtx) error) T {
 	c.cmd.Function = handler
-	return c
+	return builderWrapify(c)
 }
 
-func (c *commandBuilder) Build() (*Command, error) {
+func (c *commandBuilder[T]) Build() (*Command, error) {
 	c.map_[c.cmd.Name] = &c.cmd
 	return &c.cmd, nil
 }
 
-func (c *commandBuilder) MustBuild() *Command {
+func (c *commandBuilder[T]) MustBuild() *Command {
 	cmd, err := c.Build()
 	if err != nil {
 		panic(err)
@@ -86,6 +86,6 @@ func (c userCommandBuilder) Handler(handler func(*CommandRouterCtx, *objects.Gui
 
 // NewCommandBuilder is used to create a builder for a *Command object.
 func (c *CommandGroup) NewCommandBuilder(name string) SubCommandBuilder {
-	x := &commandBuilder{map_: c.Subcommands, cmd: Command{Name: name, commandType: int(objects.CommandTypeChatInput), parent: c}}
+	x := &commandBuilder[SubCommandBuilder]{map_: c.Subcommands, cmd: Command{Name: name, commandType: int(objects.CommandTypeChatInput), parent: c}}
 	return subcommandBuilder{x}
 }

@@ -27,9 +27,9 @@ func TestComponentRouterCtx_UpdateMessage(t *testing.T) {
 
 func TestComponentRouter_prep(t *testing.T) {
 	x := &ComponentRouter{}
-	assert.Equal(t, (map[string]interface{})(nil), x.routes)
+	assert.Equal(t, (map[string]any)(nil), x.routes)
 	x.prep()
-	assert.Equal(t, map[string]interface{}{}, x.routes)
+	assert.Equal(t, map[string]any{}, x.routes)
 }
 
 func TestComponentRouter_RegisterSelectMenu(t *testing.T) {
@@ -54,7 +54,7 @@ func Test_ungenericError(t *testing.T) {
 	tests := []struct {
 		name string
 
-		errGeneric interface{}
+		errGeneric any
 		expectErr  string
 	}{
 		{
@@ -83,7 +83,7 @@ func Test_ungenericError(t *testing.T) {
 // NOT to be used, but just used to check it exists.
 var dummyRestClient = &rest.Client{}
 
-func jsonify(t *testing.T, x interface{}) json.RawMessage {
+func jsonify(t *testing.T, x any) json.RawMessage {
 	t.Helper()
 	b, err := json.Marshal(x)
 	if err != nil {

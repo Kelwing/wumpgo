@@ -18,9 +18,9 @@ import (
 // TestingT is our internal requirements from *testing.T. The weird edgecase is Run since the return type can be different.
 type TestingT interface {
 	require.TestingT
-	Fatal(args ...interface{})
-	Fatalf(format string, args ...interface{})
-	Log(args ...interface{})
+	Fatal(args ...any)
+	Fatalf(format string, args ...any)
+	Log(args ...any)
 	Helper()
 }
 

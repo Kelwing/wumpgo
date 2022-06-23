@@ -1,8 +1,11 @@
 package router
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"sync"
+	"unsafe"
 
 	"github.com/Postcord/objects"
 )
@@ -100,4 +103,123 @@ func (r *responseBuilder) editComponent(component *objects.Component, appendComp
 	} else {
 		d.Components = []*objects.Component{component}
 	}
+}
+
+// Internal struct to expose the response builder whilst having a memory friendly way to change the generic.
+// !! UNSAFE WARNING !!: This uses the location of the struct to determine the where the parent is. This is fine
+// because it is embedded into the struct as the first item. HOWEVER, IF YOU IMPLEMENT THIS, YOU MUST MAKE IT THE
+// FIRST ITEM IN THE STRUCT OR YOU WILL WRITE TO RANDOM MEMORY. BE CAREFUL! The reason this is unsafe in the first
+// place is to avoid unneeded circular references.
+type publicResponseBuilder[T any] struct {
+	responseBuilder
+}
+
+// See warning above.
+func (c *publicResponseBuilder[T]) getOrigin() T {
+	unsafePtr := unsafe.Pointer(c)
+	var ptr *T
+	switch (any)(ptr).(type) {
+	case **ModalRouterCtx:
+		x := (*ModalRouterCtx)(unsafePtr)
+		return (any)(x).(T)
+	case **CommandRouterCtx:
+		x := (*CommandRouterCtx)(unsafePtr)
+		return (any)(x).(T)
+	case **ComponentRouterCtx:
+		x := (*ComponentRouterCtx)(unsafePtr)
+		return (any)(x).(T)
+	default:
+		panic("postcord internal error - unknown type of parent for public response builder")
+	}
+}
+
+// SetEmbed is used to set the embed, overwriting any previously.
+func (c *publicResponseBuilder[T]) SetEmbed(embed *objects.Embed) T {
+	c.editEmbed(embed, false)
+	return c.getOrigin()
+}
+
+// AddEmbed is used to append the embed, joining any previously.
+func (c *publicResponseBuilder[T]) AddEmbed(embed *objects.Embed) T {
+	c.editEmbed(embed, true)
+	return c.getOrigin()
+}
+
+// AddComponentRow is used to add a row of components.
+func (c *publicResponseBuilder[T]) AddComponentRow(row []*objects.Component) T {
+	component := &objects.Component{Type: objects.ComponentTypeActionRow, Components: row}
+	response := c.ResponseData()
+	response.Components = append(response.Components, component)
+	return c.getOrigin()
+}
+
+// SetComponentRows is used to set rows of components.
+func (c *publicResponseBuilder[T]) SetComponentRows(rows [][]*objects.Component) T {
+	components := make([]*objects.Component, len(rows))
+	for i, v := range rows {
+		components[i] = &objects.Component{Type: objects.ComponentTypeActionRow, Components: v}
+	}
+	c.ResponseData().Components = components
+	return c.getOrigin()
+}
+
+// ClearComponents is used to clear the components in a response.
+func (c *publicResponseBuilder[T]) ClearComponents() T {
+	c.ResponseData().Components = []*objects.Component{}
+	return c.getOrigin()
+}
+
+// SetContent is used to set the content of a response.
+func (c *publicResponseBuilder[T]) SetContent(content string) T {
+	c.ResponseData().Content = content
+	return c.getOrigin()
+}
+
+// SetContentf is used to set the content of a response using fmt.Sprintf.
+func (c *publicResponseBuilder[T]) SetContentf(content string, args ...any) T {
+	c.ResponseData().Content = fmt.Sprintf(content, args...)
+	return c.getOrigin()
+}
+
+// SetAllowedMentions is used to set the allowed mentions of a response. This will override your global configuration.
+func (c *publicResponseBuilder[T]) SetAllowedMentions(config *objects.AllowedMentions) T {
+	c.ResponseData().AllowedMentions = config
+	return c.getOrigin()
+}
+
+// SetTTS is used to set the TTS configuration for your response.
+func (c *publicResponseBuilder[T]) SetTTS(tts bool) T {
+	c.ResponseData().TTS = tts
+	return c.getOrigin()
+}
+
+// Ephemeral is used to set the response as ephemeral.
+func (c *publicResponseBuilder[T]) Ephemeral() T {
+	c.ResponseData().Flags = 64
+	return c.getOrigin()
+}
+
+// AttachBytes adds a file attachment to the response from a byte array
+func (c *publicResponseBuilder[T]) AttachBytes(data []byte, filename, description string) T {
+	file := &objects.DiscordFile{
+		Buffer:      bytes.NewBuffer(data),
+		Filename:    filename,
+		Description: description,
+	}
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c.getOrigin()
+}
+
+// AttachFile adds a file attachment to the response from an *objects.DiscordFile
+func (c *publicResponseBuilder[T]) AttachFile(file *objects.DiscordFile) T {
+	response := c.ResponseData()
+	response.Files = append(response.Files, file)
+	return c.getOrigin()
+}
+
+// ChannelMessageWithSource is used to respond to the interaction with a message.
+func (c *publicResponseBuilder[T]) ChannelMessageWithSource() T {
+	c.respType = objects.ResponseChannelMessageWithSource
+	return c.getOrigin()
 }

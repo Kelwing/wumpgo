@@ -20,7 +20,7 @@ type Command struct {
 	parent *CommandGroup
 
 	// Defines any autocomplete options. Interface can be any of the ___AutoCompleteFunc's.
-	autocomplete map[string]interface{}
+	autocomplete map[string]any
 
 	// Name is the commands name.
 	Name string `json:"name"`
@@ -79,8 +79,8 @@ type commandExecutionOptions struct {
 }
 
 // Maps out the options.
-func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption, exceptionHandler ErrorHandler) (*objects.InteractionResponse, map[string]interface{}) {
-	mappedOptions := map[string]interface{}{}
+func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption, exceptionHandler ErrorHandler) (*objects.InteractionResponse, map[string]any) {
+	mappedOptions := map[string]any{}
 	for _, v := range options {
 		// Find the option.
 		option := findOption(v.Name, c.Options)
@@ -99,20 +99,20 @@ func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommand
 		// Check what the type is.
 		switch option.OptionType {
 		case objects.TypeChannel:
-			mappedOptions[option.Name] = &ResolvableChannel{
+			mappedOptions[option.Name] = (ResolvableChannel)(resolvable[objects.Channel]{
 				id:   v.Value.(string),
 				data: data,
-			}
+			})
 		case objects.TypeRole:
-			mappedOptions[option.Name] = &ResolvableRole{
+			mappedOptions[option.Name] = (ResolvableRole)(resolvable[objects.Role]{
 				id:   v.Value.(string),
 				data: data,
-			}
+			})
 		case objects.TypeUser:
-			mappedOptions[option.Name] = &ResolvableUser{
+			mappedOptions[option.Name] = (ResolvableUser)(resolvableUser{resolvable[objects.User]{
 				id:   v.Value.(string),
 				data: data,
-			}
+			}})
 		case objects.TypeString:
 			mappedOptions[option.Name] = v.Value.(string)
 		case objects.TypeInteger:
@@ -125,10 +125,12 @@ func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommand
 		case objects.TypeBoolean:
 			mappedOptions[option.Name] = v.Value.(bool)
 		case objects.TypeMentionable:
-			mappedOptions[option.Name] = &ResolvableMentionable{
-				id:   v.Value.(string),
-				data: data,
-			}
+			mappedOptions[option.Name] = (ResolvableMentionable)(resolvableMentionable{
+				resolvable: resolvable[any]{
+					id:   v.Value.(string),
+					data: data,
+				},
+			})
 		case objects.TypeNumber:
 			mappedOptions[option.Name] = v.Value
 		}
@@ -139,20 +141,22 @@ func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommand
 // Execute the command.
 func (c *Command) execute(reqCtx context.Context, opts commandExecutionOptions, middlewareList *list.List) (resp *objects.InteractionResponse) {
 	// Process the options.
-	var mappedOptions map[string]interface{}
+	var mappedOptions map[string]any
 	if opts.data.TargetID != 0 {
 		// Add a special case for "/target". The slash is there as a keyword.
-		mappedOptions = map[string]interface{}{}
+		mappedOptions = map[string]any{}
 		if _, ok := opts.data.Resolved.Messages[opts.data.TargetID]; ok {
-			mappedOptions["/target"] = &ResolvableMessage{
+			mappedOptions["/target"] = (ResolvableMessage)(resolvable[objects.Message]{
 				id:   strconv.FormatUint(uint64(opts.data.TargetID), 10),
 				data: opts.data,
-			}
+			})
 		} else if _, ok = opts.data.Resolved.Users[opts.data.TargetID]; ok {
-			mappedOptions["/target"] = &ResolvableUser{
-				id:   strconv.FormatUint(uint64(opts.data.TargetID), 10),
-				data: opts.data,
-			}
+			mappedOptions["/target"] = (ResolvableUser)(resolvableUser{
+				resolvable: resolvable[objects.User]{
+					id:   strconv.FormatUint(uint64(opts.data.TargetID), 10),
+					data: opts.data,
+				},
+			})
 		}
 	} else {
 		// Call the function to map options.

@@ -17,101 +17,14 @@ package router
 //go:generate go run generate_response_builder.go
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 
 	"github.com/Postcord/objects"
 )
 
 `
 
-const singleStructureTemplate = `// SetEmbed is used to set the embed, overwriting any previously.
-func (c *{{ .Type }}) SetEmbed(embed *objects.Embed) *{{ .Type }} {
-	c.editEmbed(embed, false)
-	return c
-}
-
-// AddEmbed is used to append the embed, joining any previously.
-func (c *{{ .Type }}) AddEmbed(embed *objects.Embed) *{{ .Type }} {
-	c.editEmbed(embed, true)
-	return c
-}
-
-// AddComponentRow is used to add a row of components.
-func (c *{{ .Type }}) AddComponentRow(row []*objects.Component) *{{ .Type }} {
-	component := &objects.Component{Type: objects.ComponentTypeActionRow, Components: row}
-	response := c.ResponseData()
-	response.Components = append(response.Components, component)
-	return c
-}
-
-// SetComponentRows is used to set rows of components.
-func (c *{{ .Type }}) SetComponentRows(rows [][]*objects.Component) *{{ .Type }} {
-	components := make([]*objects.Component, len(rows))
-	for i, v := range rows {
-		components[i] = &objects.Component{Type: objects.ComponentTypeActionRow, Components: v}
-	}
-	c.ResponseData().Components = components
-	return c
-}
-
-// ClearComponents is used to clear the components in a response.
-func (c *{{ .Type }}) ClearComponents() *{{ .Type }} {
-	c.ResponseData().Components = []*objects.Component{}
-	return c
-}
-
-// SetContent is used to set the content of a response.
-func (c *{{ .Type }}) SetContent(content string) *{{ .Type }} {
-	c.ResponseData().Content = content
-	return c
-}
-
-// SetContentf is used to set the content of a response using fmt.Sprintf.
-func (c *{{ .Type }}) SetContentf(content string, args ...interface{}) *{{ .Type }} {
-	c.ResponseData().Content = fmt.Sprintf(content, args...)
-	return c
-}
-
-// SetAllowedMentions is used to set the allowed mentions of a response. This will override your global configuration.
-func (c *{{ .Type }}) SetAllowedMentions(config *objects.AllowedMentions) *{{ .Type }} {
-	c.ResponseData().AllowedMentions = config
-	return c
-}
-
-// SetTTS is used to set the TTS configuration for your response.
-func (c *{{ .Type }}) SetTTS(tts bool) *{{ .Type }} {
-	c.ResponseData().TTS = tts
-	return c
-}
-
-// Ephemeral is used to set the response as ephemeral.
-func (c *{{ .Type }}) Ephemeral() *{{ .Type }} {
-	c.ResponseData().Flags = 64
-	return c
-}
-
-// AttachBytes adds a file attachment to the response from a byte array
-func (c *{{ .Type }}) AttachBytes(data []byte, filename, description string) *{{ .Type }} {
-	file := &objects.DiscordFile{
-		Buffer:			bytes.NewBuffer(data),
-		Filename:   	filename,
-		Description: 	description,
-	}
-	response := c.ResponseData()
-	response.Files = append(response.Files, file)
-	return c
-}
-
-// AttachFile adds a file attachment to the response from an *objects.DiscordFile
-func (c *{{ .Type }}) AttachFile(file *objects.DiscordFile) *{{ .Type }} {
-	response := c.ResponseData()
-	response.Files = append(response.Files, file)
-	return c
-}
-
-// UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
+const singleStructureTemplate = `// UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
 func (c *{{ .Type }}) UpdateLater(f func(*{{ .Type }}) error) *{{ .Type }} {
 	cpy := *c
 	cpy.responseBuilder = responseBuilder{}
@@ -139,12 +52,6 @@ func (c *{{ .Type }}) UpdateLater(f func(*{{ .Type }}) error) *{{ .Type }} {
 func (c *{{ .Type }}) DeferredChannelMessageWithSource(f func(*{{ .Type }}) error) {
 	c.respType = objects.ResponseDeferredChannelMessageWithSource
 	c.UpdateLater(f)
-}
-
-// ChannelMessageWithSource is used to respond to the interaction with a message.
-func (c *{{ .Type }}) ChannelMessageWithSource() *{{ .Type }} {
-	c.respType = objects.ResponseChannelMessageWithSource
-	return c
 }{{ if ne .Type "ModalRouterCtx" }}
 
 // WithModalPath is used to set the response to the modal path specified.
@@ -169,7 +76,7 @@ func main() {
 	}
 	for i, v := range types {
 		buf := &bytes.Buffer{}
-		if err := t.Execute(buf, map[string]interface{}{"Type": v}); err != nil {
+		if err := t.Execute(buf, map[string]any{"Type": v}); err != nil {
 			panic(err)
 		}
 		parts[i] = buf.String()

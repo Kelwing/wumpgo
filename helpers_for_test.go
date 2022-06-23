@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func callBuilderFunction(t *testing.T, builder interface{}, funcName string, args ...interface{}) (err error) {
+func callBuilderFunction(t *testing.T, builder any, funcName string, args ...any) (err error) {
 	t.Helper()
 	defer func() {
 		if r := recover(); r != nil {

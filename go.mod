@@ -1,6 +1,6 @@
 module github.com/Postcord/router
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Postcord/interactions v0.1.5
