@@ -110,6 +110,8 @@ func (r *request) SendRaw(c *Client) (*DiscordResponse, error) {
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return resp, &ErrorREST{
 			Message: fmt.Sprintf("Non 2xx status code: %d (%s)", resp.StatusCode, string(resp.Body)),
+			Status:  resp.StatusCode,
+			Body:    resp.Body,
 		}
 	}
 
