@@ -1,4 +1,4 @@
-module github.com/Postcord/rest
+module github.com/Kelwing/wumpgo/rest
 
 go 1.18
 
