@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Postcord/objects"
+	"github.com/Kelwing/wumpgo/objects"
 )
 
 func (c *Client) Gateway(ctx context.Context) (*objects.Gateway, error) {

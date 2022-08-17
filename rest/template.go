@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Postcord/objects"
+	"github.com/Kelwing/wumpgo/objects"
 )
 
 func (c *Client) GetTemplate(ctx context.Context, code string) (*objects.Template, error) {

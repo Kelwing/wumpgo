@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Postcord/objects"
-	"github.com/Postcord/objects/permissions"
+	"github.com/Kelwing/wumpgo/objects"
+	"github.com/Kelwing/wumpgo/objects/permissions"
 	"github.com/google/go-querystring/query"
 )
 

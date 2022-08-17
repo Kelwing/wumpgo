@@ -8,9 +8,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/Kelwing/wumpgo/objects"
 	"github.com/stretchr/testify/require"
-
-	"github.com/Postcord/objects"
 )
 
 func getRealClient(t *testing.T) *Client {

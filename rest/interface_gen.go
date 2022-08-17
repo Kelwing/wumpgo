@@ -6,7 +6,7 @@ import (
 	"context"
 	"image"
 
-	"github.com/Postcord/objects"
+	"github.com/Kelwing/wumpgo/objects"
 )
 
 // RESTClient is the interface that contains all functions in *rest.Client.
