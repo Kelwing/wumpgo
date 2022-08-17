@@ -1,3 +1,3 @@
-module github.com/Postcord/objects
+module github.com/Kelwing/wumpgo/objects
 
-go 1.17
+go 1.18

@@ -5,7 +5,7 @@ package objects
 import (
 	"encoding/json"
 
-	"github.com/Postcord/objects/permissions"
+	"github.com/Kelwing/wumpgo/objects/permissions"
 )
 
 var _ SnowflakeObject = (*ApplicationCommand)(nil)
