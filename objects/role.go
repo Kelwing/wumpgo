@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/Postcord/objects/permissions"
+	"github.com/Kelwing/wumpgo/objects/permissions"
 )
 
 var _ Mentionable = (*Role)(nil)
