@@ -1,4 +1,4 @@
-package commanderrors
+package command_errors
 
 import (
 	"github.com/Postcord/objects"
