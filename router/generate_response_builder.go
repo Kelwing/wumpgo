@@ -19,7 +19,7 @@ package router
 import (
 	"context"
 
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 )
 
 `

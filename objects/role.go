@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/Kelwing/wumpgo/objects/permissions"
+	"github.com/kelwing/wumpgo/objects/permissions"
 )
 
 var _ Mentionable = (*Role)(nil)

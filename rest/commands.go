@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects"
 )
 
 // Global Commands

@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/Postcord/router"
+	"github.com/kelwing/wumpgo/router"
 )
 
 func TestComponent_set(t *testing.T) {

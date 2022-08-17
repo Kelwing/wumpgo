@@ -6,9 +6,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/Postcord/interactions"
-	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/interactions"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 // ModalGenerationCtx is used to generate a modal.

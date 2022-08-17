@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/Postcord/interactions"
-	"github.com/Postcord/objects"
-	"github.com/Postcord/router"
+	"github.com/kelwing/wumpgo/interactions"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/router"
 )
 
 func builder() (*router.CommandRouter, *interactions.App, router.LoaderBuilder) {

@@ -7,7 +7,7 @@ package router
 import (
 	"fmt"
 
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 )
 
 // StringAutoCompleteFunc is used to define the auto-complete function for StringChoice.

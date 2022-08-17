@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 )
 
 // Defines all information relating to a Postcord data frame.

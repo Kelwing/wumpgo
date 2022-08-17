@@ -6,9 +6,9 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/Postcord/objects"
-	"github.com/Postcord/objects/permissions"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects/permissions"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 // Command is used to define a Discord (sub-)command. DO NOT MAKE YOURSELF! USE CommandGroup.NewCommandBuilder OR CommandRouter.NewCommandBuilder!

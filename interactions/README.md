@@ -1,6 +1,6 @@
 # Postcord Interactions
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/Postcord/interactions.svg)](https://pkg.go.dev/github.com/Postcord/interactions)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kelwing/wumpgo/interactions.svg)](https://pkg.go.dev/github.com/kelwing/wumpgo/interactions)
 
 Interactions is a simple, batteries included HTTP interactions library for Discord.  It is designed to make is fast and easy to create a new Discord server integration using Discords new interactions system.
 
@@ -8,7 +8,7 @@ Interactions is a simple, batteries included HTTP interactions library for Disco
 
 Add Interactions to your project
 ```
-go get -u github.com/Postcord/interactions
+go get -u github.com/kelwing/wumpgo/interactions
 ```
 
 ### Example
@@ -20,8 +20,8 @@ import (
     "log"
     "os"
 
-    "github.com/Postcord/interactions"
-    "github.com/Postcord/objects"
+    "github.com/kelwing/wumpgo/interactions"
+    "github.com/kelwing/wumpgo/objects"
 )
 
 func main() {
@@ -51,7 +51,7 @@ func testHandler(ctx *objects.Interaction) *objects.InteractionResponse {
 ```
 
 ## Command Routing
-If you're looking for a more batteries included solution that includes command and interaction routing.  Check out our [router](https://github.com/Postcord/router) package.
+If you're looking for a more batteries included solution that includes command and interaction routing.  Check out our [router](https://github.com/kelwing/wumpgo/router) package.
 
 ## Documentation
 

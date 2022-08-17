@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 )
 
 // Resolvable is the type which is used for all resolvable items.

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Postcord/interactions"
-	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/interactions"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 // ErrorHandler defines the error handler function used within Postcord.

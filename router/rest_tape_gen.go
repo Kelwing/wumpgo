@@ -8,8 +8,8 @@ import (
 	"context"
 	"image"
 
-	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 type restTape struct {

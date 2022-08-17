@@ -1,9 +1,0 @@
-go 1.18
-
-use (
-	./command_errors
-	./interactions
-	./objects
-	./rest
-	./router
-)

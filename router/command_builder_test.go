@@ -1,10 +1,10 @@
 package router
 
 import (
-	"github.com/Postcord/objects/permissions"
+	"github.com/kelwing/wumpgo/objects/permissions"
 	"testing"
 
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
 )
 

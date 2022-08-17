@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects"
 	"github.com/google/go-querystring/query"
 )
 

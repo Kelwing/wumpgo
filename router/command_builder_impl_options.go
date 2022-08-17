@@ -1,6 +1,6 @@
 package router
 
-import "github.com/Postcord/objects"
+import "github.com/kelwing/wumpgo/objects"
 
 // StringChoice is used to define a choice of the string type.
 type StringChoice struct {

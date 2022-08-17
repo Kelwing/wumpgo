@@ -3,8 +3,8 @@ package router
 import (
 	"context"
 
-	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/rest"
 	"github.com/stretchr/testify/assert"
 
 	"testing"

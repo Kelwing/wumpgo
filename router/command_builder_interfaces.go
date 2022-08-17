@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/Postcord/objects"
-	"github.com/Postcord/objects/permissions"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects/permissions"
 )
 
 // commandOptions is a struct that contains the options for a command.

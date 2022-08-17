@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/Postcord/objects"
-	"github.com/Postcord/objects/permissions"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects/permissions"
 )
 
 type commandBuilder[T any] struct {

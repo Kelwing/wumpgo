@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 // Used as a workaround since we can't compare functions or their addresses

@@ -1,15 +1,15 @@
-module github.com/Postcord/router/example
+module github.com/kelwing/wumpgo/router/example
 
 go 1.18
 
 require (
-	github.com/Postcord/interactions v0.1.5
-	github.com/Postcord/objects v0.1.4
-	github.com/Postcord/router v0.0.0-20210709051239-15283fd7ff45
+	github.com/kelwing/wumpgo/interactions v0.1.5
+	github.com/kelwing/wumpgo/objects v0.1.4
+	github.com/kelwing/wumpgo/router v0.0.0-20210709051239-15283fd7ff45
 )
 
 require (
-	github.com/Postcord/rest v0.1.4 // indirect
+	github.com/kelwing/wumpgo/rest v0.1.4 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/aws/aws-lambda-go v1.28.0 // indirect
 	github.com/awslabs/aws-lambda-go-api-proxy v0.12.0 // indirect
@@ -31,4 +31,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/Postcord/router v0.0.0-20210709051239-15283fd7ff45 => ../
+replace github.com/kelwing/wumpgo/router v0.0.0-20210709051239-15283fd7ff45 => ../

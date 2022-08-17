@@ -14,8 +14,8 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
 	"github.com/rs/zerolog/log"
 
-	"github.com/Postcord/objects"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/rest"
 	"github.com/rs/zerolog"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"

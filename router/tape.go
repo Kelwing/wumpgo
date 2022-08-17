@@ -5,7 +5,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/rest"
 	"github.com/stretchr/testify/require"
 )
 

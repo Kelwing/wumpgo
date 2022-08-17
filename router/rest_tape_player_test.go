@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 var _ rest.RESTClient = (*restTapePlayer)(nil)

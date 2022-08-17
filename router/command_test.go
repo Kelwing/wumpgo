@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects"
 )
 
 type BaseStickerParams struct {

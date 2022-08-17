@@ -1,7 +1,7 @@
 package command_errors
 
 import (
-	"github.com/Postcord/objects"
+	"github.com/kelwing/wumpgo/objects"
 	"github.com/rs/zerolog"
 )
 

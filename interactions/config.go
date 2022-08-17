@@ -1,7 +1,7 @@
 package interactions
 
 import (
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/rest"
 	"github.com/rs/zerolog"
 )
 

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/Postcord/interactions"
-	"github.com/Postcord/objects"
-	"github.com/Postcord/objects/permissions"
-	"github.com/Postcord/rest"
+	"github.com/kelwing/wumpgo/interactions"
+	"github.com/kelwing/wumpgo/objects"
+	"github.com/kelwing/wumpgo/objects/permissions"
+	"github.com/kelwing/wumpgo/rest"
 )
 
 // CommandRouterCtx is used to define the commands context from the router.
