@@ -19,7 +19,7 @@ package router
 import (
 	"fmt"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 `

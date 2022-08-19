@@ -10,8 +10,8 @@ import (
 	"net/url"
 
 	"github.com/google/go-querystring/query"
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/objects/permissions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
 func (c *Client) GetChannel(ctx context.Context, id objects.SnowflakeObject) (*objects.Channel, error) {

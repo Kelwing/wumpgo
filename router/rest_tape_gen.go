@@ -8,8 +8,8 @@ import (
 	"context"
 	"image"
 
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/rest"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
 )
 
 type restTape struct {

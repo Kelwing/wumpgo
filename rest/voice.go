@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func (c *Client) GetVoiceRegions(ctx context.Context) ([]*objects.VoiceRegion, error) {

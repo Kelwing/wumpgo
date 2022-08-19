@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/objects/permissions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
 type commandBuilder[T any] struct {

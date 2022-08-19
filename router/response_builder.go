@@ -7,7 +7,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 // Embedded into contexts to build responses.

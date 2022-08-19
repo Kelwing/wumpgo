@@ -14,11 +14,11 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
 	"github.com/rs/zerolog/log"
 
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/rest"
 	"github.com/rs/zerolog"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
 )
 
 type (

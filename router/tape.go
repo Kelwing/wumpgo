@@ -5,7 +5,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/kelwing/wumpgo/rest"
+	"wumpgo.dev/wumpgo/rest"
 	"github.com/stretchr/testify/require"
 )
 

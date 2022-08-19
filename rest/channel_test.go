@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/objects/permissions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
 // commandOptions is a struct that contains the options for a command.

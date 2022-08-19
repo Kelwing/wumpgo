@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/objects/permissions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects/permissions"
 	"github.com/jimeh/go-golden"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

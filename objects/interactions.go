@@ -5,7 +5,7 @@ package objects
 import (
 	"encoding/json"
 
-	"github.com/kelwing/wumpgo/objects/permissions"
+	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
 var _ SnowflakeObject = (*ApplicationCommand)(nil)

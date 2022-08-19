@@ -1,8 +1,8 @@
 package interactions
 
 import (
-	"github.com/kelwing/wumpgo/rest"
 	"github.com/rs/zerolog"
+	"wumpgo.dev/wumpgo/rest"
 )
 
 type (

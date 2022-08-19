@@ -1,6 +1,6 @@
 package router
 
-import "github.com/kelwing/wumpgo/objects"
+import "wumpgo.dev/wumpgo/objects"
 
 type resolvableUser struct {
 	resolvable[objects.User]

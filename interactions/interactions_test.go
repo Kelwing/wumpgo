@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {

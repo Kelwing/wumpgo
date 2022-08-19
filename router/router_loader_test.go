@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kelwing/wumpgo/interactions"
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/rest"
+	"wumpgo.dev/wumpgo/interactions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
 	"github.com/stretchr/testify/assert"
 )
 

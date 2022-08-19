@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/objects/permissions"
 	"github.com/google/go-querystring/query"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
 type CreateGuildParams struct {

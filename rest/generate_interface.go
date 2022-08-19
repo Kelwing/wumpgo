@@ -26,7 +26,7 @@ import (
 	"context"
 	"image"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 // RESTClient is the interface that contains all functions in *rest.Client.

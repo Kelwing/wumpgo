@@ -1,8 +1,8 @@
 package command_errors
 
 import (
-	"github.com/kelwing/wumpgo/objects"
 	"github.com/rs/zerolog"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func ErrorHandler(logger zerolog.Logger) func(err error) *objects.InteractionResponse {

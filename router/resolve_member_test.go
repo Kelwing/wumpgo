@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
 
 	"testing"

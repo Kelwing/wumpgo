@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/kelwing/wumpgo/router"
+	"wumpgo.dev/wumpgo/router"
 )
 
 func TestComponent_set(t *testing.T) {

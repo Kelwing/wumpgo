@@ -3,7 +3,7 @@ package command_errors
 import (
 	"fmt"
 
-	"github.com/kelwing/wumpgo/router"
+	"wumpgo.dev/wumpgo/router"
 )
 
 // CommandError is an error that is returned when a command fails

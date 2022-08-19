@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kelwing/wumpgo/rest"
+	"wumpgo.dev/wumpgo/rest"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
 )
 

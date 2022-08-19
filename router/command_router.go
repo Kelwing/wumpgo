@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/kelwing/wumpgo/interactions"
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/objects/permissions"
-	"github.com/kelwing/wumpgo/rest"
+	"wumpgo.dev/wumpgo/interactions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects/permissions"
+	"wumpgo.dev/wumpgo/rest"
 )
 
 // CommandRouterCtx is used to define the commands context from the router.

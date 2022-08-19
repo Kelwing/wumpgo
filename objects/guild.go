@@ -1,6 +1,6 @@
 package objects
 
-import "github.com/kelwing/wumpgo/objects/permissions"
+import "wumpgo.dev/wumpgo/objects/permissions"
 
 var _ SnowflakeObject = (*Guild)(nil)
 var _ SnowflakeObject = (*UnavailableGuild)(nil)

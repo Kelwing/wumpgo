@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/kelwing/wumpgo/interactions"
-	"github.com/kelwing/wumpgo/objects"
-	"github.com/kelwing/wumpgo/router"
+	"wumpgo.dev/wumpgo/interactions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/router"
 )
 
 func builder() (*router.CommandRouter, *interactions.App, router.LoaderBuilder) {

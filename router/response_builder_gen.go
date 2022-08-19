@@ -7,7 +7,7 @@ package router
 import (
 	"context"
 
-	"github.com/kelwing/wumpgo/objects"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 // UpdateLater is used to spawn the function specified in a goroutine. When the function is returned, the result is set as a message update.
