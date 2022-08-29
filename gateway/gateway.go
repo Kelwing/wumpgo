@@ -57,7 +57,9 @@ type GatewayConfig struct {
 func New(config *GatewayConfig) *Gateway {
 	intents, err := ParseIntents(config.Intents)
 	if err != nil {
-		config.Hub.CaptureException(err)
+		if config.Hub != nil {
+			config.Hub.CaptureException(err)
+		}
 		log.Panic().Err(err).Msg("failed to parse intents")
 	}
 
@@ -123,7 +125,7 @@ func (g *Gateway) Receive() error {
 		var p Payload
 		err = json.Unmarshal(packet, &p)
 		if err != nil {
-			g.hub.CaptureException(err)
+			g.captureException(err)
 			g.logger.Error().Err(err).Msg("failed to unmarshal packet")
 			return err
 		}
@@ -145,7 +147,7 @@ func (g *Gateway) Receive() error {
 				ready := &objects.Ready{}
 				err = json.Unmarshal(p.Data, ready)
 				if err != nil {
-					g.hub.CaptureException(err)
+					g.captureException(err)
 					g.logger.Err(err).Msg("Failed to unmarshal ready")
 					return err
 				}
@@ -157,13 +159,13 @@ func (g *Gateway) Receive() error {
 				err := g.dispatcher.Dispatch(p.EventName, p.Data)
 				log.Debug().Dur("duration", time.Since(start)).Str("event", p.EventName).Msg("Dispatch finished")
 				if err != nil {
-					g.hub.CaptureException(err)
+					g.captureException(err)
 					g.logger.Err(err).Msg("Failed to dispatch")
 				}
 			}(p.EventName, p.Data)
 		case OpHeartbeat:
 			if err := g.heartbeat.SendHeartbeat(); err != nil {
-				g.hub.CaptureException(err)
+				g.captureException(err)
 				g.logger.Err(err).Msg("Failed to send heartbeat")
 				return err
 			}
@@ -183,7 +185,7 @@ func (g *Gateway) Receive() error {
 			hello := Hello{}
 			err = json.Unmarshal(p.Data, &hello)
 			if err != nil {
-				g.hub.CaptureException(err)
+				g.captureException(err)
 				g.logger.Err(err).Msg("Failed to unmarshal hello")
 				return err
 			}
@@ -198,7 +200,7 @@ func (g *Gateway) Receive() error {
 				g.resume = false
 				err = g.sendResume()
 				if err != nil {
-					g.hub.CaptureException(err)
+					g.captureException(err)
 					g.logger.Err(err).Msg("Failed to resume session")
 					return err
 				}
@@ -206,7 +208,7 @@ func (g *Gateway) Receive() error {
 				g.logger.Info().Msg("Identifying")
 				err = g.sendIdentify()
 				if err != nil {
-					g.hub.CaptureException(err)
+					g.captureException(err)
 					g.logger.Err(err).Msg("Failed to identify")
 					return err
 				}
@@ -243,7 +245,7 @@ func (g *Gateway) setResume() {
 func (g *Gateway) sendIdentify() error {
 	err := g.Send(OpIdentify, g.identify)
 	if err != nil {
-		g.hub.CaptureException(err)
+		g.captureException(err)
 		g.logger.Err(err).Msg("failed to send identify payload")
 		return err
 	}
@@ -264,7 +266,7 @@ func (g *Gateway) sendResume() error {
 
 	err := g.Send(OpResume, resume)
 	if err != nil {
-		g.hub.CaptureException(err)
+		g.captureException(err)
 		g.logger.Err(err).Msg("failed to send resume payload")
 		return err
 	}
@@ -277,7 +279,7 @@ func (g *Gateway) Run() error {
 	for {
 		err = g.connect()
 		if err != nil {
-			g.hub.CaptureException(err)
+			g.captureException(err)
 			g.logger.Error().Err(err).Msg("failed to connect")
 			time.Sleep(time.Second * 3)
 			continue
@@ -359,8 +361,14 @@ func (g *Gateway) ReconnectHandler(err error) (cont bool, wait time.Duration) {
 	}
 	g.hub.WithScope(func(scope *sentry.Scope) {
 		scope.SetExtra("close_code", closeCode)
-		g.hub.CaptureException(err)
+		g.captureException(err)
 	})
 	g.logger.Error().Err(err).Msg("unknown or unhandled error")
 	return
+}
+
+func (g *Gateway) captureException(exception error) {
+	if g.hub != nil {
+		g.hub.CaptureException(exception)
+	}
 }

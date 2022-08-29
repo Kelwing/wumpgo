@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/rs/zerolog"
@@ -104,7 +104,7 @@ func (w *Websocket) decompressPacket(b []byte) ([]byte, error) {
 		}
 	}()
 
-	return ioutil.ReadAll(z)
+	return io.ReadAll(z)
 }
 
 func (w *Websocket) IsConnected() bool {
