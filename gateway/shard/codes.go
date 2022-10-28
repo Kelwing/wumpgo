@@ -1,4 +1,4 @@
-package gateway
+package shard
 
 type DiscordCloseCode int64
 

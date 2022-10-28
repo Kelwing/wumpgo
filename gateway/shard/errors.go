@@ -1,4 +1,4 @@
-package gateway
+package shard
 
 import gatewayerrors "wumpgo.dev/wumpgo/gateway/internal/gateway_errors"
 

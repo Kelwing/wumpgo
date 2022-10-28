@@ -2,7 +2,7 @@ package rest
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -58,7 +58,7 @@ func TestDefaultHTTPClient_Request(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			handler := http.HandlerFunc(func(writer http.ResponseWriter, r *http.Request) {
-				gotBody, err := ioutil.ReadAll(r.Body)
+				gotBody, err := io.ReadAll(r.Body)
 				require.NoError(t, err)
 				assert.Equal(t, tc.wantBody, gotBody)
 				assert.Equal(t, tc.wantHeader, r.Header)

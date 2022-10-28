@@ -1,4 +1,4 @@
-package gateway
+package shard
 
 import (
 	"bytes"
@@ -10,13 +10,17 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"go.uber.org/atomic"
 	"nhooyr.io/websocket"
 )
 
-func NewWebsocket(logger zerolog.Logger) *Websocket {
+func NewWebsocket(logger *zerolog.Logger) *Websocket {
+	if logger == nil {
+		logger = &log.Logger
+	}
 	return &Websocket{
-		logger:      logger,
+		logger:      *logger,
 		isConnected: atomic.NewBool(false),
 	}
 }

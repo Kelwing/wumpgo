@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func Test_findOption(t *testing.T) {
@@ -134,7 +134,7 @@ func TestCommand_mapOptions(t *testing.T) {
 		},
 		{
 			name: "channel option",
-			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeChannel,
@@ -151,13 +151,13 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]any{
 				"opt1": (ResolvableChannel)(resolvable[objects.Channel]{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+					data: &objects.ApplicationCommandInteractionData{ID: 6921},
 				}),
 			},
 		},
 		{
 			name: "role option",
-			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeRole,
@@ -174,13 +174,13 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]any{
 				"opt1": (ResolvableRole)(resolvable[objects.Role]{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+					data: &objects.ApplicationCommandInteractionData{ID: 6921},
 				}),
 			},
 		},
 		{
 			name: "user option",
-			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeUser,
@@ -197,7 +197,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]any{
 				"opt1": (ResolvableUser)(resolvableUser{resolvable[objects.User]{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+					data: &objects.ApplicationCommandInteractionData{ID: 6921},
 				}}),
 			},
 		},
@@ -260,7 +260,7 @@ func TestCommand_mapOptions(t *testing.T) {
 		},
 		{
 			name: "mentionable option",
-			data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+			data: &objects.ApplicationCommandInteractionData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeMentionable,
@@ -278,7 +278,7 @@ func TestCommand_mapOptions(t *testing.T) {
 				"opt1": (ResolvableMentionable)(resolvableMentionable{
 					resolvable: resolvable[any]{
 						id:   "123",
-						data: &objects.ApplicationCommandInteractionData{DiscordBaseObject: objects.DiscordBaseObject{ID: 6921}},
+						data: &objects.ApplicationCommandInteractionData{ID: 6921},
 					},
 				}),
 			},
@@ -333,12 +333,12 @@ var messageTargetData = &objects.ApplicationCommandInteractionData{
 	Resolved: objects.ApplicationCommandInteractionDataResolved{
 		Users: map[objects.Snowflake]objects.User{
 			1: {
-				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
+				ID: 6921,
 			},
 		},
 		Messages: map[objects.Snowflake]objects.Message{
 			1: {
-				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
+				ID: 6921,
 			},
 		},
 	},
@@ -349,12 +349,12 @@ var userTargetData = &objects.ApplicationCommandInteractionData{
 	Resolved: objects.ApplicationCommandInteractionDataResolved{
 		Users: map[objects.Snowflake]objects.User{
 			2: {
-				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
+				ID: 6921,
 			},
 		},
 		Messages: map[objects.Snowflake]objects.Message{
 			1: {
-				DiscordBaseObject: objects.DiscordBaseObject{ID: 6921},
+				ID: 6921,
 			},
 		},
 	},

@@ -5,18 +5,13 @@ import (
 	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/awslabs/aws-lambda-go-api-proxy/handlerfunc"
-	"github.com/rs/zerolog/log"
-
 	"github.com/rs/zerolog"
-	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
 )
@@ -51,7 +46,7 @@ func New(config *Config) (*App, error) {
 	}
 
 	if config.Logger == nil {
-		a.logger = log.Logger
+		a.logger = zerolog.Nop()
 	} else {
 		a.logger = *config.Logger
 	}
@@ -59,7 +54,7 @@ func New(config *Config) (*App, error) {
 	var restClient *rest.Client
 	if config.RESTClient == nil {
 		restClient = rest.New(&rest.Config{
-			UserAgent:     "PostcordRest/1.0 (Linux) Postcord (https://github.com/Postcord)",
+			UserAgent:     "WumpgoRest/1.0 (Linux) Wumpgo (https://github.com/Kelwing/wumpgo)",
 			Authorization: config.Token,
 			Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
 				MaxRetries: 3,
@@ -92,16 +87,6 @@ func (a *App) ModalHandler(handler HandlerFunc) {
 	a.modalHandler = handler
 }
 
-// FastHTTPHandler exposes a fasthttp handler to process incoming interactions
-func (a *App) FastHTTPHandler() fasthttp.RequestHandler {
-	return fasthttpadaptor.NewFastHTTPHandler(a.HTTPHandler())
-}
-
-// LambdaHandler exposes an AWS APi Gateway Lambda handler to process incoming interactions
-func (a *App) LambdaHandler() LambdaHandler {
-	return handlerfunc.New(a.HTTPHandler()).ProxyWithContext
-}
-
 // ServeHTTP makes App implement the http.Handler interface
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.HTTPHandler()(w, r)
@@ -123,7 +108,7 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jr := json.NewEncoder(w)
 		signature := r.Header.Get("X-Signature-Ed25519")
-		bodyBytes, err := ioutil.ReadAll(r.Body)
+		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			FailUnknownError(w, jr)
 			return

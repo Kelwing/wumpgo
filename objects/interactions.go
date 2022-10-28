@@ -8,12 +8,6 @@ import (
 	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
-var _ SnowflakeObject = (*ApplicationCommand)(nil)
-var _ SnowflakeObject = (*Interaction)(nil)
-var _ SnowflakeObject = (*GuildApplicationCommandPermissions)(nil)
-var _ SnowflakeObject = (*ApplicationCommandPermissions)(nil)
-var _ SnowflakeObject = (*ApplicationCommandInteractionData)(nil)
-
 type (
 	ApplicationCommandOptionType     int
 	InteractionType                  int
@@ -98,7 +92,7 @@ const (
 
 type ApplicationCommand struct {
 	// ID is the unique id of the command
-	DiscordBaseObject
+	ID Snowflake `json:"id"`
 	// Type is	the type of command, defaults 1 if not set
 	Type *ApplicationCommandType `json:"type,omitempty"`
 	// Application ID is the unique id of the parent application
@@ -140,14 +134,14 @@ type ApplicationCommandOptionChoice struct {
 }
 
 type GuildApplicationCommandPermissions struct {
-	DiscordBaseObject
+	ID            Snowflake                       `json:"id"`
 	ApplicationID Snowflake                       `json:"application_id"`
 	GuildID       Snowflake                       `json:"guild_id"`
 	Permissions   []ApplicationCommandPermissions `json:"permissions"`
 }
 
 type ApplicationCommandPermissions struct {
-	DiscordBaseObject
+	ID         Snowflake                        `json:"id"`
 	Type       ApplicationCommandPermissionType `json:"type"`
 	Permission bool                             `json:"permission"`
 }
@@ -161,7 +155,7 @@ type ApplicationCommandInteractionDataOption struct {
 }
 
 type ApplicationCommandInteractionData struct {
-	DiscordBaseObject
+	ID       Snowflake                                  `json:"id"`
 	Name     string                                     `json:"name"`
 	Type     ApplicationCommandType                     `json:"type"`
 	Version  Snowflake                                  `json:"version"`
@@ -180,7 +174,7 @@ type ApplicationCommandInteractionDataResolved struct {
 }
 
 type Interaction struct {
-	DiscordBaseObject
+	ID            Snowflake       `json:"id"`
 	ApplicationID Snowflake       `json:"application_id"`
 	Type          InteractionType `json:"type"`
 	Data          json.RawMessage `json:"data,omitempty"`

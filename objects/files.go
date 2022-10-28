@@ -44,9 +44,9 @@ func (f *DiscordFile) GenerateAttachment(index Snowflake, m *multipart.Writer) (
 		f.Filename = "SPOILER_" + f.Filename
 	}
 	a := &Attachment{
-		DiscordBaseObject: DiscordBaseObject{ID: index},
-		Filename:          f.Filename,
-		Description:       f.Description,
+		ID:          index,
+		Filename:    f.Filename,
+		Description: f.Description,
 	}
 	contentType := "application/octet-stream"
 	if f.ContentType != "" {

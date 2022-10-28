@@ -1,26 +1,26 @@
 package router
 
 import (
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
+	"wumpgo.dev/wumpgo/objects"
 
 	"testing"
 )
 
 var fullUser = objects.User{
-	DiscordBaseObject: objects.DiscordBaseObject{ID: 1},
-	Username:          "test",
-	Discriminator:     "1234",
-	Avatar:            "a_fgeiogeig",
-	Bot:               true,
-	System:            true,
-	MFAEnabled:        true,
-	Locale:            "en",
-	Verified:          true,
-	Email:             "test@example.com",
-	Flags:             1,
-	PremiumType:       1,
-	PublicFlags:       1,
+	ID:            1,
+	Username:      "test",
+	Discriminator: "1234",
+	Avatar:        "a_fgeiogeig",
+	Bot:           true,
+	System:        true,
+	MFAEnabled:    true,
+	Locale:        "en",
+	Verified:      true,
+	Email:         "test@example.com",
+	Flags:         1,
+	PremiumType:   1,
+	PublicFlags:   1,
 }
 
 var fullMemberExceptUser = objects.GuildMember{

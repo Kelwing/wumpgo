@@ -5,8 +5,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func setUnexportedField(field reflect.Value, value any) {
@@ -334,49 +334,49 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 			name: "channel",
 			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
-					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
-					Roles:    map[objects.Snowflake]objects.Role{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 123}}},
-					Channels: map[objects.Snowflake]objects.Channel{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 123}}},
+					Roles:    map[objects.Snowflake]objects.Role{1: {ID: 123}},
+					Channels: map[objects.Snowflake]objects.Channel{1: {ID: 123}},
 				},
 			},
-			expected: &objects.Channel{DiscordBaseObject: objects.DiscordBaseObject{ID: 123}},
+			expected: &objects.Channel{ID: 123},
 		},
 		{
 			name: "role",
 			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
-					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
-					Roles:    map[objects.Snowflake]objects.Role{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 123}}},
+					Roles:    map[objects.Snowflake]objects.Role{1: {ID: 123}},
 					Channels: map[objects.Snowflake]objects.Channel{},
 				},
 			},
-			expected: &objects.Role{DiscordBaseObject: objects.DiscordBaseObject{ID: 123}},
+			expected: &objects.Role{ID: 123},
 		},
 		{
 			name: "member",
 			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
-					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
 					Roles:    map[objects.Snowflake]objects.Role{},
 					Channels: map[objects.Snowflake]objects.Channel{},
 				},
 			},
-			expected: &objects.GuildMember{Nick: "abc", User: &objects.User{DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+			expected: &objects.GuildMember{Nick: "abc", User: &objects.User{ID: 1}},
 		},
 		{
 			name: "user",
 			data: &objects.ApplicationCommandInteractionData{
 				Resolved: objects.ApplicationCommandInteractionDataResolved{
-					Users:    map[objects.Snowflake]objects.User{1: {DiscordBaseObject: objects.DiscordBaseObject{ID: 1}}},
+					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{},
 					Roles:    map[objects.Snowflake]objects.Role{},
 					Channels: map[objects.Snowflake]objects.Channel{},
 				},
 			},
-			expected: &objects.User{DiscordBaseObject: objects.DiscordBaseObject{ID: 1}},
+			expected: &objects.User{ID: 1},
 		},
 	}
 	for _, tt := range tests {

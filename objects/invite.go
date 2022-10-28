@@ -25,11 +25,11 @@ type Invite struct {
 	// the user who created the invite
 	Inviter *User `json:"inviter,omitempty"`
 
-	// the target user for this invite
-	TargetUser *User `json:"target_user,omitempty"`
-
 	// The target type for this invite
 	TargetType InviteTargetType `json:"target_type,omitempty"`
+
+	// the target user for this invite
+	TargetUser *User `json:"target_user,omitempty"`
 
 	// The application the invite is targeting
 	TargetApplication *Application `json:"target_application,omitempty"`
@@ -39,6 +39,12 @@ type Invite struct {
 
 	// approximate count of total members
 	ApproximateMemberCount int `json:"approximate_member_count,omitempty"`
+
+	// the expiration date of this invite, returned from the GET /invites/<code> endpoint when with_expiration is true
+	ExpiresAt *Time `json:"expires_at,omitempty"`
+
+	// guild scheduled event data, only included if guild_scheduled_event_id contains a valid guild scheduled event id
+	GuildScheduledEvent *GuildScheduledEvent `json:"guild_scheduled_event,omitempty"`
 
 	// number of times this invite has been used
 	Uses int `json:"uses"`

@@ -51,9 +51,9 @@ func Test_HTTPHandler(t *testing.T) {
 	app, priv, _ := PrepareTest()
 
 	req := generateValid(&objects.Interaction{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Type:              objects.InteractionRequestPing,
-		Version:           1,
+		ID:      objects.Snowflake(1234),
+		Type:    objects.InteractionRequestPing,
+		Version: 1,
 	}, priv)
 
 	w := httptest.NewRecorder()
@@ -71,9 +71,9 @@ func Test_HTTPHandler_InvalidSignature(t *testing.T) {
 	buf := bytes.Buffer{}
 	enc := json.NewEncoder(&buf)
 	enc.Encode(objects.Interaction{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Type:              objects.InteractionRequestPing,
-		Version:           1,
+		ID:      objects.Snowflake(1234),
+		Type:    objects.InteractionRequestPing,
+		Version: 1,
 	})
 
 	req := httptest.NewRequest("POST", "/", &buf)
@@ -104,26 +104,26 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 	})
 
 	data, err := json.Marshal(&objects.ApplicationCommandInteractionData{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Name:              "test",
-		Type:              objects.CommandTypeChatInput,
+		ID:   objects.Snowflake(1234),
+		Name: "test",
+		Type: objects.CommandTypeChatInput,
 	})
 	if err != nil {
 		t.Errorf("Failed to marshal test interaction: %s", err)
 	}
 
 	req := generateValid(&objects.Interaction{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Type:              objects.InteractionApplicationCommand,
-		ApplicationID:     objects.Snowflake(1234),
-		Data:              data,
-		GuildID:           objects.Snowflake(1234),
-		ChannelID:         objects.Snowflake(1234),
+		ID:            objects.Snowflake(1234),
+		Type:          objects.InteractionApplicationCommand,
+		ApplicationID: objects.Snowflake(1234),
+		Data:          data,
+		GuildID:       objects.Snowflake(1234),
+		ChannelID:     objects.Snowflake(1234),
 		Member: &objects.GuildMember{
 			User: &objects.User{
-				DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-				Username:          "Test",
-				Discriminator:     "1234",
+				ID:            objects.Snowflake(1234),
+				Username:      "Test",
+				Discriminator: "1234",
 			},
 		},
 		Version: 1,

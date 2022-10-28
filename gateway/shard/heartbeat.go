@@ -1,29 +1,27 @@
-package gateway
+package shard
 
 import (
 	"time"
 
 	"go.uber.org/atomic"
+	"wumpgo.dev/wumpgo/objects"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/rs/zerolog/log"
 )
 
 type Heartbeat struct {
 	interval      int64
 	acked         *atomic.Bool
-	gw            *Gateway
+	gw            *Shard
 	stop          chan bool
 	lastHeartbeat time.Time
-	hub           *sentry.Hub
 }
 
-func NewHeartbeat(interval int64, gw *Gateway, hub *sentry.Hub) *Heartbeat {
+func NewHeartbeat(interval int64, shard *Shard) *Heartbeat {
 	return &Heartbeat{
 		interval: interval,
 		acked:    atomic.NewBool(true),
-		gw:       gw,
-		hub:      hub,
+		gw:       shard,
 	}
 }
 
@@ -40,7 +38,6 @@ func (h *Heartbeat) heartbeat(interval int64) {
 				evt.Tags = map[string]string{
 					"last_heartbeat": h.lastHeartbeat.Format(time.RFC3339),
 				}
-				h.hub.CaptureEvent(evt)
 				h.gw.logger.Error().Msg("Discord missed last heartbeat")
 				h.gw.conn.Close()
 				return
@@ -48,7 +45,6 @@ func (h *Heartbeat) heartbeat(interval int64) {
 			h.acked.Store(false)
 			err := h.SendHeartbeat()
 			if err != nil {
-				h.hub.CaptureException(err)
 				h.gw.logger.Err(err).Msg("Failed to send heartbeat")
 			}
 		case <-h.stop:
@@ -58,9 +54,9 @@ func (h *Heartbeat) heartbeat(interval int64) {
 }
 
 func (h *Heartbeat) SendHeartbeat() error {
-	h.gw.logger.Debug().Int64("op", int64(OpHeartbeat)).Int64("sequence", h.gw.sequence.Load()).Msg("Sending heartbeat")
+	h.gw.logger.Debug().Int64("op", int64(objects.OpHeartbeat)).Uint64("sequence", h.gw.seq.Load()).Msg("Sending heartbeat")
 	h.lastHeartbeat = time.Now()
-	return h.gw.Send(OpHeartbeat, h.gw.sequence.Load())
+	return h.gw.Send(objects.OpHeartbeat, h.gw.seq.Load())
 }
 
 func (h *Heartbeat) Start() {
@@ -77,5 +73,5 @@ func (h *Heartbeat) Stop() {
 
 func (h *Heartbeat) ACK() {
 	h.acked.Store(true)
-	log.Debug().Dur("latency", time.Since(h.lastHeartbeat)).Msg("Received heartbeat ACK")
+	h.gw.logger.Debug().Dur("latency", time.Since(h.lastHeartbeat)).Msg("Received heartbeat ACK")
 }

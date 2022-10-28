@@ -8,10 +8,9 @@ import (
 )
 
 var _ Mentionable = (*Role)(nil)
-var _ SnowflakeObject = (*Role)(nil)
 
 type Role struct {
-	DiscordBaseObject
+	ID           Snowflake                 `json:"id"`
 	Name         string                    `json:"name"`
 	Color        int                       `json:"color"`
 	Hoist        bool                      `json:"hoist"`

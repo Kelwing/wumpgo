@@ -554,6 +554,87 @@ func (c *Client) StartThread(ctx context.Context, channel objects.SnowflakeObjec
 	return thread, err
 }
 
+type StartThreadInForumChannelParams struct {
+	Name                string                    `json:"name"`
+	AutoArchiveDuration uint64                    `json:"auto_archive_duration"`
+	RateLimitPerUser    uint64                    `json:"rate_limit_per_user"`
+	Message             *ForumThreadMessageParams `json:"message"`
+	AppliedTags         []objects.Snowflake       `json:"applied_tags"`
+	Reason              string                    `json:"-"`
+}
+
+type ForumThreadMessageParams struct {
+	Content         string                  `json:"content,omitempty"`
+	Embeds          []*objects.Embed        `json:"embeds,omitempty"`
+	AllowedMentions objects.AllowedMentions `json:"allowed_mentions,omitempty"`
+	Components      []*objects.Component    `json:"components,omitempty"`
+	StickerIDs      []objects.Snowflake     `json:"sticker_ids,omitempty"`
+	Files           []*objects.DiscordFile  `json:"files,omitempty"`
+	Attachments     []*objects.Attachment   `json:"attachments,omitempty"`
+	Flags           objects.MessageFlag     `json:"flags,omitempty"`
+}
+
+type ForumThreadChannel struct {
+	*objects.Channel
+	Message *objects.Message
+}
+
+func (c *Client) StartThreadInForumChannel(ctx context.Context, channel objects.SnowflakeObject, params *StartThreadInForumChannelParams) (*objects.ForumThreadChannel, error) {
+	var contentType string
+	var body []byte
+
+	reason := ""
+	if params != nil {
+		reason = params.Reason
+	}
+
+	if len(params.Message.Files) > 0 {
+		buffer := new(bytes.Buffer)
+		m := multipart.NewWriter(buffer)
+
+		for n, file := range params.Message.Files {
+			a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+			if err != nil {
+				continue
+			}
+			params.Message.Attachments = append(params.Message.Attachments, a)
+		}
+
+		if w, err := m.CreateFormField("payload_json"); err != nil {
+			return nil, err
+		} else {
+			if err := json.NewEncoder(w).Encode(params); err != nil {
+				return nil, err
+			}
+		}
+
+		contentType = m.FormDataContentType()
+		if err := m.Close(); err != nil {
+			return nil, err
+		}
+		body = buffer.Bytes()
+	} else {
+		contentType = JsonContentType
+		var err error
+		body, err = json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ch := &objects.ForumThreadChannel{}
+	err := NewRequest().
+		Method(http.MethodPost).
+		WithContext(ctx).
+		Path(fmt.Sprintf(ChannelMessagesFmt, channel.GetID())).
+		ContentType(contentType).
+		Body(body).
+		Reason(reason).
+		Bind(ch).
+		Send(c)
+
+	return ch, err
+}
+
 func (c *Client) JoinThread(ctx context.Context, thread objects.SnowflakeObject) error {
 	return NewRequest().
 		Method(http.MethodPost).
@@ -588,6 +669,20 @@ func (c *Client) RemoveThreadMember(ctx context.Context, thread, user objects.Sn
 		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread.GetID(), user.GetID())).
 		ContentType(JsonContentType).
 		Send(c)
+}
+
+func (c *Client) GetThreadMember(ctx context.Context, channel objects.SnowflakeObject, user objects.SnowflakeObject) (*objects.ThreadMember, error) {
+	member := &objects.ThreadMember{}
+
+	err := NewRequest().
+		Method(http.MethodGet).
+		WithContext(ctx).
+		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, channel, user)).
+		ContentType(JsonContentType).
+		Bind(member).
+		Send(c)
+
+	return member, err
 }
 
 func (c *Client) ListThreadMembers(ctx context.Context, thread objects.SnowflakeObject) ([]*objects.ThreadMember, error) {

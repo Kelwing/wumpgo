@@ -8,7 +8,7 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[AuditLogEvtGuildUpdate-1]
+	_ = x[AuditLogEventGuildUpdate-1]
 	_ = x[AuditLogEventChannelCreate-10]
 	_ = x[AuditLogEventChannelUpdate-11]
 	_ = x[AuditLogEventChannelDelete-12]
@@ -46,7 +46,7 @@ func _() {
 }
 
 const (
-	_AuditLogEvent_name_0 = "AuditLogEvtGuildUpdate"
+	_AuditLogEvent_name_0 = "GuildUpdate"
 	_AuditLogEvent_name_1 = "ChannelCreateChannelUpdateChannelDeleteOverwriteCreateOverwriteUpdateOverwriteDelete"
 	_AuditLogEvent_name_2 = "MemberKickMemberPruneMemberBanAddMemberBanRemoveMemberUpdateMemberRoleUpdateMemberMoveMemberDisconnectBotAdd"
 	_AuditLogEvent_name_3 = "RoleCreateRoleUpdateRoleDelete"
