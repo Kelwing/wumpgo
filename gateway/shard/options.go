@@ -72,3 +72,15 @@ func (o *withLogger) apply(s *Shard) {
 func WithLogger(l zerolog.Logger) ShardOpt {
 	return &withLogger{logger: l}
 }
+
+type withInitialPresence struct {
+	presence objects.UpdatePresence
+}
+
+func (o *withInitialPresence) apply(s *Shard) {
+	s.identify.Presence = o.presence
+}
+
+func WithInitialPresence(p objects.UpdatePresence) ShardOpt {
+	return &withInitialPresence{presence: p}
+}

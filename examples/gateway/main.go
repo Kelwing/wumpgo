@@ -35,6 +35,13 @@ func main() {
 		shard.WithGatewayURL(gateway.URL),
 		shard.WithIntents(objects.IntentsAllWithoutPrivileged),
 		shard.WithDispatcher(d),
+		shard.WithInitialPresence(objects.UpdatePresence{
+			Activities: []objects.Activity{
+				{
+					Name: "I'm a bot!",
+				},
+			},
+		}),
 	)
 
 	if err := s.Run(); err != nil {
