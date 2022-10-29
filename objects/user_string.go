@@ -13,18 +13,19 @@ func _() {
 	_ = x[PartneredServerOwner-2]
 	_ = x[HypesquadEvents-4]
 	_ = x[BugHunterLevel1-8]
-	_ = x[HouseBravery-16]
-	_ = x[HouseBrilliance-32]
-	_ = x[HouseBalance-64]
-	_ = x[EarlySupporter-128]
-	_ = x[TeamUser-256]
-	_ = x[System-4096]
+	_ = x[HouseBravery-64]
+	_ = x[HouseBrilliance-128]
+	_ = x[HouseBalance-256]
+	_ = x[EarlySupporter-512]
+	_ = x[TeamUser-1024]
 	_ = x[BugHunterLevel2-16384]
 	_ = x[VerifiedBot-65536]
 	_ = x[EarlyVerifiedBotDeveloper-131072]
+	_ = x[DiscordCertifiedModerator-262144]
+	_ = x[BotHTTPInteractions-524288]
 }
 
-const _UserFlags_name = "UserFlagsNoneDiscordEmployeePartneredServerOwnerHypesquadEventsBugHunterLevel1HouseBraveryHouseBrillianceHouseBalanceEarlySupporterTeamUserSystemBugHunterLevel2VerifiedBotEarlyVerifiedBotDeveloper"
+const _UserFlags_name = "UserFlagsNoneDiscordEmployeePartneredServerOwnerHypesquadEventsBugHunterLevel1HouseBraveryHouseBrillianceHouseBalanceEarlySupporterTeamUserBugHunterLevel2VerifiedBotEarlyVerifiedBotDeveloperDiscordCertifiedModeratorBotHTTPInteractions"
 
 var _UserFlags_map = map[UserFlags]string{
 	0:      _UserFlags_name[0:13],
@@ -32,15 +33,16 @@ var _UserFlags_map = map[UserFlags]string{
 	2:      _UserFlags_name[28:48],
 	4:      _UserFlags_name[48:63],
 	8:      _UserFlags_name[63:78],
-	16:     _UserFlags_name[78:90],
-	32:     _UserFlags_name[90:105],
-	64:     _UserFlags_name[105:117],
-	128:    _UserFlags_name[117:131],
-	256:    _UserFlags_name[131:139],
-	4096:   _UserFlags_name[139:145],
-	16384:  _UserFlags_name[145:160],
-	65536:  _UserFlags_name[160:171],
-	131072: _UserFlags_name[171:196],
+	64:     _UserFlags_name[78:90],
+	128:    _UserFlags_name[90:105],
+	256:    _UserFlags_name[105:117],
+	512:    _UserFlags_name[117:131],
+	1024:   _UserFlags_name[131:139],
+	16384:  _UserFlags_name[139:154],
+	65536:  _UserFlags_name[154:165],
+	131072: _UserFlags_name[165:190],
+	262144: _UserFlags_name[190:215],
+	524288: _UserFlags_name[215:234],
 }
 
 func (i UserFlags) String() string {
@@ -56,11 +58,12 @@ func _() {
 	_ = x[PremiumTypeNone-0]
 	_ = x[NitroClassic-1]
 	_ = x[Nitro-2]
+	_ = x[NitroBasic-3]
 }
 
-const _PremiumType_name = "PremiumTypeNoneNitroClassicNitro"
+const _PremiumType_name = "PremiumTypeNoneNitroClassicNitroNitroBasic"
 
-var _PremiumType_index = [...]uint8{0, 15, 27, 32}
+var _PremiumType_index = [...]uint8{0, 15, 27, 32, 42}
 
 func (i PremiumType) String() string {
 	if i >= PremiumType(len(_PremiumType_index)-1) {

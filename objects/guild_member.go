@@ -1,7 +1,6 @@
 package objects
 
 var _ Mentionable = (*GuildMember)(nil)
-var _ SnowflakeObject = (*GuildMember)(nil)
 
 type GuildMember struct {
 	User                       *User       `json:"user,omitempty"`
@@ -15,10 +14,6 @@ type GuildMember struct {
 	Pending                    bool        `json:"pending,omitempty"`
 	Permissions                string      `json:"permissions,omitempty"`
 	CommunicationDisabledUntil *Time       `json:"communication_disabled_until,omitempty"`
-}
-
-func (m *GuildMember) GetID() Snowflake {
-	return m.User.GetID()
 }
 
 func (m *GuildMember) Mention() string {

@@ -17,7 +17,7 @@ import (
 var fakeHandlerValue string
 
 func fakeHandler(val string) *routeContext {
-	return &routeContext{func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
+	return &routeContext{func(reqCtx context.Context, ctx *objects.Interaction, data *objects.MessageComponentData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 		fakeHandlerValue = val
 		return nil
 	}, val}

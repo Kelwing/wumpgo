@@ -137,11 +137,15 @@ func _() {
 	_ = x[ComponentTypeButton-2]
 	_ = x[ComponentTypeSelectMenu-3]
 	_ = x[ComponentTypeInputText-4]
+	_ = x[ComponentTypeUserSelect-5]
+	_ = x[ComponentTypeRoleSelect-6]
+	_ = x[ComponentTypeMentionableSelect-7]
+	_ = x[ComponentTypeChannelSelect-8]
 }
 
-const _ComponentType_name = "ComponentTypeActionRowComponentTypeButtonComponentTypeSelectMenuComponentTypeInputText"
+const _ComponentType_name = "ComponentTypeActionRowComponentTypeButtonComponentTypeSelectMenuComponentTypeInputTextComponentTypeUserSelectComponentTypeRoleSelectComponentTypeMentionableSelectComponentTypeChannelSelect"
 
-var _ComponentType_index = [...]uint8{0, 22, 41, 64, 86}
+var _ComponentType_index = [...]uint8{0, 22, 41, 64, 86, 109, 132, 162, 188}
 
 func (i ComponentType) String() string {
 	i -= 1
@@ -175,11 +179,12 @@ func _() {
 	var x [1]struct{}
 	_ = x[PermissionTypeRole-1]
 	_ = x[PermissionTypeUser-2]
+	_ = x[PermissionTypeChannel-3]
 }
 
-const _ApplicationCommandPermissionType_name = "PermissionTypeRolePermissionTypeUser"
+const _ApplicationCommandPermissionType_name = "PermissionTypeRolePermissionTypeUserPermissionTypeChannel"
 
-var _ApplicationCommandPermissionType_index = [...]uint8{0, 18, 36}
+var _ApplicationCommandPermissionType_index = [...]uint8{0, 18, 36, 57}
 
 func (i ApplicationCommandPermissionType) String() string {
 	i -= 1

@@ -3,10 +3,9 @@ package objects
 import "strings"
 
 var _ Mentionable = (*Emoji)(nil)
-var _ SnowflakeObject = (*Emoji)(nil)
 
 type Emoji struct {
-	DiscordBaseObject
+	ID            Snowflake   `json:"id"`
 	Name          string      `json:"name,omitempty"`
 	Roles         []Snowflake `json:"roles,omitempty"`
 	User          *User       `json:"user,omitempty"`

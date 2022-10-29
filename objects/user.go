@@ -3,7 +3,6 @@ package objects
 //go:generate stringer -type UserFlags,PremiumType,ActivityType,ActivityFlag -output user_string.go
 
 var _ Mentionable = (*User)(nil)
-var _ SnowflakeObject = (*User)(nil)
 
 type UserFlags uint
 
@@ -13,6 +12,8 @@ const (
 	PartneredServerOwner
 	HypesquadEvents
 	BugHunterLevel1
+	_
+	_
 	HouseBravery
 	HouseBrilliance
 	HouseBalance
@@ -21,12 +22,12 @@ const (
 	_
 	_
 	_
-	System
-	_
 	BugHunterLevel2
 	_
 	VerifiedBot
 	EarlyVerifiedBotDeveloper
+	DiscordCertifiedModerator
+	BotHTTPInteractions
 )
 
 type PremiumType uint
@@ -35,6 +36,7 @@ const (
 	PremiumTypeNone PremiumType = iota
 	NitroClassic
 	Nitro
+	NitroBasic
 )
 
 type ActivityType uint
@@ -59,7 +61,7 @@ const (
 )
 
 type User struct {
-	DiscordBaseObject
+	ID            Snowflake   `json:"id"`
 	Username      string      `json:"username"`
 	Discriminator string      `json:"discriminator"`
 	Avatar        string      `json:"avatar,omitempty"`
@@ -141,14 +143,37 @@ const (
 	VisibilityEveryone
 )
 
+type Service string
+
+const (
+	ServiceBattleNet       Service = "battlenet"
+	ServiceEbay            Service = "ebay"
+	ServiceEpicGames       Service = "epicgames"
+	ServiceFacebook        Service = "facebook"
+	ServiceGithub          Service = "github"
+	ServiceLeagueOfLegends Service = "leagueoflegends"
+	ServicePaypal          Service = "paypal"
+	ServicePlaystation     Service = "playstation"
+	ServiceReddit          Service = "reddit"
+	ServiceRiotGames       Service = "riotgames"
+	ServiceSpotify         Service = "spotify"
+	ServiceSkype           Service = "skype"
+	ServiceSteam           Service = "steam"
+	ServiceTwitch          Service = "twitch"
+	ServiceTwitter         Service = "twitter"
+	ServiceXbox            Service = "xbox"
+	ServiceYouTube         Service = "youtube"
+)
+
 type Connection struct {
 	ID           string         `json:"id"`
 	Name         string         `json:"name"`
-	Type         string         `json:"type"`
+	Type         Service        `json:"type"`
 	Revoked      bool           `json:"revoked,omitempty"`
 	Integrations []*Integration `json:"integrations,omitempty"`
 	Verified     bool           `json:"verified"`
 	FriendSync   bool           `json:"friend_sync"`
 	ShowActivity bool           `json:"show_activity"`
+	TwoWayLink   bool           `json:"two_way_link"`
 	Visibility   Visibility     `json:"visibility"`
 }

@@ -8,12 +8,6 @@ import (
 	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
-var _ SnowflakeObject = (*ApplicationCommand)(nil)
-var _ SnowflakeObject = (*Interaction)(nil)
-var _ SnowflakeObject = (*GuildApplicationCommandPermissions)(nil)
-var _ SnowflakeObject = (*ApplicationCommandPermissions)(nil)
-var _ SnowflakeObject = (*ApplicationCommandInteractionData)(nil)
-
 type (
 	ApplicationCommandOptionType     int
 	InteractionType                  int
@@ -73,6 +67,7 @@ const (
 const (
 	PermissionTypeRole ApplicationCommandPermissionType = iota + 1
 	PermissionTypeUser
+	PermissionTypeChannel
 )
 
 const (
@@ -94,11 +89,15 @@ const (
 	ComponentTypeSelectMenu
 	// ComponentTypeInputText is only usable in modals
 	ComponentTypeInputText
+	ComponentTypeUserSelect
+	ComponentTypeRoleSelect
+	ComponentTypeMentionableSelect
+	ComponentTypeChannelSelect
 )
 
 type ApplicationCommand struct {
 	// ID is the unique id of the command
-	DiscordBaseObject
+	ID Snowflake `json:"id"`
 	// Type is	the type of command, defaults 1 if not set
 	Type *ApplicationCommandType `json:"type,omitempty"`
 	// Application ID is the unique id of the parent application
@@ -107,8 +106,12 @@ type ApplicationCommand struct {
 	GuildID *Snowflake `json:"guild_id,omitempty"`
 	// Name is a 1-32 character name
 	Name string `json:"name"`
+	// Localization dictionary for name field. Values follow the same restrictions as name
+	NameLocalizations map[string]string `json:"name_localizations,omitempty"`
 	// Description is a 1-100 character description for CHAT_INPUT commands, empty string for USER and MESSAGE commands
 	Description string `json:"description,omitempty"`
+	// Localization dictionary for description field. Values follow the same restrictions as description
+	DescriptionLocalizations map[string]string `json:"description_localizations,omitempty"`
 	// Options are the parameters for the command, max 25, only valid for CHAT_INPUT commands
 	Options []ApplicationCommandOption `json:"options"`
 	// Set of permissions represented as a bit set
@@ -122,55 +125,60 @@ type ApplicationCommand struct {
 }
 
 type ApplicationCommandOption struct {
-	OptionType   ApplicationCommandOptionType     `json:"type"`
-	Name         string                           `json:"name"`
-	Description  string                           `json:"description"`
-	Required     bool                             `json:"required,omitempty"`
-	Choices      []ApplicationCommandOptionChoice `json:"choices,omitempty"`
-	Options      []ApplicationCommandOption       `json:"options,omitempty"`
-	ChannelTypes []ChannelType                    `json:"channel_types,omitempty"`
-	MinValue     json.Number                      `json:"min_value,omitempty"`
-	MaxValue     json.Number                      `json:"max_value,omitempty"`
-	Autocomplete bool                             `json:"autocomplete,omitempty"`
+	OptionType               ApplicationCommandOptionType     `json:"type"`
+	Name                     string                           `json:"name"`
+	NameLocalizations        map[string]string                `json:"name_localizations,omitempty"`
+	Description              string                           `json:"description"`
+	DescriptionLocalizations map[string]string                `json:"description_localizations,omitempty"`
+	Required                 bool                             `json:"required,omitempty"`
+	Choices                  []ApplicationCommandOptionChoice `json:"choices,omitempty"`
+	Options                  []ApplicationCommandOption       `json:"options,omitempty"`
+	ChannelTypes             []ChannelType                    `json:"channel_types,omitempty"`
+	MinValue                 json.Number                      `json:"min_value,omitempty"`
+	MaxValue                 json.Number                      `json:"max_value,omitempty"`
+	MinLength                int64                            `json:"min_length,omitempty"`
+	MaxLength                int64                            `json:"max_length,omitempty"`
+	Autocomplete             bool                             `json:"autocomplete,omitempty"`
 }
 
 type ApplicationCommandOptionChoice struct {
-	Name  string      `json:"name"`
-	Value interface{} `json:"value"`
+	Name              string            `json:"name"`
+	NameLocalizations map[string]string `json:"name_localizations,omitempty"`
+	Value             interface{}       `json:"value"`
 }
 
 type GuildApplicationCommandPermissions struct {
-	DiscordBaseObject
+	ID            Snowflake                       `json:"id"`
 	ApplicationID Snowflake                       `json:"application_id"`
 	GuildID       Snowflake                       `json:"guild_id"`
 	Permissions   []ApplicationCommandPermissions `json:"permissions"`
 }
 
 type ApplicationCommandPermissions struct {
-	DiscordBaseObject
+	ID         Snowflake                        `json:"id"`
 	Type       ApplicationCommandPermissionType `json:"type"`
 	Permission bool                             `json:"permission"`
 }
 
-type ApplicationCommandInteractionDataOption struct {
-	Type    ApplicationCommandOptionType               `json:"type"`
-	Name    string                                     `json:"name"`
-	Value   interface{}                                `json:"value,omitempty"`
-	Focused bool                                       `json:"focused,omitempty"`
-	Options []*ApplicationCommandInteractionDataOption `json:"options,omitempty"`
+type ApplicationCommandDataOption struct {
+	Type    ApplicationCommandOptionType    `json:"type"`
+	Name    string                          `json:"name"`
+	Value   interface{}                     `json:"value,omitempty"`
+	Focused bool                            `json:"focused,omitempty"`
+	Options []*ApplicationCommandDataOption `json:"options,omitempty"`
 }
 
-type ApplicationCommandInteractionData struct {
-	DiscordBaseObject
-	Name     string                                     `json:"name"`
-	Type     ApplicationCommandType                     `json:"type"`
-	Version  Snowflake                                  `json:"version"`
-	Options  []*ApplicationCommandInteractionDataOption `json:"options"`
-	Resolved ApplicationCommandInteractionDataResolved  `json:"resolved"`
-	TargetID Snowflake                                  `json:"target_id"`
+type ApplicationCommandData struct {
+	ID       Snowflake                       `json:"id"`
+	Name     string                          `json:"name"`
+	Type     ApplicationCommandType          `json:"type"`
+	Resolved ApplicationCommandDataResolved  `json:"resolved"`
+	Options  []*ApplicationCommandDataOption `json:"options"`
+	GuildID  Snowflake                       `json:"guild_id"`
+	TargetID Snowflake                       `json:"target_id"`
 }
 
-type ApplicationCommandInteractionDataResolved struct {
+type ApplicationCommandDataResolved struct {
 	Users       map[Snowflake]User        `json:"users"`
 	Members     map[Snowflake]GuildMember `json:"members"`
 	Roles       map[Snowflake]Role        `json:"roles"`
@@ -180,19 +188,20 @@ type ApplicationCommandInteractionDataResolved struct {
 }
 
 type Interaction struct {
-	DiscordBaseObject
-	ApplicationID Snowflake       `json:"application_id"`
-	Type          InteractionType `json:"type"`
-	Data          json.RawMessage `json:"data,omitempty"`
-	GuildID       Snowflake       `json:"guild_id"`
-	ChannelID     Snowflake       `json:"channel_id"`
-	Member        *GuildMember    `json:"member"`
-	User          *User           `json:"user"`
-	Token         string          `json:"token"`
-	Message       *Message        `json:"message,omitempty"`
-	Version       int             `json:"version,omitempty"`
-	Locale        string          `json:"locale"`
-	GuildLocale   string          `json:"guild_locale"`
+	ID             Snowflake                 `json:"id"`
+	ApplicationID  Snowflake                 `json:"application_id"`
+	Type           InteractionType           `json:"type"`
+	Data           json.RawMessage           `json:"data,omitempty"`
+	GuildID        Snowflake                 `json:"guild_id"`
+	ChannelID      Snowflake                 `json:"channel_id"`
+	Member         *GuildMember              `json:"member"`
+	User           *User                     `json:"user"`
+	Token          string                    `json:"token"`
+	Version        int                       `json:"version,omitempty"`
+	Message        *Message                  `json:"message,omitempty"`
+	AppPermissions permissions.PermissionBit `json:"app_permissions"`
+	Locale         string                    `json:"locale"`
+	GuildLocale    string                    `json:"guild_locale"`
 }
 
 type InteractionApplicationCommandCallbackData struct {
@@ -215,13 +224,13 @@ type InteractionResponse struct {
 	Data *InteractionApplicationCommandCallbackData `json:"data,omitempty"`
 }
 
-type ApplicationComponentInteractionData struct {
+type MessageComponentData struct {
 	CustomID      string        `json:"custom_id"`
 	ComponentType ComponentType `json:"component_type"`
 	Values        []string      `json:"values,omitempty"`
 }
 
-type ApplicationModalInteractionData struct {
+type ModalSubmitData struct {
 	CustomID   string                          `json:"custom_id"`
 	Components []*InteractionResponseComponent `json:"components"`
 }

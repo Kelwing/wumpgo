@@ -13,6 +13,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// NewLeakyBucketRatelimiter creates a new LeakyBucketRatelimiter based on rate.Limiter
 func NewLeakyBucketRatelimiter() *LeakyBucketRatelimiter {
 	return &LeakyBucketRatelimiter{
 		buckets:  make(map[string]*rate.Limiter),
