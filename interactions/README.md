@@ -11,45 +11,6 @@ Add Interactions to your project
 go get -u github.com/kelwing/wumpgo/interactions
 ```
 
-### Example
-
-```go
-package main
-
-import (
-    "log"
-    "os"
-
-    "github.com/kelwing/wumpgo/interactions"
-    "github.com/kelwing/wumpgo/objects"
-)
-
-func main() {
-	app, err := interactions.New(&interactions.Config{
-		PublicKey: os.Getenv("DISCORD_PUBLIC_KEY"),
-		Token:     "Bot " + os.Getenv("DISCORD_TOKEN"),
-	})
-	if err != nil {
-		panic("failed to create interactions client")
-	}
-
-	app.CommandHandler(testHandler)
-
-	log.Println("test-bot is now running")
-	http.ListenAndServe(":8080", app.HTTPHandler())
-}
-
-func testHandler(ctx *objects.Interaction) *objects.InteractionResponse {
-	return &objects.InteractionResponse{
-		Type: objects.ResponseChannelMessageWithSource,
-		Data: &objects.InteractionApplicationCommandCallbackData{
-			Content: "Hello world!",
-			Flags:   objects.ResponseFlagEphemeral,
-		},
-	}
-}
-```
-
 ## Command Routing
 If you're looking for a more batteries included solution that includes command and interaction routing.  Check out our [router](https://github.com/kelwing/wumpgo/router) package.
 
