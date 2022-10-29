@@ -3,7 +3,6 @@ module wumpgo.dev/wumpgo
 go 1.19
 
 require (
-	github.com/aws/aws-lambda-go v1.34.1
 	github.com/getsentry/sentry-go v0.13.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redsync/redsync/v4 v4.5.1
