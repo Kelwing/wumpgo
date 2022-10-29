@@ -87,6 +87,13 @@ func (r restTape) BulkOverwriteGuildCommands(a context.Context, b objects.Snowfl
 	return e, f
 }
 
+func (r restTape) CreateAutoModerationRule(a context.Context, b objects.SnowflakeObject, c *rest.CreateAutoModerationRuleParams) (*objects.AutoModerationRule, error) {
+	result := r.tape.write("CreateAutoModerationRule", false, a, b, c)
+	d, e := r.rest.CreateAutoModerationRule(a, b, c)
+	result.end(d, e)
+	return d, e
+}
+
 func (r restTape) CreateBan(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.CreateGuildBanParams) error {
 	result := r.tape.write("CreateBan", false, a, b, c, d)
 	x := r.rest.CreateBan(a, b, c, d)
@@ -216,6 +223,13 @@ func (r restTape) CrossPostMessage(a context.Context, b objects.SnowflakeObject,
 func (r restTape) DeleteAllReactions(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) error {
 	result := r.tape.write("DeleteAllReactions", false, a, b, c)
 	x := r.rest.DeleteAllReactions(a, b, c)
+	result.end(x)
+	return x
+}
+
+func (r restTape) DeleteAutoModerationRule(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d ...string) error {
+	result := r.tape.write("DeleteAutoModerationRule", true, a, b, c, d)
+	x := r.rest.DeleteAutoModerationRule(a, b, c, d...)
 	result.end(x)
 	return x
 }
@@ -449,6 +463,20 @@ func (r restTape) GetAuditLogs(a context.Context, b objects.SnowflakeObject, c *
 	d, e := r.rest.GetAuditLogs(a, b, c)
 	result.end(d, e)
 	return d, e
+}
+
+func (r restTape) GetAutoModerationRule(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (*objects.AutoModerationRule, error) {
+	result := r.tape.write("GetAutoModerationRule", false, a, b, c)
+	d, e := r.rest.GetAutoModerationRule(a, b, c)
+	result.end(d, e)
+	return d, e
+}
+
+func (r restTape) GetAutoModerationRules(a context.Context, b objects.SnowflakeObject) ([]*objects.AutoModerationRule, error) {
+	result := r.tape.write("GetAutoModerationRules", false, a, b)
+	c, d := r.rest.GetAutoModerationRules(a, b)
+	result.end(c, d)
+	return c, d
 }
 
 func (r restTape) GetChannel(a context.Context, b objects.SnowflakeObject) (*objects.Channel, error) {
@@ -738,6 +766,13 @@ func (r restTape) GetTemplate(a context.Context, b string) (*objects.Template, e
 	return c, d
 }
 
+func (r restTape) GetThreadMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (*objects.ThreadMember, error) {
+	result := r.tape.write("GetThreadMember", false, a, b, c)
+	d, e := r.rest.GetThreadMember(a, b, c)
+	result.end(d, e)
+	return d, e
+}
+
 func (r restTape) GetUser(a context.Context, b objects.SnowflakeObject) (*objects.User, error) {
 	result := r.tape.write("GetUser", false, a, b)
 	c, d := r.rest.GetUser(a, b)
@@ -764,6 +799,13 @@ func (r restTape) GetWebhook(a context.Context, b objects.SnowflakeObject) (*obj
 	c, d := r.rest.GetWebhook(a, b)
 	result.end(c, d)
 	return c, d
+}
+
+func (r restTape) GetWebhookMesssage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (*objects.Message, error) {
+	result := r.tape.write("GetWebhookMesssage", false, a, b, c, d)
+	e, f := r.rest.GetWebhookMesssage(a, b, c, d)
+	result.end(e, f)
+	return e, f
 }
 
 func (r restTape) GetWebhookWithToken(a context.Context, b objects.SnowflakeObject, c string) (*objects.Webhook, error) {
@@ -848,6 +890,13 @@ func (r restTape) ListThreadMembers(a context.Context, b objects.SnowflakeObject
 	c, d := r.rest.ListThreadMembers(a, b)
 	result.end(c, d)
 	return c, d
+}
+
+func (r restTape) ModifyAutoModerationRule(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.ModifyAutoModerationRuleParams) (*objects.AutoModerationRule, error) {
+	result := r.tape.write("ModifyAutoModerationRule", false, a, b, c, d)
+	e, f := r.rest.ModifyAutoModerationRule(a, b, c, d)
+	result.end(e, f)
+	return e, f
 }
 
 func (r restTape) ModifyChannel(a context.Context, b objects.SnowflakeObject, c *rest.ModifyChannelParams) (*objects.Channel, error) {
@@ -986,6 +1035,13 @@ func (r restTape) RemoveThreadMember(a context.Context, b objects.SnowflakeObjec
 func (r restTape) StartThread(a context.Context, b objects.SnowflakeObject, c *rest.StartThreadParams) (*objects.Channel, error) {
 	result := r.tape.write("StartThread", false, a, b, c)
 	d, e := r.rest.StartThread(a, b, c)
+	result.end(d, e)
+	return d, e
+}
+
+func (r restTape) StartThreadInForumChannel(a context.Context, b objects.SnowflakeObject, c *rest.StartThreadInForumChannelParams) (*objects.ForumThreadChannel, error) {
+	result := r.tape.write("StartThreadInForumChannel", false, a, b, c)
+	d, e := r.rest.StartThreadInForumChannel(a, b, c)
 	result.end(d, e)
 	return d, e
 }

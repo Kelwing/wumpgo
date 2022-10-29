@@ -129,6 +129,17 @@ func (r *restTapePlayer) BulkOverwriteGuildCommands(a context.Context, b objects
 	return
 }
 
+func (r *restTapePlayer) CreateAutoModerationRule(a context.Context, b objects.SnowflakeObject, c *rest.CreateAutoModerationRuleParams) (d *objects.AutoModerationRule, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected CreateAutoModerationRule at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "CreateAutoModerationRule", false, 3, a, b, c, &d, &e)
+	return
+}
+
 func (r *restTapePlayer) CreateBan(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.CreateGuildBanParams) (e error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected CreateBan at end of tape")
@@ -335,6 +346,17 @@ func (r *restTapePlayer) DeleteAllReactions(a context.Context, b objects.Snowfla
 	action := r.tape[r.index]
 	r.index++
 	action.match(r.t, "DeleteAllReactions", false, 3, a, b, c, &d)
+	return
+}
+
+func (r *restTapePlayer) DeleteAutoModerationRule(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d ...string) (e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected DeleteAutoModerationRule at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "DeleteAutoModerationRule", true, 4, a, b, c, d, &e)
 	return
 }
 
@@ -698,6 +720,28 @@ func (r *restTapePlayer) GetAuditLogs(a context.Context, b objects.SnowflakeObje
 	action := r.tape[r.index]
 	r.index++
 	action.match(r.t, "GetAuditLogs", false, 3, a, b, c, &d, &e)
+	return
+}
+
+func (r *restTapePlayer) GetAutoModerationRule(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.AutoModerationRule, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetAutoModerationRule at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetAutoModerationRule", false, 3, a, b, c, &d, &e)
+	return
+}
+
+func (r *restTapePlayer) GetAutoModerationRules(a context.Context, b objects.SnowflakeObject) (c []*objects.AutoModerationRule, d error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetAutoModerationRules at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetAutoModerationRules", false, 2, a, b, &c, &d)
 	return
 }
 
@@ -1152,6 +1196,17 @@ func (r *restTapePlayer) GetTemplate(a context.Context, b string) (c *objects.Te
 	return
 }
 
+func (r *restTapePlayer) GetThreadMember(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject) (d *objects.ThreadMember, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetThreadMember at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetThreadMember", false, 3, a, b, c, &d, &e)
+	return
+}
+
 func (r *restTapePlayer) GetUser(a context.Context, b objects.SnowflakeObject) (c *objects.User, d error) {
 	if r.index == len(r.tape) {
 		r.t.Fatal("unexpected GetUser at end of tape")
@@ -1193,6 +1248,17 @@ func (r *restTapePlayer) GetWebhook(a context.Context, b objects.SnowflakeObject
 	action := r.tape[r.index]
 	r.index++
 	action.match(r.t, "GetWebhook", false, 2, a, b, &c, &d)
+	return
+}
+
+func (r *restTapePlayer) GetWebhookMesssage(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d string) (e *objects.Message, f error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected GetWebhookMesssage at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "GetWebhookMesssage", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
@@ -1325,6 +1391,17 @@ func (r *restTapePlayer) ListThreadMembers(a context.Context, b objects.Snowflak
 	action := r.tape[r.index]
 	r.index++
 	action.match(r.t, "ListThreadMembers", false, 2, a, b, &c, &d)
+	return
+}
+
+func (r *restTapePlayer) ModifyAutoModerationRule(a context.Context, b objects.SnowflakeObject, c objects.SnowflakeObject, d *rest.ModifyAutoModerationRuleParams) (e *objects.AutoModerationRule, f error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected ModifyAutoModerationRule at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "ModifyAutoModerationRule", false, 4, a, b, c, d, &e, &f)
 	return
 }
 
@@ -1545,6 +1622,17 @@ func (r *restTapePlayer) StartThread(a context.Context, b objects.SnowflakeObjec
 	action := r.tape[r.index]
 	r.index++
 	action.match(r.t, "StartThread", false, 3, a, b, c, &d, &e)
+	return
+}
+
+func (r *restTapePlayer) StartThreadInForumChannel(a context.Context, b objects.SnowflakeObject, c *rest.StartThreadInForumChannelParams) (d *objects.ForumThreadChannel, e error) {
+	if r.index == len(r.tape) {
+		r.t.Fatal("unexpected StartThreadInForumChannel at end of tape")
+		return // Here for unit tests - in production this will never be hit.
+	}
+	action := r.tape[r.index]
+	r.index++
+	action.match(r.t, "StartThreadInForumChannel", false, 3, a, b, c, &d, &e)
 	return
 }
 

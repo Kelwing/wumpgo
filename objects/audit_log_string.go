@@ -43,60 +43,89 @@ func _() {
 	_ = x[AuditLogEventIntegrationCreate-80]
 	_ = x[AuditLogEventIntegrationUpdate-81]
 	_ = x[AuditLogEventIntegrationDelete-82]
+	_ = x[AuditLogEventStageInstanceCreate-83]
+	_ = x[AuditLogEventStageInstanceUpdate-84]
+	_ = x[AuditLogEventStageInstanceDelete-85]
+	_ = x[AuditLogEventStickerCreate-90]
+	_ = x[AuditLogEventStickerUpdate-91]
+	_ = x[AuditLogEventStickerDelete-92]
+	_ = x[AuditLogEventGuildScheduledEventCreate-100]
+	_ = x[AuditLogEventGuildScheduledEventUpdate-101]
+	_ = x[AuditLogEventGuildScheduledEventDelete-102]
+	_ = x[AuditLogEventThreadCreate-110]
+	_ = x[AuditLogEventThreadUpdate-111]
+	_ = x[AuditLogEventThreadDelete-112]
+	_ = x[AuditLogApplicationCommandPermissionUpdate-121]
+	_ = x[AuditLogAutoModerationRuleCreate-140]
+	_ = x[AuditLogAutoModerationRuleUpdate-141]
+	_ = x[AuditLogAutoModerationRuleDelete-142]
+	_ = x[AuditLogAutoModerationBlockMessage-143]
+	_ = x[AuditLogAutoModerationFlagToChannel-144]
+	_ = x[AuditLogAutoModerationUserCommunicationDisabled-145]
 }
 
-const (
-	_AuditLogEvent_name_0 = "GuildUpdate"
-	_AuditLogEvent_name_1 = "ChannelCreateChannelUpdateChannelDeleteOverwriteCreateOverwriteUpdateOverwriteDelete"
-	_AuditLogEvent_name_2 = "MemberKickMemberPruneMemberBanAddMemberBanRemoveMemberUpdateMemberRoleUpdateMemberMoveMemberDisconnectBotAdd"
-	_AuditLogEvent_name_3 = "RoleCreateRoleUpdateRoleDelete"
-	_AuditLogEvent_name_4 = "InviteCreateInviteUpdateInviteDelete"
-	_AuditLogEvent_name_5 = "WebhookCreateWebhookUpdateWebhookDelete"
-	_AuditLogEvent_name_6 = "EmojiCreateEmojiUpdateEmojiDelete"
-	_AuditLogEvent_name_7 = "MessageDeleteMessageBulkDeleteMessagePinMessageUnpin"
-	_AuditLogEvent_name_8 = "IntegrationCreateIntegrationUpdateIntegrationDelete"
-)
+const _AuditLogEvent_name = "GuildUpdateChannelCreateChannelUpdateChannelDeleteOverwriteCreateOverwriteUpdateOverwriteDeleteMemberKickMemberPruneMemberBanAddMemberBanRemoveMemberUpdateMemberRoleUpdateMemberMoveMemberDisconnectBotAddRoleCreateRoleUpdateRoleDeleteInviteCreateInviteUpdateInviteDeleteWebhookCreateWebhookUpdateWebhookDeleteEmojiCreateEmojiUpdateEmojiDeleteMessageDeleteMessageBulkDeleteMessagePinMessageUnpinIntegrationCreateIntegrationUpdateIntegrationDeleteStageInstanceCreateStageInstanceUpdateStageInstanceDeleteStickerCreateStickerUpdateStickerDeleteGuildScheduledEventCreateGuildScheduledEventUpdateGuildScheduledEventDeleteThreadCreateThreadUpdateThreadDeleteAuditLogApplicationCommandPermissionUpdateAuditLogAutoModerationRuleCreateAuditLogAutoModerationRuleUpdateAuditLogAutoModerationRuleDeleteAuditLogAutoModerationBlockMessageAuditLogAutoModerationFlagToChannelAuditLogAutoModerationUserCommunicationDisabled"
 
-var (
-	_AuditLogEvent_index_1 = [...]uint8{0, 13, 26, 39, 54, 69, 84}
-	_AuditLogEvent_index_2 = [...]uint8{0, 10, 21, 33, 48, 60, 76, 86, 102, 108}
-	_AuditLogEvent_index_3 = [...]uint8{0, 10, 20, 30}
-	_AuditLogEvent_index_4 = [...]uint8{0, 12, 24, 36}
-	_AuditLogEvent_index_5 = [...]uint8{0, 13, 26, 39}
-	_AuditLogEvent_index_6 = [...]uint8{0, 11, 22, 33}
-	_AuditLogEvent_index_7 = [...]uint8{0, 13, 30, 40, 52}
-	_AuditLogEvent_index_8 = [...]uint8{0, 17, 34, 51}
-)
+var _AuditLogEvent_map = map[AuditLogEvent]string{
+	1:   _AuditLogEvent_name[0:11],
+	10:  _AuditLogEvent_name[11:24],
+	11:  _AuditLogEvent_name[24:37],
+	12:  _AuditLogEvent_name[37:50],
+	13:  _AuditLogEvent_name[50:65],
+	14:  _AuditLogEvent_name[65:80],
+	15:  _AuditLogEvent_name[80:95],
+	20:  _AuditLogEvent_name[95:105],
+	21:  _AuditLogEvent_name[105:116],
+	22:  _AuditLogEvent_name[116:128],
+	23:  _AuditLogEvent_name[128:143],
+	24:  _AuditLogEvent_name[143:155],
+	25:  _AuditLogEvent_name[155:171],
+	26:  _AuditLogEvent_name[171:181],
+	27:  _AuditLogEvent_name[181:197],
+	28:  _AuditLogEvent_name[197:203],
+	30:  _AuditLogEvent_name[203:213],
+	31:  _AuditLogEvent_name[213:223],
+	32:  _AuditLogEvent_name[223:233],
+	40:  _AuditLogEvent_name[233:245],
+	41:  _AuditLogEvent_name[245:257],
+	42:  _AuditLogEvent_name[257:269],
+	50:  _AuditLogEvent_name[269:282],
+	51:  _AuditLogEvent_name[282:295],
+	52:  _AuditLogEvent_name[295:308],
+	60:  _AuditLogEvent_name[308:319],
+	61:  _AuditLogEvent_name[319:330],
+	62:  _AuditLogEvent_name[330:341],
+	72:  _AuditLogEvent_name[341:354],
+	73:  _AuditLogEvent_name[354:371],
+	74:  _AuditLogEvent_name[371:381],
+	75:  _AuditLogEvent_name[381:393],
+	80:  _AuditLogEvent_name[393:410],
+	81:  _AuditLogEvent_name[410:427],
+	82:  _AuditLogEvent_name[427:444],
+	83:  _AuditLogEvent_name[444:463],
+	84:  _AuditLogEvent_name[463:482],
+	85:  _AuditLogEvent_name[482:501],
+	90:  _AuditLogEvent_name[501:514],
+	91:  _AuditLogEvent_name[514:527],
+	92:  _AuditLogEvent_name[527:540],
+	100: _AuditLogEvent_name[540:565],
+	101: _AuditLogEvent_name[565:590],
+	102: _AuditLogEvent_name[590:615],
+	110: _AuditLogEvent_name[615:627],
+	111: _AuditLogEvent_name[627:639],
+	112: _AuditLogEvent_name[639:651],
+	121: _AuditLogEvent_name[651:693],
+	140: _AuditLogEvent_name[693:725],
+	141: _AuditLogEvent_name[725:757],
+	142: _AuditLogEvent_name[757:789],
+	143: _AuditLogEvent_name[789:823],
+	144: _AuditLogEvent_name[823:858],
+	145: _AuditLogEvent_name[858:905],
+}
 
 func (i AuditLogEvent) String() string {
-	switch {
-	case i == 1:
-		return _AuditLogEvent_name_0
-	case 10 <= i && i <= 15:
-		i -= 10
-		return _AuditLogEvent_name_1[_AuditLogEvent_index_1[i]:_AuditLogEvent_index_1[i+1]]
-	case 20 <= i && i <= 28:
-		i -= 20
-		return _AuditLogEvent_name_2[_AuditLogEvent_index_2[i]:_AuditLogEvent_index_2[i+1]]
-	case 30 <= i && i <= 32:
-		i -= 30
-		return _AuditLogEvent_name_3[_AuditLogEvent_index_3[i]:_AuditLogEvent_index_3[i+1]]
-	case 40 <= i && i <= 42:
-		i -= 40
-		return _AuditLogEvent_name_4[_AuditLogEvent_index_4[i]:_AuditLogEvent_index_4[i+1]]
-	case 50 <= i && i <= 52:
-		i -= 50
-		return _AuditLogEvent_name_5[_AuditLogEvent_index_5[i]:_AuditLogEvent_index_5[i+1]]
-	case 60 <= i && i <= 62:
-		i -= 60
-		return _AuditLogEvent_name_6[_AuditLogEvent_index_6[i]:_AuditLogEvent_index_6[i+1]]
-	case 72 <= i && i <= 75:
-		i -= 72
-		return _AuditLogEvent_name_7[_AuditLogEvent_index_7[i]:_AuditLogEvent_index_7[i+1]]
-	case 80 <= i && i <= 82:
-		i -= 80
-		return _AuditLogEvent_name_8[_AuditLogEvent_index_8[i]:_AuditLogEvent_index_8[i+1]]
-	default:
-		return "AuditLogEvent(" + strconv.FormatInt(int64(i), 10) + ")"
+	if str, ok := _AuditLogEvent_map[i]; ok {
+		return str
 	}
+	return "AuditLogEvent(" + strconv.FormatInt(int64(i), 10) + ")"
 }
