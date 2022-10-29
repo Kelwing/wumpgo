@@ -7,8 +7,8 @@ import (
 
 	"wumpgo.dev/wumpgo/rest"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func TestModalRouter_prep(t *testing.T) {
@@ -288,7 +288,7 @@ func TestModalRouter_build(t *testing.T) {
 		{
 			name: "unset route",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID: "/a",
 				}),
 			},
@@ -297,7 +297,7 @@ func TestModalRouter_build(t *testing.T) {
 		{
 			name: "success",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationModalInteractionData{
+				Data: jsonify(t, objects.ModalSubmitData{
 					CustomID: "/a",
 					Components: []*objects.InteractionResponseComponent{
 						{
@@ -339,7 +339,7 @@ func TestModalRouter_build(t *testing.T) {
 		{
 			name: "modal custom param",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationModalInteractionData{
+				Data: jsonify(t, objects.ModalSubmitData{
 					CustomID: "/a/hello",
 					Components: []*objects.InteractionResponseComponent{
 						{
@@ -382,7 +382,7 @@ func TestModalRouter_build(t *testing.T) {
 		{
 			name: "modal error",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID: "/a",
 				}),
 			},
@@ -402,7 +402,7 @@ func TestModalRouter_build(t *testing.T) {
 		{
 			name: "modal panic",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID: "/a",
 				}),
 			},

@@ -2,9 +2,6 @@ package objects
 
 //go:generate stringer -type=ApplicationFlag,TeamMembershipState -output application_string.go
 
-var _ SnowflakeObject = (*Application)(nil)
-var _ SnowflakeObject = (*Team)(nil)
-
 type ApplicationFlag int
 
 const (
@@ -21,7 +18,7 @@ const (
 // A Discord API Application object.
 // https://discord.com/developers/docs/resources/application#application-object-application-structure
 type Application struct {
-	DiscordBaseObject
+	ID                  Snowflake       `json:"id"`
 	Name                string          `json:"name"`
 	Icon                string          `json:"icon"`
 	Description         string          `json:"description"`
@@ -39,6 +36,9 @@ type Application struct {
 	Slug                string          `json:"slug"`
 	CoverImage          string          `json:"cover_image"`
 	Flags               ApplicationFlag `json:"flags"`
+	Tags                []string        `json:"tags"`
+	InstallParams       InstallParams   `json:"install_params"`
+	CustomInstallURL    string          `json:"custom_install_url"`
 }
 
 type TeamMembershipState int
@@ -49,7 +49,7 @@ const (
 )
 
 type Team struct {
-	DiscordBaseObject
+	ID          Snowflake     `json:"id"`
 	Icon        string        `json:"icon"`
 	Members     []*TeamMember `json:"members"`
 	Name        string        `json:"name"`
@@ -61,4 +61,9 @@ type TeamMember struct {
 	Permissions     []string            `json:"permissions"`
 	TeamID          Snowflake           `json:"team_id"`
 	User            *User               `json:"user"`
+}
+
+type InstallParams struct {
+	Scopes      []string `json:"scopes"`
+	Permissions string   `json:"permissions"`
 }

@@ -1,20 +1,19 @@
 package objects
 
-//go:generate stringer -type=WebhookType -output webhook_string.go
-
-var _ SnowflakeObject = (*Webhook)(nil)
+//go:generate stringer -type=WebhookType -trimprefix=Webhook -output webhook_string.go
 
 // https://discord.com/developers/docs/resources/webhook#webhook-object-webhook-types
 type WebhookType uint
 
 const (
-	IncomingWebhook WebhookType = iota + 1
-	ChannelFollowWebhook
+	WebhookIncoming WebhookType = iota + 1
+	WebhookChannelFollower
+	WebhookApplication
 )
 
 // https://discord.com/developers/docs/resources/invite#invite-object-invite-structure
 type Webhook struct {
-	DiscordBaseObject
+	ID Snowflake `json:"id"`
 
 	// the type of the webhook
 	Type WebhookType `json:"type"`
@@ -39,4 +38,13 @@ type Webhook struct {
 
 	// the bot/OAuth2 application that created this webhook
 	ApplicationID Snowflake `json:"application_id,omitempty"`
+
+	// the guild of the channel that this webhook is following (returned for Channel Follower Webhooks)
+	SourceGuild *Guild `json:"source_guild,omitempty"`
+
+	// the channel that this webhook is following (returned for Channel Follower Webhooks)
+	SourceChannel *Channel `json:"source_channel,omitempty"`
+
+	// the url used for executing the webhook (returned by the webhooks OAuth2 flow)
+	URL string `json:"url,omitempty"`
 }

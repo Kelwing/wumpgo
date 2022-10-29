@@ -1,7 +1,5 @@
 package objects
 
-var _ SnowflakeObject = (*GuildScheduledEvent)(nil)
-
 //go:generate stringer -type=GuildScheduledEventStatus,GuildScheduledEventEntityType -output guild_scheduled_event_string.go
 type GuildScheduledEventStatus int
 
@@ -25,9 +23,10 @@ type GuildScheduledEventEntityMetadata struct {
 }
 
 type GuildScheduledEvent struct {
-	DiscordBaseObject
+	ID                 Snowflake                          `json:"id"`
 	GuildID            Snowflake                          `json:"guild_id"`
 	ChannelID          *Snowflake                         `json:"channel_id,omitempty"`
+	CreatorID          *Snowflake                         `json:"creator_id,omitempty"`
 	Name               string                             `json:"name"`
 	Description        *string                            `json:"description,omitempty"`
 	ScheduledStartTime Time                               `json:"scheduled_start_time"`

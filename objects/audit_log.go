@@ -5,7 +5,7 @@ package objects
 type AuditLogEvent uint
 
 const (
-	AuditLogEvtGuildUpdate AuditLogEvent = 1
+	AuditLogEventGuildUpdate AuditLogEvent = 1
 )
 const (
 	AuditLogEventChannelCreate AuditLogEvent = iota + 10
@@ -63,6 +63,40 @@ const (
 	AuditLogEventIntegrationCreate AuditLogEvent = iota + 80
 	AuditLogEventIntegrationUpdate
 	AuditLogEventIntegrationDelete
+	AuditLogEventStageInstanceCreate
+	AuditLogEventStageInstanceUpdate
+	AuditLogEventStageInstanceDelete
+)
+
+const (
+	AuditLogEventStickerCreate AuditLogEvent = iota + 90
+	AuditLogEventStickerUpdate
+	AuditLogEventStickerDelete
+)
+
+const (
+	AuditLogEventGuildScheduledEventCreate AuditLogEvent = iota + 100
+	AuditLogEventGuildScheduledEventUpdate
+	AuditLogEventGuildScheduledEventDelete
+)
+
+const (
+	AuditLogEventThreadCreate AuditLogEvent = iota + 110
+	AuditLogEventThreadUpdate
+	AuditLogEventThreadDelete
+)
+
+const (
+	AuditLogApplicationCommandPermissionUpdate AuditLogEvent = iota + 121
+)
+
+const (
+	AuditLogAutoModerationRuleCreate AuditLogEvent = iota + 140
+	AuditLogAutoModerationRuleUpdate
+	AuditLogAutoModerationRuleDelete
+	AuditLogAutoModerationBlockMessage
+	AuditLogAutoModerationFlagToChannel
+	AuditLogAutoModerationUserCommunicationDisabled
 )
 
 type AuditLogChangeKey string
@@ -181,8 +215,12 @@ type AuditLogOption struct {
 }
 
 type AuditLog struct {
-	Webhooks      []*Webhook       `json:"webhooks"`
-	Users         []*User          `json:"users"`
-	AuditLogEntry []*AuditLogEntry `json:"audit_log_entry"`
-	Integrations  []*Integration
+	ApplicationCommands  []*ApplicationCommand  `json:"application_commands"`
+	AuditLogEntries      []*AuditLogEntry       `json:"audit_log_entries"`
+	AutoModerationRules  []*AutoModerationRule  `json:"auto_moderation_rules"`
+	GuildScheduledEvents []*GuildScheduledEvent `json:"guild_scheduled_events"`
+	Integrations         []*Integration         `json:"integrations"`
+	Threads              []*Channel             `json:"threads"`
+	Users                []*User                `json:"users"`
+	Webhooks             []*Webhook             `json:"webhooks"`
 }

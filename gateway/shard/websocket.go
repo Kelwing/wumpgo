@@ -1,4 +1,4 @@
-package gateway
+package shard
 
 import (
 	"bytes"
@@ -6,17 +6,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"go.uber.org/atomic"
 	"nhooyr.io/websocket"
 )
 
-func NewWebsocket(logger zerolog.Logger) *Websocket {
+func NewWebsocket(logger *zerolog.Logger) *Websocket {
+	if logger == nil {
+		logger = &log.Logger
+	}
 	return &Websocket{
-		logger:      logger,
+		logger:      *logger,
 		isConnected: atomic.NewBool(false),
 	}
 }
@@ -104,7 +108,7 @@ func (w *Websocket) decompressPacket(b []byte) ([]byte, error) {
 		}
 	}()
 
-	return ioutil.ReadAll(z)
+	return io.ReadAll(z)
 }
 
 func (w *Websocket) IsConnected() bool {

@@ -32,10 +32,13 @@ func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {
 }
 
 // Generates a valid request for the given interaction
-func generateValid(i *objects.Interaction, priv ed25519.PrivateKey) *http.Request {
+func generateValid(i *objects.Interaction, priv ed25519.PrivateKey) (*http.Request, error) {
 	buf := bytes.Buffer{}
 	enc := json.NewEncoder(&buf)
-	enc.Encode(i)
+	err := enc.Encode(i)
+	if err != nil {
+		return nil, err
+	}
 
 	req := httptest.NewRequest("POST", "/", &buf)
 	timestamp := time.Now().Format(time.RFC3339)
@@ -43,18 +46,22 @@ func generateValid(i *objects.Interaction, priv ed25519.PrivateKey) *http.Reques
 	signature := ed25519.Sign(priv, append([]byte(timestamp), buf.Bytes()...))
 	req.Header.Set("X-Signature-Ed25519", hex.EncodeToString(signature))
 
-	return req
+	return req, nil
 }
 
 func Test_HTTPHandler(t *testing.T) {
 	// Generate a keypair for use in testing
 	app, priv, _ := PrepareTest()
 
-	req := generateValid(&objects.Interaction{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Type:              objects.InteractionRequestPing,
-		Version:           1,
+	req, err := generateValid(&objects.Interaction{
+		ID:      objects.Snowflake(1234),
+		Type:    objects.InteractionRequestPing,
+		Version: 1,
 	}, priv)
+
+	if err != nil {
+		t.Fail()
+	}
 
 	w := httptest.NewRecorder()
 	app.HTTPHandler()(w, req)
@@ -70,11 +77,14 @@ func Test_HTTPHandler_InvalidSignature(t *testing.T) {
 
 	buf := bytes.Buffer{}
 	enc := json.NewEncoder(&buf)
-	enc.Encode(objects.Interaction{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Type:              objects.InteractionRequestPing,
-		Version:           1,
+	err := enc.Encode(objects.Interaction{
+		ID:      objects.Snowflake(1234),
+		Type:    objects.InteractionRequestPing,
+		Version: 1,
 	})
+	if err != nil {
+		t.Fail()
+	}
 
 	req := httptest.NewRequest("POST", "/", &buf)
 	timestamp := time.Now().Format(time.RFC3339)
@@ -103,31 +113,35 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 		}
 	})
 
-	data, err := json.Marshal(&objects.ApplicationCommandInteractionData{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Name:              "test",
-		Type:              objects.CommandTypeChatInput,
+	data, err := json.Marshal(&objects.ApplicationCommandData{
+		ID:   objects.Snowflake(1234),
+		Name: "test",
+		Type: objects.CommandTypeChatInput,
 	})
 	if err != nil {
 		t.Errorf("Failed to marshal test interaction: %s", err)
 	}
 
-	req := generateValid(&objects.Interaction{
-		DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-		Type:              objects.InteractionApplicationCommand,
-		ApplicationID:     objects.Snowflake(1234),
-		Data:              data,
-		GuildID:           objects.Snowflake(1234),
-		ChannelID:         objects.Snowflake(1234),
+	req, err := generateValid(&objects.Interaction{
+		ID:            objects.Snowflake(1234),
+		Type:          objects.InteractionApplicationCommand,
+		ApplicationID: objects.Snowflake(1234),
+		Data:          data,
+		GuildID:       objects.Snowflake(1234),
+		ChannelID:     objects.Snowflake(1234),
 		Member: &objects.GuildMember{
 			User: &objects.User{
-				DiscordBaseObject: objects.DiscordBaseObject{ID: objects.Snowflake(1234)},
-				Username:          "Test",
-				Discriminator:     "1234",
+				ID:            objects.Snowflake(1234),
+				Username:      "Test",
+				Discriminator: "1234",
 			},
 		},
 		Version: 1,
 	}, priv)
+
+	if err != nil {
+		t.Fail()
+	}
 
 	w := httptest.NewRecorder()
 	app.HTTPHandler()(w, req)

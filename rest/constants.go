@@ -2,7 +2,7 @@ package rest
 
 const (
 	// Discord API Base URL
-	BaseURL = "https://discord.com/api/v9"
+	BaseURL = "https://discord.com/api/v10"
 
 	XAuditLogReasonHeader = "X-Audit-Log-Reason"
 
@@ -123,4 +123,8 @@ const (
 	// Gateway
 	GatewayFmt    = BaseURL + "/gateway"
 	GatewayBotFmt = GatewayFmt + "/bot"
+
+	// AutoModeration
+	AutoModerationRules = GuildBaseFmt + "/auto-moderation/rules"
+	AutoModerationRule  = AutoModerationRules + "/%d"
 )

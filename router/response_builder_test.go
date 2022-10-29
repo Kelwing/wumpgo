@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func Test_responseBuilder_ResponseData(t *testing.T) {
@@ -706,7 +706,7 @@ func TestComponentRouterCtx_WithModalPath(t *testing.T) {
 				x = objects.ComponentTypeSelectMenu
 			}
 			resp := f.componentHandler(context.Background(), &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/test",
 					ComponentType: x,
 				}),
@@ -796,12 +796,11 @@ func TestCommandRouterCtx_WithModalPath(t *testing.T) {
 
 			// Call the command handler.
 			resp := f.commandHandler(context.Background(), &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationCommandInteractionData{
-					DiscordBaseObject: objects.DiscordBaseObject{ID: 1234},
-					Name:              "test",
-					Type:              objects.CommandTypeChatInput,
-					Version:           1,
-					Resolved:          objects.ApplicationCommandInteractionDataResolved{},
+				Data: jsonify(t, objects.ApplicationCommandData{
+					ID:       1234,
+					Name:     "test",
+					Type:     objects.CommandTypeChatInput,
+					Resolved: objects.ApplicationCommandDataResolved{},
 				}),
 			})
 

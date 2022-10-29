@@ -235,7 +235,7 @@ var NoAutoCompleteFunc = errors.New("discord sent auto-complete for argument wit
 func (c *CommandRouter) autocompleteHandler(loader loaderPassthrough) interactions.HandlerFunc {
 	return func(reqCtx context.Context, interaction *objects.Interaction) *objects.InteractionResponse {
 		// Parse the data JSON.
-		var rootData objects.ApplicationCommandInteractionData
+		var rootData objects.ApplicationCommandData
 		if err := json.Unmarshal(interaction.Data, &rootData); err != nil {
 			return loader.errHandler(err)
 		}
@@ -426,7 +426,7 @@ type dataWrapper interface {
 }
 
 type rootDataWrapper struct {
-	root *objects.ApplicationCommandInteractionData
+	root *objects.ApplicationCommandData
 }
 
 func (r rootDataWrapper) type_() any {
@@ -438,7 +438,7 @@ func (r rootDataWrapper) name() string {
 }
 
 type optionDataWrapper struct {
-	option *objects.ApplicationCommandInteractionDataOption
+	option *objects.ApplicationCommandDataOption
 }
 
 func (r optionDataWrapper) type_() any {
@@ -468,7 +468,7 @@ func (c *CommandRouter) commandHandler(loader loaderPassthrough) interactions.Ha
 		}
 
 		// Parse the data JSON.
-		var rootData objects.ApplicationCommandInteractionData
+		var rootData objects.ApplicationCommandData
 		if err := json.Unmarshal(interaction.Data, &rootData); err != nil {
 			return loader.errHandler(err)
 		}

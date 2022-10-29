@@ -1,5 +1,6 @@
 [
   {
+    "id": "0",
     "type": 1,
     "name": "rootnoargs",
     "description": "root with no arguments",
@@ -7,6 +8,7 @@
     "default_member_permissions": "8"
   },
   {
+    "id": "0",
     "type": 1,
     "name": "rootargs",
     "description": "root with arguments",
@@ -105,6 +107,7 @@
     ]
   },
   {
+    "id": "0",
     "type": 1,
     "name": "group1",
     "description": "group 1",
@@ -130,6 +133,7 @@
     ]
   },
   {
+    "id": "0",
     "type": 1,
     "name": "group2",
     "description": "group 2",

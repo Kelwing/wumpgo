@@ -133,7 +133,7 @@ func (f *ModalRouter) build(loader loaderPassthrough) interactions.HandlerFunc {
 	// Return the handler.
 	return func(reqCtx context.Context, ctx *objects.Interaction) (resp *objects.InteractionResponse) {
 		// Get the value from the tree.
-		var data objects.ApplicationModalInteractionData
+		var data objects.ModalSubmitData
 		if err := json.Unmarshal(ctx.Data, &data); err != nil {
 			return loader.errHandler(err)
 		}

@@ -19,7 +19,7 @@ type Resolvable[T any] interface {
 	String() string
 
 	// RawData exposes the underlying data.
-	RawData() *objects.ApplicationCommandInteractionData
+	RawData() *objects.ApplicationCommandData
 
 	// Resolve is used to attempt to resolve the item to its type. Returns nil if it doesn't exist.
 	Resolve() *T
@@ -38,7 +38,7 @@ type ResolvableMentionable interface {
 	String() string
 
 	// RawData exposes the underlying data.
-	RawData() *objects.ApplicationCommandInteractionData
+	RawData() *objects.ApplicationCommandData
 
 	// Resolve is used to try and resolve the ID into an any type. Nil is returned if it wasn't resolved, or a *objects.<type> if it was.
 	Resolve() any
@@ -46,7 +46,7 @@ type ResolvableMentionable interface {
 
 type resolvable[T any] struct {
 	id   string
-	data *objects.ApplicationCommandInteractionData
+	data *objects.ApplicationCommandData
 }
 
 func (r resolvable[T]) Snowflake() objects.Snowflake {
@@ -95,7 +95,7 @@ func (r resolvable[T]) String() string {
 	return r.id
 }
 
-func (r resolvable[T]) RawData() *objects.ApplicationCommandInteractionData {
+func (r resolvable[T]) RawData() *objects.ApplicationCommandData {
 	return r.data
 }
 

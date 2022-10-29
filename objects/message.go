@@ -2,12 +2,6 @@ package objects
 
 //go:generate stringer -type=MessageType,MessageActivityType,MessageFlag,MessageStickerFormat -output message_string.go
 
-var _ SnowflakeObject = (*Message)(nil)
-var _ SnowflakeObject = (*MessageInteraction)(nil)
-var _ SnowflakeObject = (*MessageApplication)(nil)
-var _ SnowflakeObject = (*Attachment)(nil)
-var _ SnowflakeObject = (*ChannelMention)(nil)
-
 type MessageType uint
 
 const (
@@ -66,7 +60,7 @@ const (
 )
 
 type Message struct {
-	DiscordBaseObject
+	ID                Snowflake           `json:"id"`
 	ChannelID         Snowflake           `json:"channel_id"`
 	GuildID           Snowflake           `json:"guild_id,omitempty"`
 	Author            *User               `json:"author"`
@@ -100,7 +94,7 @@ type Message struct {
 }
 
 type MessageInteraction struct {
-	DiscordBaseObject
+	ID   Snowflake       `json:"id"`
 	Type InteractionType `json:"type"`
 	Name string          `json:"name"`
 	User *User           `json:"user"`
@@ -118,28 +112,28 @@ type MessageReference struct {
 }
 
 type MessageApplication struct {
-	DiscordBaseObject
-	CoverImage  string `json:"cover_image,omitempty"`
-	Description string `json:"description"`
-	Icon        string `json:"icon,omitempty"`
-	Name        string `json:"name"`
+	ID          Snowflake `json:"id"`
+	CoverImage  string    `json:"cover_image,omitempty"`
+	Description string    `json:"description"`
+	Icon        string    `json:"icon,omitempty"`
+	Name        string    `json:"name"`
 }
 
 type Attachment struct {
-	DiscordBaseObject
-	Filename    string `json:"filename,omitempty"`
-	Description string `json:"description,omitempty"`
-	ContentType string `json:"content_type,omitempty"`
-	Size        int    `json:"size,omitempty"`
-	URL         string `json:"url,omitempty"`
-	ProxyURL    string `json:"proxy_url,omitempty"`
-	Height      int    `json:"height,omitempty"`
-	Width       int    `json:"width,omitempty"`
-	Ephemeral   bool   `json:"ephemeral,omitempty"`
+	ID          Snowflake `json:"id"`
+	Filename    string    `json:"filename,omitempty"`
+	Description string    `json:"description,omitempty"`
+	ContentType string    `json:"content_type,omitempty"`
+	Size        int       `json:"size,omitempty"`
+	URL         string    `json:"url,omitempty"`
+	ProxyURL    string    `json:"proxy_url,omitempty"`
+	Height      int       `json:"height,omitempty"`
+	Width       int       `json:"width,omitempty"`
+	Ephemeral   bool      `json:"ephemeral,omitempty"`
 }
 
 type ChannelMention struct {
-	DiscordBaseObject
+	ID      Snowflake   `json:"id"`
 	GuildID Snowflake   `json:"guild_id"`
 	Type    ChannelType `json:"type"`
 	Name    string      `json:"name"`

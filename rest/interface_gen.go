@@ -21,6 +21,7 @@ type RESTClient interface {
 	BulkDeleteMessages(context.Context, objects.SnowflakeObject, *DeleteMessagesParams) error
 	BulkOverwriteGlobalCommands(context.Context, objects.SnowflakeObject, []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error)
 	BulkOverwriteGuildCommands(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error)
+	CreateAutoModerationRule(context.Context, objects.SnowflakeObject, *CreateAutoModerationRuleParams) (*objects.AutoModerationRule, error)
 	CreateBan(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, *CreateGuildBanParams) error
 	CreateChannelInvite(context.Context, objects.SnowflakeObject, *CreateInviteParams) (*objects.Invite, error)
 	CreateCommand(context.Context, objects.SnowflakeObject, *objects.ApplicationCommand) (*objects.ApplicationCommand, error)
@@ -40,6 +41,7 @@ type RESTClient interface {
 	CreateWebhook(context.Context, objects.SnowflakeObject, *CreateWebhookParams) (*objects.Webhook, error)
 	CrossPostMessage(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.Message, error)
 	DeleteAllReactions(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) error
+	DeleteAutoModerationRule(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, ...string) error
 	DeleteChannel(context.Context, objects.SnowflakeObject, string) (*objects.Channel, error)
 	DeleteChannelPermission(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, string) error
 	DeleteCommand(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) error
@@ -73,6 +75,8 @@ type RESTClient interface {
 	GatewayBot(context.Context) (*objects.Gateway, error)
 	GetApplicationCommandPermissions(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.GuildApplicationCommandPermissions, error)
 	GetAuditLogs(context.Context, objects.SnowflakeObject, *GetAuditLogParams) (*objects.AuditLog, error)
+	GetAutoModerationRule(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.AutoModerationRule, error)
+	GetAutoModerationRules(context.Context, objects.SnowflakeObject) ([]*objects.AutoModerationRule, error)
 	GetChannel(context.Context, objects.SnowflakeObject) (*objects.Channel, error)
 	GetChannelInvites(context.Context, objects.SnowflakeObject) ([]*objects.Invite, error)
 	GetChannelMessage(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.Message, error)
@@ -114,10 +118,12 @@ type RESTClient interface {
 	GetReactions(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, interface {}, *GetReactionsParams) ([]*objects.User, error)
 	GetSticker(context.Context, objects.SnowflakeObject) (*objects.Sticker, error)
 	GetTemplate(context.Context, string) (*objects.Template, error)
+	GetThreadMember(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.ThreadMember, error)
 	GetUser(context.Context, objects.SnowflakeObject) (*objects.User, error)
 	GetUserConnections(context.Context) ([]*objects.Connection, error)
 	GetVoiceRegions(context.Context) ([]*objects.VoiceRegion, error)
 	GetWebhook(context.Context, objects.SnowflakeObject) (*objects.Webhook, error)
+	GetWebhookMesssage(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, string) (*objects.Message, error)
 	GetWebhookWithToken(context.Context, objects.SnowflakeObject, string) (*objects.Webhook, error)
 	JoinThread(context.Context, objects.SnowflakeObject) error
 	LeaveGuild(context.Context, objects.SnowflakeObject) error
@@ -130,6 +136,7 @@ type RESTClient interface {
 	ListPrivateArchivedThreads(context.Context, objects.SnowflakeObject, ...*ListThreadsParams) (*ListThreadsResponse, error)
 	ListPublicArchivedThreads(context.Context, objects.SnowflakeObject, ...*ListThreadsParams) (*ListThreadsResponse, error)
 	ListThreadMembers(context.Context, objects.SnowflakeObject) ([]*objects.ThreadMember, error)
+	ModifyAutoModerationRule(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, *ModifyAutoModerationRuleParams) (*objects.AutoModerationRule, error)
 	ModifyChannel(context.Context, objects.SnowflakeObject, *ModifyChannelParams) (*objects.Channel, error)
 	ModifyCurrentUser(context.Context, *ModifyCurrentUserParams) (*objects.User, error)
 	ModifyCurrentUserNick(context.Context, objects.SnowflakeObject, *ModifyCurrentUserNickParams) (*ModifyCurrentUserNickParams, error)
@@ -150,6 +157,7 @@ type RESTClient interface {
 	RemoveGuildMemberRole(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, objects.SnowflakeObject, string) error
 	RemoveThreadMember(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) error
 	StartThread(context.Context, objects.SnowflakeObject, *StartThreadParams) (*objects.Channel, error)
+	StartThreadInForumChannel(context.Context, objects.SnowflakeObject, *StartThreadInForumChannelParams) (*objects.ForumThreadChannel, error)
 	StartThreadWithMessage(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, *StartThreadParams) (*objects.Channel, error)
 	StartTyping(context.Context, objects.SnowflakeObject) error
 	SyncGuildTemplate(context.Context, objects.SnowflakeObject, string) (*objects.Template, error)

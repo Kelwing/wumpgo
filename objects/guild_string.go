@@ -106,18 +106,32 @@ func _() {
 	var x [1]struct{}
 	_ = x[FlagSupressJoinNotifications-1]
 	_ = x[FlagSupressPremiumSubscriptions-2]
+	_ = x[FlagSupressGuildReminderNotifications-4]
+	_ = x[FlagSupressJoinNotificationReplies-8]
 }
 
-const _SystemChannelFlags_name = "FlagSupressJoinNotificationsFlagSupressPremiumSubscriptions"
+const (
+	_SystemChannelFlags_name_0 = "FlagSupressJoinNotificationsFlagSupressPremiumSubscriptions"
+	_SystemChannelFlags_name_1 = "FlagSupressGuildReminderNotifications"
+	_SystemChannelFlags_name_2 = "FlagSupressJoinNotificationReplies"
+)
 
-var _SystemChannelFlags_index = [...]uint8{0, 28, 59}
+var (
+	_SystemChannelFlags_index_0 = [...]uint8{0, 28, 59}
+)
 
 func (i SystemChannelFlags) String() string {
-	i -= 1
-	if i >= SystemChannelFlags(len(_SystemChannelFlags_index)-1) {
-		return "SystemChannelFlags(" + strconv.FormatInt(int64(i+1), 10) + ")"
+	switch {
+	case 1 <= i && i <= 2:
+		i -= 1
+		return _SystemChannelFlags_name_0[_SystemChannelFlags_index_0[i]:_SystemChannelFlags_index_0[i+1]]
+	case i == 4:
+		return _SystemChannelFlags_name_1
+	case i == 8:
+		return _SystemChannelFlags_name_2
+	default:
+		return "SystemChannelFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _SystemChannelFlags_name[_SystemChannelFlags_index[i]:_SystemChannelFlags_index[i+1]]
 }
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
