@@ -30,14 +30,14 @@ func (t StickerTags) MarshalJSON() ([]byte, error) {
 	)
 }
 
-func (t StickerTags) UnmarshalJSON(bytes []byte) error {
+func (t *StickerTags) UnmarshalJSON(bytes []byte) error {
 	var tags string
 	err := json.Unmarshal(bytes, &tags)
 	if err != nil {
 		return err
 	}
 
-	t = strings.Split(tags, ",")
+	*t = strings.Split(tags, ",")
 	return nil
 }
 
