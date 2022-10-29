@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/interactions"
@@ -22,6 +23,8 @@ func main() {
 
 	app.CommandHandler(myCommandHandler)
 	app.ComponentHandler(myComponentHandler)
+
+	log.Err(http.ListenAndServe(":8080", app)).Msg("failed to listen")
 }
 
 func myCommandHandler(ctx context.Context, i *objects.Interaction) *objects.InteractionResponse {
