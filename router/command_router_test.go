@@ -33,9 +33,9 @@ func TestCommandRouterCtx_TargetMessage(t *testing.T) {
 			options: map[string]any{
 				"/target": (ResolvableMessage)(resolvable[objects.Message]{
 					id: "123",
-					data: &objects.ApplicationCommandInteractionData{
+					data: &objects.ApplicationCommandData{
 						TargetID: 123,
-						Resolved: objects.ApplicationCommandInteractionDataResolved{
+						Resolved: objects.ApplicationCommandDataResolved{
 							Messages: map[objects.Snowflake]objects.Message{
 								123: {
 									Content: "hello world",
@@ -78,9 +78,9 @@ func TestCommandRouterCtx_TargetMember(t *testing.T) {
 			options: map[string]any{
 				"/target": (ResolvableUser)(resolvableUser{resolvable[objects.User]{
 					id: "123",
-					data: &objects.ApplicationCommandInteractionData{
+					data: &objects.ApplicationCommandData{
 						TargetID: 123,
-						Resolved: objects.ApplicationCommandInteractionDataResolved{
+						Resolved: objects.ApplicationCommandDataResolved{
 							Members: map[objects.Snowflake]objects.GuildMember{
 								123: {
 									Deaf: true,
@@ -116,9 +116,9 @@ func Test_messageTargetWrapper(t *testing.T) {
 			options: map[string]any{
 				"/target": (ResolvableMessage)(resolvable[objects.Message]{
 					id: "123",
-					data: &objects.ApplicationCommandInteractionData{
+					data: &objects.ApplicationCommandData{
 						TargetID: 123,
-						Resolved: objects.ApplicationCommandInteractionDataResolved{
+						Resolved: objects.ApplicationCommandDataResolved{
 							Messages: map[objects.Snowflake]objects.Message{
 								123: {
 									Content: "hello world",
@@ -186,9 +186,9 @@ func Test_memberTargetWrapper(t *testing.T) {
 				"/target": ResolvableUser(resolvableUser{
 					resolvable: resolvable[objects.User]{
 						id: "123",
-						data: &objects.ApplicationCommandInteractionData{
+						data: &objects.ApplicationCommandData{
 							TargetID: 123,
-							Resolved: objects.ApplicationCommandInteractionDataResolved{
+							Resolved: objects.ApplicationCommandDataResolved{
 								Members: map[objects.Snowflake]objects.GuildMember{
 									123: {
 										Nick: "hello world",
@@ -631,13 +631,12 @@ func TestCommandRouter_build(t *testing.T) {
 				Parse:       []string{"a", "b", "c"},
 				RepliedUser: true,
 			},
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
 				ID:       1234,
 				Name:     "root1",
 				Type:     objects.CommandTypeChatInput,
-				Version:  1,
 				Options:  nil,
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			cmdResponse: &objects.InteractionResponse{
 				Type: 4,
@@ -662,18 +661,17 @@ func TestCommandRouter_build(t *testing.T) {
 				Parse:       []string{"d", "e", "f"},
 				RepliedUser: true,
 			},
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type: objects.TypeSubCommand,
 						Name: "sub1",
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			cmdResponse: &objects.InteractionResponse{
 				Type: 4,
@@ -693,25 +691,23 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "root command with no params",
 			cmd:  "root1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
 				ID:       1234,
 				Name:     "root1",
 				Type:     objects.CommandTypeChatInput,
-				Version:  1,
 				Options:  nil,
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			cmdResponse: helloWorldResponse,
 		},
 		{
 			name: "root command with params",
 			cmd:  "root2",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root2",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root2",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "string",
@@ -727,7 +723,7 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -739,35 +735,33 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "sub-command with no params",
 			cmd:  "sub1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub1",
-						Options: []*objects.ApplicationCommandInteractionDataOption{},
+						Options: []*objects.ApplicationCommandDataOption{},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			cmdResponse: helloWorldResponse,
 		},
 		{
 			name: "sub-command with params",
 			cmd:  "sub2",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type: objects.TypeSubCommand,
 						Name: "sub2",
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "string",
@@ -785,7 +779,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -797,16 +791,15 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "sub-sub-command with no params",
 			cmd:  "subsub1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type: objects.TypeSubCommandGroup,
 						Name: "sub3",
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type: objects.TypeSubCommand,
 								Name: "subsub1",
@@ -814,27 +807,26 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			cmdResponse: helloWorldResponse,
 		},
 		{
 			name: "sub-sub-command with params",
 			cmd:  "subsub2",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type: objects.TypeSubCommandGroup,
 						Name: "sub3",
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type: objects.TypeSubCommand,
 								Name: "subsub2",
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "string",
@@ -854,7 +846,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -868,79 +860,74 @@ func TestCommandRouter_build(t *testing.T) {
 
 		{
 			name: "root command not found",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
 				ID:       1234,
 				Name:     "nonexistent",
 				Type:     objects.CommandTypeChatInput,
-				Version:  1,
 				Options:  nil,
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 				TargetID: 1234,
 			}),
 		},
 		{
 			name: "root command throws error",
 			cmd:  "root1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
 				ID:       1234,
 				Name:     "root1",
 				Type:     objects.CommandTypeChatInput,
-				Version:  1,
 				Options:  nil,
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			throwsCmdErr: "cat broke wire",
 			wantsCmdErr:  "cat broke wire",
 		},
 		{
 			name: "sub-command not found",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "nonexistentsub",
-						Options: []*objects.ApplicationCommandInteractionDataOption{},
+						Options: []*objects.ApplicationCommandDataOption{},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 		},
 		{
 			name: "sub-command throws error",
 			cmd:  "sub1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub1",
-						Options: []*objects.ApplicationCommandInteractionDataOption{},
+						Options: []*objects.ApplicationCommandDataOption{},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			throwsCmdErr: "cat broke wire",
 			wantsCmdErr:  "cat broke wire",
 		},
 		{
 			name: "sub-sub-command not found",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type: objects.TypeSubCommandGroup,
 						Name: "sub3",
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type: objects.TypeSubCommand,
 								Name: "nonexistentsub",
@@ -948,22 +935,21 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 		},
 		{
 			name: "sub-sub-command throws error",
 			cmd:  "subsub1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type: objects.TypeSubCommandGroup,
 						Name: "sub3",
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type: objects.TypeSubCommand,
 								Name: "subsub1",
@@ -971,7 +957,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			throwsCmdErr: "cat broke wire",
 			wantsCmdErr:  "cat broke wire",
@@ -982,12 +968,11 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "root auto-complete with no params",
 			cmd:  "root1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root1",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root1",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "autocompletetest",
@@ -996,14 +981,13 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root1",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root1",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "autocompletetest",
@@ -1012,7 +996,7 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -1024,12 +1008,11 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "root auto-complete with params",
 			cmd:  "root2",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root2",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root2",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "autocompletetest",
@@ -1052,14 +1035,13 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root2",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root2",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "autocompletetest",
@@ -1068,7 +1050,7 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -1082,17 +1064,16 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "sub-command auto-complete with no params",
 			cmd:  "sub1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub1",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "autocompletetest",
@@ -1103,19 +1084,18 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub1",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "autocompletetest",
@@ -1126,7 +1106,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -1138,17 +1118,16 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "sub-command auto-complete with params",
 			cmd:  "sub2",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub2",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "autocompletetest",
@@ -1173,19 +1152,18 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub2",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "autocompletetest",
@@ -1210,7 +1188,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -1222,22 +1200,21 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "sub-sub-command auto-complete with no params",
 			cmd:  "subsub1",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommandGroup,
 						Name:    "sub3",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeSubCommand,
 								Name:    "subsub1",
 								Focused: false,
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "autocompletetest",
@@ -1249,24 +1226,23 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommandGroup,
 						Name:    "sub3",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeSubCommand,
 								Name:    "subsub1",
 								Focused: false,
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "autocompletetest",
@@ -1278,7 +1254,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -1290,22 +1266,21 @@ func TestCommandRouter_build(t *testing.T) {
 		{
 			name: "sub-sub-command auto-complete with params",
 			cmd:  "subsub2",
-			cmdInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			cmdInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommandGroup,
 						Name:    "sub3",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeSubCommand,
 								Name:    "subsub2",
 								Focused: false,
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "autocompletetest",
@@ -1332,24 +1307,23 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommandGroup,
 						Name:    "sub3",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeSubCommand,
 								Name:    "subsub2",
 								Focused: false,
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "autocompletetest",
@@ -1376,7 +1350,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			paramsCheck: func(t *testing.T, m map[string]any) {
 				t.Helper()
@@ -1390,12 +1364,11 @@ func TestCommandRouter_build(t *testing.T) {
 
 		{
 			name: "root auto-complete not found",
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "abcd",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "abcd",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "autocompletetest",
@@ -1404,18 +1377,17 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 		},
 		{
 			name: "root auto-complete throws error",
 			cmd:  "root1",
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root1",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root1",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeString,
 						Name:    "autocompletetest",
@@ -1424,24 +1396,23 @@ func TestCommandRouter_build(t *testing.T) {
 						Options: nil,
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			throwsAutocompleteErr: "cat broke wire",
 			wantsAutocompleteErr:  "cat broke wire",
 		},
 		{
 			name: "sub-command auto-complete not found",
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "nonexistentsub",
 						Focused: true,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "autocompletetest",
@@ -1452,24 +1423,23 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			wantsAutocompleteErr: "the command does not exist",
 		},
 		{
 			name: "sub-command auto-complete throws error",
 			cmd:  "sub1",
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root3",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root3",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommand,
 						Name:    "sub1",
 						Focused: true,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type:    objects.TypeString,
 								Name:    "autocompletetest",
@@ -1480,28 +1450,27 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			throwsAutocompleteErr: "cat broke wire",
 			wantsAutocompleteErr:  "cat broke wire",
 		},
 		{
 			name: "sub-sub-command auto-complete not found",
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommandGroup,
 						Name:    "sub3",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type: objects.TypeSubCommand,
 								Name: "abc",
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "autocompletetest",
@@ -1513,28 +1482,27 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			wantsAutocompleteErr: "the command does not exist",
 		},
 		{
 			name: "sub-sub-command auto-complete throws error",
 			cmd:  "subsub1",
-			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandInteractionData{
-				ID:      1234,
-				Name:    "root4",
-				Type:    objects.CommandTypeChatInput,
-				Version: 1,
-				Options: []*objects.ApplicationCommandInteractionDataOption{
+			autocompleteInteraction: mockInteraction(&objects.ApplicationCommandData{
+				ID:   1234,
+				Name: "root4",
+				Type: objects.CommandTypeChatInput,
+				Options: []*objects.ApplicationCommandDataOption{
 					{
 						Type:    objects.TypeSubCommandGroup,
 						Name:    "sub3",
 						Focused: false,
-						Options: []*objects.ApplicationCommandInteractionDataOption{
+						Options: []*objects.ApplicationCommandDataOption{
 							{
 								Type: objects.TypeSubCommand,
 								Name: "subsub1",
-								Options: []*objects.ApplicationCommandInteractionDataOption{
+								Options: []*objects.ApplicationCommandDataOption{
 									{
 										Type:    objects.TypeString,
 										Name:    "autocompletetest",
@@ -1546,7 +1514,7 @@ func TestCommandRouter_build(t *testing.T) {
 						},
 					},
 				},
-				Resolved: objects.ApplicationCommandInteractionDataResolved{},
+				Resolved: objects.ApplicationCommandDataResolved{},
 			}),
 			throwsAutocompleteErr: "cat broke wire",
 			wantsAutocompleteErr:  "cat broke wire",

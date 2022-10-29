@@ -9,8 +9,8 @@ import (
 
 	"wumpgo.dev/wumpgo/rest"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/assert"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func TestComponentRouterCtx_DeferredMessageUpdate(t *testing.T) {
@@ -108,7 +108,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "internal void function",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID: "/_postcord/void/1",
 				}),
 			},
@@ -119,7 +119,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "unset route",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID: "/a",
 				}),
 			},
@@ -129,7 +129,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "button success",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeButton,
 				}),
@@ -153,7 +153,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "button custom param",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a/hello",
 					ComponentType: objects.ComponentTypeButton,
 				}),
@@ -174,7 +174,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "button error",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeButton,
 				}),
@@ -189,7 +189,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "button panic",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeButton,
 				}),
@@ -205,7 +205,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "select menu success",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeSelectMenu,
 					Values:        []string{"a", "b", "c"},
@@ -232,7 +232,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "select menu custom param",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a/hello",
 					ComponentType: objects.ComponentTypeSelectMenu,
 					Values:        []string{"a", "b", "c"},
@@ -256,7 +256,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "select menu error",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeSelectMenu,
 				}),
@@ -271,7 +271,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "select menu panic",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeSelectMenu,
 				}),
@@ -286,7 +286,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "prefer component over modal",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeButton,
 				}),
@@ -320,7 +320,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "modal proxy",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeButton,
 				}),
@@ -371,7 +371,7 @@ func TestComponentRouter_build(t *testing.T) {
 		{
 			name: "modal proxy not found",
 			interaction: &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/a",
 					ComponentType: objects.ComponentTypeButton,
 				}),

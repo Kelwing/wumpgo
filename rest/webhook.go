@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/google/go-querystring/query"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 type CreateWebhookParams struct {
@@ -253,6 +253,20 @@ func (c *Client) ExecuteWebhook(ctx context.Context, id objects.SnowflakeObject,
 		Body(body).
 		Bind(msg).
 		OmitAuth().Send(c)
+
+	return msg, err
+}
+
+func (c *Client) GetWebhookMesssage(ctx context.Context, messageID, webhookID objects.SnowflakeObject, token string) (*objects.Message, error) {
+	msg := &objects.Message{}
+	err := NewRequest().
+		Method(http.MethodGet).
+		WithContext(ctx).
+		Path(fmt.Sprintf(WebhookMessageFmt, webhookID.GetID(), token, messageID.GetID())).
+		ContentType(JsonContentType).
+		Bind(msg).
+		OmitAuth().
+		Send(c)
 
 	return msg, err
 }

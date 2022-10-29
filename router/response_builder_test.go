@@ -706,7 +706,7 @@ func TestComponentRouterCtx_WithModalPath(t *testing.T) {
 				x = objects.ComponentTypeSelectMenu
 			}
 			resp := f.componentHandler(context.Background(), &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationComponentInteractionData{
+				Data: jsonify(t, objects.MessageComponentData{
 					CustomID:      "/test",
 					ComponentType: x,
 				}),
@@ -796,12 +796,11 @@ func TestCommandRouterCtx_WithModalPath(t *testing.T) {
 
 			// Call the command handler.
 			resp := f.commandHandler(context.Background(), &objects.Interaction{
-				Data: jsonify(t, objects.ApplicationCommandInteractionData{
+				Data: jsonify(t, objects.ApplicationCommandData{
 					ID:       1234,
 					Name:     "test",
 					Type:     objects.CommandTypeChatInput,
-					Version:  1,
-					Resolved: objects.ApplicationCommandInteractionDataResolved{},
+					Resolved: objects.ApplicationCommandDataResolved{},
 				}),
 			})
 

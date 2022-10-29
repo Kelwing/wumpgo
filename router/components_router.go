@@ -94,7 +94,7 @@ var NotSelectionMenu = errors.New("the data returned is not that of a selection 
 var NotButton = errors.New("the data returned is not that of a button")
 
 // Adds the argument context to the handler.
-type contextCallback = func(context.Context, *objects.Interaction, *objects.ApplicationComponentInteractionData, map[string]string, rest.RESTClient, ErrorHandler) *objects.InteractionResponse
+type contextCallback = func(context.Context, *objects.Interaction, *objects.MessageComponentData, map[string]string, rest.RESTClient, ErrorHandler) *objects.InteractionResponse
 
 // Defines the data for the context for the route.
 type routeContext struct {
@@ -122,7 +122,7 @@ func (c *ComponentRouter) build(modalRouter *ModalRouter, loader loaderPassthrou
 	c.prep()
 	root := new(node)
 	root.addRoute("/_postcord/void/:number", &routeContext{
-		i: func(reqCtx context.Context, ctx *objects.Interaction, _ *objects.ApplicationComponentInteractionData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
+		i: func(reqCtx context.Context, ctx *objects.Interaction, _ *objects.MessageComponentData, _ map[string]string, _ rest.RESTClient, _ ErrorHandler) *objects.InteractionResponse {
 			// The point of this route is to just return the default handler.
 			rctx := &ComponentRouterCtx{
 				globalAllowedMentions: loader.globalAllowedMentions,
@@ -136,7 +136,7 @@ func (c *ComponentRouter) build(modalRouter *ModalRouter, loader loaderPassthrou
 		var cb contextCallback
 		switch x := v.(type) {
 		case ButtonFunc:
-			cb = func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
+			cb = func(reqCtx context.Context, ctx *objects.Interaction, data *objects.MessageComponentData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 				if data.ComponentType != objects.ComponentTypeButton {
 					return loader.errHandler(NotButton)
 				}
@@ -161,7 +161,7 @@ func (c *ComponentRouter) build(modalRouter *ModalRouter, loader loaderPassthrou
 				return rctx.buildResponse(true, loader.errHandler, loader.globalAllowedMentions)
 			}
 		case SelectMenuFunc:
-			cb = func(reqCtx context.Context, ctx *objects.Interaction, data *objects.ApplicationComponentInteractionData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
+			cb = func(reqCtx context.Context, ctx *objects.Interaction, data *objects.MessageComponentData, params map[string]string, rest rest.RESTClient, errHandler ErrorHandler) *objects.InteractionResponse {
 				values := data.Values
 				if values == nil {
 					// This is a blank result from Discord.
@@ -216,7 +216,7 @@ func (c *ComponentRouter) build(modalRouter *ModalRouter, loader loaderPassthrou
 
 		// Run the command.
 		params := map[string]string{}
-		var data objects.ApplicationComponentInteractionData
+		var data objects.MessageComponentData
 		if err := json.Unmarshal(ctx.Data, &data); err != nil {
 			return loader.errHandler(err)
 		}

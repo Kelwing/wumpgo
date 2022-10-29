@@ -103,7 +103,7 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 		}
 	})
 
-	data, err := json.Marshal(&objects.ApplicationCommandInteractionData{
+	data, err := json.Marshal(&objects.ApplicationCommandData{
 		ID:   objects.Snowflake(1234),
 		Name: "test",
 		Type: objects.CommandTypeChatInput,

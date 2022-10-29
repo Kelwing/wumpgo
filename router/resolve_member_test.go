@@ -44,17 +44,17 @@ func TestResolvableUser_ResolveMember(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data   *objects.ApplicationCommandInteractionData
+		data   *objects.ApplicationCommandData
 		member *objects.GuildMember
 	}{
 		{
 			name: "nil member",
-			data: &objects.ApplicationCommandInteractionData{},
+			data: &objects.ApplicationCommandData{},
 		},
 		{
 			name: "nil user",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users: map[objects.Snowflake]objects.User{},
 					Members: map[objects.Snowflake]objects.GuildMember{
 						1: {Nick: "a"},
@@ -65,8 +65,8 @@ func TestResolvableUser_ResolveMember(t *testing.T) {
 		},
 		{
 			name: "full",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users:   map[objects.Snowflake]objects.User{1: fullUser},
 					Members: map[objects.Snowflake]objects.GuildMember{1: fullMemberExceptUser},
 				},

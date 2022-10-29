@@ -70,12 +70,12 @@ type commandExecutionOptions struct {
 	modalRouter      *ModalRouter
 	allowedMentions  *objects.AllowedMentions
 	interaction      *objects.Interaction
-	data             *objects.ApplicationCommandInteractionData
-	options          []*objects.ApplicationCommandInteractionDataOption
+	data             *objects.ApplicationCommandData
+	options          []*objects.ApplicationCommandDataOption
 }
 
 // Maps out the options.
-func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandInteractionData, options []*objects.ApplicationCommandInteractionDataOption, exceptionHandler ErrorHandler) (*objects.InteractionResponse, map[string]any) {
+func (c *Command) mapOptions(autocomplete bool, data *objects.ApplicationCommandData, options []*objects.ApplicationCommandDataOption, exceptionHandler ErrorHandler) (*objects.InteractionResponse, map[string]any) {
 	mappedOptions := map[string]any{}
 	for _, v := range options {
 		// Find the option.

@@ -152,18 +152,18 @@ func TestResolvableUser_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data     *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandData
 		expected *objects.User
 	}{
 		{
 			name:     "nil",
-			data:     &objects.ApplicationCommandInteractionData{},
+			data:     &objects.ApplicationCommandData{},
 			expected: nil,
 		},
 		{
 			name: "found",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users: map[objects.Snowflake]objects.User{
 						1: {Email: "abc"},
 					},
@@ -184,18 +184,18 @@ func TestResolvableChannel_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data     *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandData
 		expected *objects.Channel
 	}{
 		{
 			name:     "nil",
-			data:     &objects.ApplicationCommandInteractionData{},
+			data:     &objects.ApplicationCommandData{},
 			expected: nil,
 		},
 		{
 			name: "found",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Channels: map[objects.Snowflake]objects.Channel{
 						1: {Name: "abc"},
 					},
@@ -216,18 +216,18 @@ func TestResolvableRole_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data     *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandData
 		expected *objects.Role
 	}{
 		{
 			name:     "nil",
-			data:     &objects.ApplicationCommandInteractionData{},
+			data:     &objects.ApplicationCommandData{},
 			expected: nil,
 		},
 		{
 			name: "found",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Roles: map[objects.Snowflake]objects.Role{
 						1: {Name: "abc"},
 					},
@@ -248,18 +248,18 @@ func TestResolvableMessage_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data     *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandData
 		expected *objects.Message
 	}{
 		{
 			name:     "nil",
-			data:     &objects.ApplicationCommandInteractionData{},
+			data:     &objects.ApplicationCommandData{},
 			expected: nil,
 		},
 		{
 			name: "found",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Messages: map[objects.Snowflake]objects.Message{
 						1: {Content: "abc"},
 					},
@@ -280,18 +280,18 @@ func TestResolvableAttachment_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data     *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandData
 		expected *objects.Attachment
 	}{
 		{
 			name:     "nil",
-			data:     &objects.ApplicationCommandInteractionData{},
+			data:     &objects.ApplicationCommandData{},
 			expected: nil,
 		},
 		{
 			name: "found",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Attachments: map[objects.Snowflake]objects.Attachment{
 						1: {Filename: "abc"},
 					},
@@ -324,7 +324,7 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 	tests := []struct {
 		name string
 
-		data     *objects.ApplicationCommandInteractionData
+		data     *objects.ApplicationCommandData
 		expected any
 	}{
 		{
@@ -332,8 +332,8 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 		},
 		{
 			name: "channel",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
 					Roles:    map[objects.Snowflake]objects.Role{1: {ID: 123}},
@@ -344,8 +344,8 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 		},
 		{
 			name: "role",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
 					Roles:    map[objects.Snowflake]objects.Role{1: {ID: 123}},
@@ -356,8 +356,8 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 		},
 		{
 			name: "member",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{1: {Nick: "abc"}},
 					Roles:    map[objects.Snowflake]objects.Role{},
@@ -368,8 +368,8 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 		},
 		{
 			name: "user",
-			data: &objects.ApplicationCommandInteractionData{
-				Resolved: objects.ApplicationCommandInteractionDataResolved{
+			data: &objects.ApplicationCommandData{
+				Resolved: objects.ApplicationCommandDataResolved{
 					Users:    map[objects.Snowflake]objects.User{1: {ID: 1}},
 					Members:  map[objects.Snowflake]objects.GuildMember{},
 					Roles:    map[objects.Snowflake]objects.Role{},
@@ -382,7 +382,7 @@ func TestResolvableMentionable_Resolve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.data == nil {
-				tt.data = &objects.ApplicationCommandInteractionData{}
+				tt.data = &objects.ApplicationCommandData{}
 			}
 			r := resolvableMentionable{
 				resolvable: resolvable[any]{id: "1", data: tt.data},

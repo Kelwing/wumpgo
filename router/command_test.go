@@ -67,9 +67,9 @@ func TestCommand_mapOptions(t *testing.T) {
 		name string
 
 		autocomplete bool
-		data         *objects.ApplicationCommandInteractionData
+		data         *objects.ApplicationCommandData
 		cmdOptions   []*objects.ApplicationCommandOption
-		retOptions   []*objects.ApplicationCommandInteractionDataOption
+		retOptions   []*objects.ApplicationCommandDataOption
 
 		expectsErr string
 		expects    map[string]any
@@ -86,7 +86,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt2",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeString,
 					Name:  "opt3",
@@ -104,7 +104,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeString,
 					Name:  "opt1",
@@ -123,7 +123,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeString,
 					Name:  "opt1",
@@ -134,14 +134,14 @@ func TestCommand_mapOptions(t *testing.T) {
 		},
 		{
 			name: "channel option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeChannel,
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeChannel,
 					Name:  "opt1",
@@ -151,20 +151,20 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]any{
 				"opt1": (ResolvableChannel)(resolvable[objects.Channel]{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandData{ID: 6921},
 				}),
 			},
 		},
 		{
 			name: "role option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeRole,
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeRole,
 					Name:  "opt1",
@@ -174,20 +174,20 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]any{
 				"opt1": (ResolvableRole)(resolvable[objects.Role]{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandData{ID: 6921},
 				}),
 			},
 		},
 		{
 			name: "user option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeUser,
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeUser,
 					Name:  "opt1",
@@ -197,7 +197,7 @@ func TestCommand_mapOptions(t *testing.T) {
 			expects: map[string]any{
 				"opt1": (ResolvableUser)(resolvableUser{resolvable[objects.User]{
 					id:   "123",
-					data: &objects.ApplicationCommandInteractionData{ID: 6921},
+					data: &objects.ApplicationCommandData{ID: 6921},
 				}}),
 			},
 		},
@@ -209,7 +209,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeString,
 					Name:  "opt1",
@@ -228,7 +228,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeInteger,
 					Name:  "opt1",
@@ -247,7 +247,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeBoolean,
 					Name:  "opt1",
@@ -260,14 +260,14 @@ func TestCommand_mapOptions(t *testing.T) {
 		},
 		{
 			name: "mentionable option",
-			data: &objects.ApplicationCommandInteractionData{ID: 6921},
+			data: &objects.ApplicationCommandData{ID: 6921},
 			cmdOptions: []*objects.ApplicationCommandOption{
 				{
 					OptionType: objects.TypeMentionable,
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeMentionable,
 					Name:  "opt1",
@@ -278,7 +278,7 @@ func TestCommand_mapOptions(t *testing.T) {
 				"opt1": (ResolvableMentionable)(resolvableMentionable{
 					resolvable: resolvable[any]{
 						id:   "123",
-						data: &objects.ApplicationCommandInteractionData{ID: 6921},
+						data: &objects.ApplicationCommandData{ID: 6921},
 					},
 				}),
 			},
@@ -291,7 +291,7 @@ func TestCommand_mapOptions(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeNumber,
 					Name:  "opt1",
@@ -328,9 +328,9 @@ func TestCommand_mapOptions(t *testing.T) {
 	}
 }
 
-var messageTargetData = &objects.ApplicationCommandInteractionData{
+var messageTargetData = &objects.ApplicationCommandData{
 	TargetID: 1,
-	Resolved: objects.ApplicationCommandInteractionDataResolved{
+	Resolved: objects.ApplicationCommandDataResolved{
 		Users: map[objects.Snowflake]objects.User{
 			1: {
 				ID: 6921,
@@ -344,9 +344,9 @@ var messageTargetData = &objects.ApplicationCommandInteractionData{
 	},
 }
 
-var userTargetData = &objects.ApplicationCommandInteractionData{
+var userTargetData = &objects.ApplicationCommandData{
 	TargetID: 2,
-	Resolved: objects.ApplicationCommandInteractionDataResolved{
+	Resolved: objects.ApplicationCommandDataResolved{
 		Users: map[objects.Snowflake]objects.User{
 			2: {
 				ID: 6921,
@@ -365,8 +365,8 @@ func TestCommand_execute(t *testing.T) {
 		name string
 
 		paramsCheck  func(*testing.T, map[string]any)
-		data         *objects.ApplicationCommandInteractionData
-		retOptions   []*objects.ApplicationCommandInteractionDataOption
+		data         *objects.ApplicationCommandData
+		retOptions   []*objects.ApplicationCommandDataOption
 		cmdOptions   []*objects.ApplicationCommandOption
 		cmdAllowed   *objects.AllowedMentions
 		noMiddleware bool
@@ -406,7 +406,7 @@ func TestCommand_execute(t *testing.T) {
 					Name:       "opt1",
 				},
 			},
-			retOptions: []*objects.ApplicationCommandInteractionDataOption{
+			retOptions: []*objects.ApplicationCommandDataOption{
 				{
 					Type:  objects.TypeInteger,
 					Name:  "opt1",
@@ -453,7 +453,7 @@ func TestCommand_execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Make sure data isn't nil.
 			if tt.data == nil {
-				tt.data = &objects.ApplicationCommandInteractionData{Options: tt.retOptions}
+				tt.data = &objects.ApplicationCommandData{Options: tt.retOptions}
 			}
 
 			// Defines a list of middleware.
