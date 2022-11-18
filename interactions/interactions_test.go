@@ -21,9 +21,7 @@ func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {
 		panic(err)
 	}
 
-	app, err := New(&Config{
-		PublicKey: hex.EncodeToString(pub),
-	})
+	app, err := New(hex.EncodeToString(pub))
 	if err != nil {
 		panic(err)
 	}

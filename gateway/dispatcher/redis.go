@@ -14,11 +14,8 @@ type RedisDispatcher struct {
 	conn *redis.Client
 }
 
-func NewRedisDispatcher(url string) (*RedisDispatcher, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr: url,
-		DB:   0,
-	})
+func NewRedisDispatcher(connectOpts *redis.Options) (*RedisDispatcher, error) {
+	rdb := redis.NewClient(connectOpts)
 
 	return &RedisDispatcher{conn: rdb}, nil
 }
@@ -26,5 +23,7 @@ func NewRedisDispatcher(url string) (*RedisDispatcher, error) {
 func (d *RedisDispatcher) Dispatch(event string, data json.RawMessage) error {
 	eventName := fmt.Sprintf("discord.%s", strings.ToLower(event))
 	log.Debug().Msgf("Dispatching event %s to Redis", eventName)
-	return d.conn.Publish(context.Background(), eventName, data).Err()
+	cmd := d.conn.Publish(context.Background(), eventName, []byte(data))
+	_, err := cmd.Result()
+	return err
 }

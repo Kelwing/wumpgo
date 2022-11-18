@@ -5,6 +5,7 @@ import (
 	"flag"
 
 	"github.com/rs/zerolog/log"
+	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
 )
 
@@ -12,11 +13,7 @@ func main() {
 	token := flag.String("token", "", "Discord token")
 	flag.Parse()
 
-	client := rest.New(&rest.Config{
-		Authorization: "Bot " + *token,
-		Ratelimiter:   rest.NewLeakyBucketRatelimiter(),
-		UserAgent:     "wumpgo/1.0",
-	})
+	client := rest.New(rest.WithToken(objects.TokenTypeBot, *token))
 
 	me, err := client.GetCurrentUser(context.Background())
 	if err != nil {

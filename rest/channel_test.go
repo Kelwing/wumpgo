@@ -2,14 +2,12 @@ package rest
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"runtime"
 	"strconv"
 	"testing"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/stretchr/testify/require"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func getRealClient(t *testing.T) *Client {
@@ -22,11 +20,10 @@ func getRealClient(t *testing.T) *Client {
 		t.Skip("Test skipped due to short mode")
 	}
 
-	return New(&Config{
-		Authorization: fmt.Sprintf("Bot %s", tokenEnv),
-		UserAgent:     fmt.Sprintf("Postcord/1.0 %s (%s)", runtime.GOOS, runtime.GOARCH),
-		Ratelimiter:   NewMemoryRatelimiter(&MemoryConf{MaxRetries: 3}),
-	})
+	return New(
+		WithToken(objects.TokenTypeBot, tokenEnv),
+		WithRateLimiter(NewLeakyBucketRatelimiter()),
+	)
 }
 
 func testChannelSnowflake(t *testing.T) objects.Snowflake {

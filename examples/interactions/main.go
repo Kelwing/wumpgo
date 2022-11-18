@@ -14,9 +14,7 @@ func main() {
 	key := flag.String("public_key", "", "Discord public key")
 	flag.Parse()
 
-	app, err := interactions.New(&interactions.Config{
-		PublicKey: *key,
-	})
+	app, err := interactions.New(*key)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create interactions client")
 	}
