@@ -11,8 +11,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
 	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
 )
+
+func generateValidKeys() (ed25519.PrivateKey, ed25519.PublicKey) {
+	pub, priv, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		panic(err)
+	}
+
+	return priv, pub
+}
 
 func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {
 	// Generate a keypair for use in testing
@@ -160,5 +172,55 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 
 	if resp.Data.Content != "Success" {
 		t.Errorf("Expected 'Success', got '%s'", resp.Data.Content)
+	}
+}
+
+func TestNew(t *testing.T) {
+	pub, _ := generateValidKeys()
+	client := rest.New()
+	tests := []struct {
+		PublicKey string
+		Options   []InteractionOption
+		Error     bool
+		Require   func(t *testing.T, a *App)
+	}{
+		{
+			PublicKey: "invalid",
+			Options:   []InteractionOption{},
+			Error:     true,
+		},
+		{
+			PublicKey: hex.EncodeToString(pub),
+			Options: []InteractionOption{
+				WithLogger(log.Logger),
+			},
+			Error: false,
+			Require: func(t *testing.T, a *App) {
+				require.Equal(t, log.Logger, a.logger)
+			},
+		},
+		{
+			PublicKey: hex.EncodeToString(pub),
+			Options: []InteractionOption{
+				WithClient(client),
+			},
+			Error: false,
+			Require: func(t *testing.T, a *App) {
+				require.Equal(t, client, a.restClient)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		app, err := New(tc.PublicKey, tc.Options...)
+		if tc.Error {
+			require.Error(t, err)
+		} else {
+			require.NoError(t, err)
+		}
+
+		if tc.Require != nil {
+			tc.Require(t, app)
+		}
 	}
 }

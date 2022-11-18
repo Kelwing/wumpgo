@@ -43,6 +43,7 @@ func New(publicKey string, opts ...InteractionOption) (*App, error) {
 	a := &App{
 		extraProps: make(map[string]interface{}),
 		pubKey:     pubKey,
+		logger:     zerolog.Nop(),
 	}
 
 	for _, o := range opts {
