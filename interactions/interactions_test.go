@@ -119,6 +119,13 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 			Type: objects.ResponseChannelMessageWithSource,
 			Data: &objects.InteractionApplicationCommandCallbackData{
 				Content: "Success",
+				Files: []*objects.DiscordFile{
+					{
+						Buffer:      bytes.NewBufferString("testing"),
+						Filename:    "test.txt",
+						ContentType: "text/plain",
+					},
+				},
 			},
 		}
 	})
@@ -149,30 +156,17 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 		Version: 1,
 	}, priv)
 
-	if err != nil {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
 	w := httptest.NewRecorder()
 	app.HTTPHandler()(w, req)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, got %d", w.Code)
-	}
-
-	if w.Header().Get("Content-Type") != "application/json" {
-		t.Errorf("Expected application/json, got %s", w.Header().Get("Content-Type"))
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
 	var resp objects.InteractionResponse
 	err = json.Unmarshal(w.Body.Bytes(), &resp)
-	if err != nil {
-		t.Errorf("Expected valid response, got %v", err)
-	}
-
-	if resp.Data.Content != "Success" {
-		t.Errorf("Expected 'Success', got '%s'", resp.Data.Content)
-	}
+	require.NoError(t, err)
 }
 
 func TestNew(t *testing.T) {
