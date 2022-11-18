@@ -47,7 +47,9 @@ func (r *RedisReceiver) Receive(ctx context.Context) (func(), error) {
 			select {
 			case msg := <-ch:
 				r.log.Debug().Str("channel", msg.Channel).Msg("received message")
-				r.Route(msg.Channel, json.RawMessage(msg.Payload))
+				if err := r.Route(msg.Channel, json.RawMessage(msg.Payload)); err != nil {
+					r.log.Warn().Err(err).Str("event", msg.Channel).Msg("failed to route event")
+				}
 			case <-stop:
 				return
 			}
