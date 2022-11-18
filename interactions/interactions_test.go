@@ -6,6 +6,8 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -162,10 +164,12 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 	app.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.Equal(t, "application/json", w.Header().Get("Content-Type"))
+	require.Contains(t, w.Header().Get("Content-Type"), "multipart/form-data")
 
-	var resp objects.InteractionResponse
-	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	resp := w.Result()
+	_, params, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	require.NoError(t, err)
+	multipart.NewReader(resp.Body, params["boundary"])
 	require.NoError(t, err)
 }
 
