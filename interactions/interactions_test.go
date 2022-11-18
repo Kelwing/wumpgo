@@ -159,7 +159,7 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 	require.NoError(t, err)
 
 	w := httptest.NewRecorder()
-	app.HTTPHandler()(w, req)
+	app.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Equal(t, "application/json", w.Header().Get("Content-Type"))
