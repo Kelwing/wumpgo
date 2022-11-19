@@ -34,8 +34,8 @@ type App struct {
 }
 
 // Create a new interactions server instance
-func New(config *Config) (*App, error) {
-	pubKey, err := parsePublicKey(config.PublicKey)
+func New(publicKey string, opts ...InteractionOption) (*App, error) {
+	pubKey, err := parsePublicKey(publicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -43,28 +43,12 @@ func New(config *Config) (*App, error) {
 	a := &App{
 		extraProps: make(map[string]interface{}),
 		pubKey:     pubKey,
+		logger:     zerolog.Nop(),
 	}
 
-	if config.Logger == nil {
-		a.logger = zerolog.Nop()
-	} else {
-		a.logger = *config.Logger
+	for _, o := range opts {
+		o(a)
 	}
-
-	var restClient *rest.Client
-	if config.RESTClient == nil {
-		restClient = rest.New(&rest.Config{
-			UserAgent:     "WumpgoRest/1.0 (Linux) Wumpgo (https://github.com/Kelwing/wumpgo)",
-			Authorization: config.Token,
-			Ratelimiter: rest.NewMemoryRatelimiter(&rest.MemoryConf{
-				MaxRetries: 3,
-			}),
-		})
-	} else {
-		restClient = config.RESTClient
-	}
-
-	a.restClient = restClient
 
 	return a, nil
 }

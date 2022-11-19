@@ -6,13 +6,27 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
 	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
 )
+
+func generateValidKeys() (ed25519.PrivateKey, ed25519.PublicKey) {
+	pub, priv, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		panic(err)
+	}
+
+	return priv, pub
+}
 
 func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {
 	// Generate a keypair for use in testing
@@ -21,9 +35,7 @@ func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {
 		panic(err)
 	}
 
-	app, err := New(&Config{
-		PublicKey: hex.EncodeToString(pub),
-	})
+	app, err := New(hex.EncodeToString(pub))
 	if err != nil {
 		panic(err)
 	}
@@ -109,6 +121,13 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 			Type: objects.ResponseChannelMessageWithSource,
 			Data: &objects.InteractionApplicationCommandCallbackData{
 				Content: "Success",
+				Files: []*objects.DiscordFile{
+					{
+						Buffer:      bytes.NewBufferString("testing"),
+						Filename:    "test.txt",
+						ContentType: "text/plain",
+					},
+				},
 			},
 		}
 	})
@@ -139,28 +158,67 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 		Version: 1,
 	}, priv)
 
-	if err != nil {
-		t.Fail()
-	}
+	require.NoError(t, err)
 
 	w := httptest.NewRecorder()
-	app.HTTPHandler()(w, req)
+	app.ServeHTTP(w, req)
 
-	if w.Code != 200 {
-		t.Errorf("Expected 200, got %d", w.Code)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Header().Get("Content-Type"), "multipart/form-data")
+
+	resp := w.Result()
+	_, params, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	require.NoError(t, err)
+	multipart.NewReader(resp.Body, params["boundary"])
+	require.NoError(t, err)
+}
+
+func TestNew(t *testing.T) {
+	pub, _ := generateValidKeys()
+	client := rest.New()
+	tests := []struct {
+		PublicKey string
+		Options   []InteractionOption
+		Error     bool
+		Require   func(t *testing.T, a *App)
+	}{
+		{
+			PublicKey: "invalid",
+			Options:   []InteractionOption{},
+			Error:     true,
+		},
+		{
+			PublicKey: hex.EncodeToString(pub),
+			Options: []InteractionOption{
+				WithLogger(log.Logger),
+			},
+			Error: false,
+			Require: func(t *testing.T, a *App) {
+				require.Equal(t, log.Logger, a.logger)
+			},
+		},
+		{
+			PublicKey: hex.EncodeToString(pub),
+			Options: []InteractionOption{
+				WithClient(client),
+			},
+			Error: false,
+			Require: func(t *testing.T, a *App) {
+				require.Equal(t, client, a.restClient)
+			},
+		},
 	}
 
-	if w.Header().Get("Content-Type") != "application/json" {
-		t.Errorf("Expected application/json, got %s", w.Header().Get("Content-Type"))
-	}
+	for _, tc := range tests {
+		app, err := New(tc.PublicKey, tc.Options...)
+		if tc.Error {
+			require.Error(t, err)
+		} else {
+			require.NoError(t, err)
+		}
 
-	var resp objects.InteractionResponse
-	err = json.Unmarshal(w.Body.Bytes(), &resp)
-	if err != nil {
-		t.Errorf("Expected valid response, got %v", err)
-	}
-
-	if resp.Data.Content != "Success" {
-		t.Errorf("Expected 'Success', got '%s'", resp.Data.Content)
+		if tc.Require != nil {
+			tc.Require(t, app)
+		}
 	}
 }

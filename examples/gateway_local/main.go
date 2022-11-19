@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/rs/zerolog"
 	"wumpgo.dev/wumpgo/gateway/dispatcher"
+	"wumpgo.dev/wumpgo/gateway/receiver"
 	"wumpgo.dev/wumpgo/gateway/shard"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
@@ -16,19 +16,16 @@ func main() {
 	token := flag.String("token", "", "Your Discord token")
 	flag.Parse()
 
-	client := rest.New(&rest.Config{
-		Authorization: "Bot " + *token,
-		Ratelimiter:   rest.NewLeakyBucketRatelimiter(),
-	})
+	client := rest.New(rest.WithToken(objects.TokenTypeBot, *token))
 
 	gateway, err := client.GatewayBot(context.Background())
 	if err != nil {
 		panic(err.Error())
 	}
-
-	d := dispatcher.NewLocalDispatcher(client, zerolog.Nop())
-	d.On("READY", ready)
-	d.On("GUILD_CREATE", guildCreate)
+	r := receiver.NewLocalReceiver(receiver.WithClient(client))
+	d := dispatcher.NewLocalDispatcher(r)
+	r.On("READY", ready)
+	r.On("GUILD_CREATE", guildCreate)
 
 	s := shard.New(
 		*token,

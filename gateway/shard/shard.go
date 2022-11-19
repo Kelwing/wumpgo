@@ -39,7 +39,7 @@ type Shard struct {
 	logger zerolog.Logger
 }
 
-func New(token string, opts ...ShardOpt) *Shard {
+func New(token string, opts ...ShardOption) *Shard {
 	s := &Shard{
 		seq: atomic.NewUint64(0),
 		identify: objects.Identify{
@@ -66,7 +66,7 @@ func New(token string, opts ...ShardOpt) *Shard {
 	}
 
 	for _, o := range opts {
-		o.apply(s)
+		o(s)
 	}
 
 	s.addProcessors(

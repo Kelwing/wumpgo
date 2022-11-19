@@ -13,8 +13,8 @@ type NATSDispatcher struct {
 	conn *nats.Conn
 }
 
-func NewNATSDispatcher(url string) (*NATSDispatcher, error) {
-	conn, err := nats.Connect(url)
+func NewNATSDispatcher(url string, opts ...nats.Option) (*NATSDispatcher, error) {
+	conn, err := nats.Connect(url, opts...)
 	if err != nil {
 		return nil, err
 	}

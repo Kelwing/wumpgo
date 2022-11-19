@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"wumpgo.dev/wumpgo"
 )
 
 type HTTPClient interface {
@@ -27,6 +28,10 @@ type Client struct {
 	httpClient  HTTPClient
 	rateLimiter Ratelimiter
 	cache       Cache
+	token       string
+	logger      zerolog.Logger
+	proxy       func(*http.Request) (*url.URL, error)
+	userAgent   *UserAgent
 }
 
 type request struct {
@@ -141,21 +146,44 @@ func (r *request) Send(c *Client) error {
 	}
 }
 
-func New(config *Config) *Client {
+type UserAgent struct {
+	Name    string
+	URL     string
+	Version string
+}
+
+func (u *UserAgent) String() string {
+	return fmt.Sprintf("%s (%s, %s)", u.Name, u.URL, u.Version)
+}
+
+func New(options ...RestOption) *Client {
+	c := &Client{
+		userAgent: &UserAgent{
+			Name:    "wumpgo",
+			URL:     "https://wumpgo.dev",
+			Version: wumpgo.LibraryVersion(),
+		},
+		rateLimiter: NewLeakyBucketRatelimiter(),
+	}
+
+	for _, o := range options {
+		o(c)
+	}
+
 	var client Doer
-	if config.Proxy != nil {
-		client = NewProxyClient(config.Proxy)
+	if c.proxy != nil {
+		client = NewProxyClient(c.proxy)
 	} else {
 		client = &http.Client{
 			Timeout: time.Second * 5,
 		}
 	}
-	return &Client{
-		rateLimiter: config.Ratelimiter,
-		httpClient: &DefaultHTTPClient{
-			doer:          client,
-			userAgent:     config.UserAgent,
-			authorization: config.Authorization,
-		},
+
+	c.httpClient = &DefaultHTTPClient{
+		doer:          client,
+		userAgent:     c.userAgent.String(),
+		authorization: c.token,
 	}
+
+	return c
 }

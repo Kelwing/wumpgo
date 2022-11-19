@@ -13,8 +13,8 @@ type NSQDispatcher struct {
 	conn *nsq.Producer
 }
 
-func NewNSQDispatcher(url string) (*NSQDispatcher, error) {
-	conn, err := nsq.NewProducer(url, nsq.NewConfig())
+func NewNSQDispatcher(url string, config *nsq.Config) (*NSQDispatcher, error) {
+	conn, err := nsq.NewProducer(url, config)
 	if err != nil {
 		return nil, err
 	}
