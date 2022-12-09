@@ -1,0 +1,153 @@
+package newrouter
+
+import (
+	"context"
+
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
+)
+
+type View interface{}
+
+type CommandResponder interface {
+	// WithSource responses with a channel message upon function return, this is the default behavior.
+	WithSource() CommandResponder
+	// Defer sends a defer response, and executes the provided function asynchronously
+	Defer(CommandHandler) CommandResponder
+	// TTS causes the content to be read out using text-to-speech
+	TTS() CommandResponder
+	// Content sets the content for the response.
+	Content(string) CommandResponder
+	// Embed adds an embed to the response, can be called up to 10 times.
+	Embed(*objects.Embed) CommandResponder
+	// Embeds overwrites all embeds in the response with the provided array.
+	Embeds([]*objects.Embed) CommandResponder
+	// AllowedMentions sets the allowed mentions
+	AllowedMentions(*objects.AllowedMentions) CommandResponder
+	// SupressEmbeds causes all embeds on this message to be hidden
+	SupressEmbeds() CommandResponder
+	// Ephemeral makes the response message ephemeral, only the person who ran the command can see it.
+	Ephemeral() CommandResponder
+	// View sets the component view to respond with
+	View(View) CommandResponder
+	// Attach adds a file attachment to the response by Attachment ID
+	Attach(f *objects.DiscordFile) CommandResponder
+}
+
+func newDefaultResponder() *defaultResponder {
+	return &defaultResponder{
+		response: &objects.InteractionResponse{
+			Type: objects.ResponseChannelMessageWithSource,
+			Data: &objects.InteractionApplicationCommandCallbackData{
+				Embeds:      make([]*objects.Embed, 0),
+				Components:  make([]*objects.Component, 0),
+				Attachments: make([]*objects.Attachment, 0),
+				Files:       make([]*objects.DiscordFile, 0),
+			},
+		},
+		deferFunc: nil,
+		view:      nil,
+		files:     make([]*objects.DiscordFile, 0),
+	}
+}
+
+type defaultResponder struct {
+	response  *objects.InteractionResponse
+	deferFunc CommandHandler
+	view      View
+	files     []*objects.DiscordFile
+}
+
+func (r *defaultResponder) WithSource() CommandResponder {
+	r.response.Type = objects.ResponseChannelMessageWithSource
+	return r
+}
+
+func (r *defaultResponder) Defer(f CommandHandler) CommandResponder {
+	r.deferFunc = f
+	return r
+}
+
+func (r *defaultResponder) TTS() CommandResponder {
+	r.response.Data.TTS = true
+	return r
+}
+
+func (r *defaultResponder) Content(c string) CommandResponder {
+	r.response.Data.Content = c
+	return r
+}
+
+func (r *defaultResponder) Embed(e *objects.Embed) CommandResponder {
+	r.response.Data.Embeds = append(r.response.Data.Embeds, e)
+	return r
+}
+
+func (r *defaultResponder) Embeds(e []*objects.Embed) CommandResponder {
+	r.response.Data.Embeds = e
+	return r
+}
+
+func (r *defaultResponder) AllowedMentions(m *objects.AllowedMentions) CommandResponder {
+	r.response.Data.AllowedMentions = m
+	return r
+}
+
+func (r *defaultResponder) SupressEmbeds() CommandResponder {
+	r.response.Data.Flags |= objects.MsgFlagSupressEmbeds
+	return r
+}
+
+func (r *defaultResponder) Ephemeral() CommandResponder {
+	r.response.Data.Flags |= objects.MsgFlagEphemeral
+	return r
+}
+
+func (r *defaultResponder) View(v View) CommandResponder {
+	r.view = v
+	return r
+}
+
+func (r *defaultResponder) Attach(f *objects.DiscordFile) CommandResponder {
+	r.files = append(r.files, f)
+	return r
+}
+
+type CommandContext struct {
+	interaction *objects.Interaction
+	options     []*objects.ApplicationCommandDataOption
+	ctx         context.Context
+	client      *rest.Client
+}
+
+func (c *CommandContext) Interaction() *objects.Interaction {
+	return c.interaction
+}
+
+func (c *CommandContext) Options() []*objects.ApplicationCommandDataOption {
+	return c.options
+}
+
+func (c *CommandContext) Context() context.Context {
+	return c.ctx
+}
+
+func (c *CommandContext) WithContext(ctx context.Context) *CommandContext {
+	c.ctx = ctx
+	return c
+}
+
+func (c *CommandContext) Client() *rest.Client {
+	return c.client
+}
+
+func newCommandContext(i *objects.Interaction, opts []*objects.ApplicationCommandDataOption) *CommandContext {
+	return &CommandContext{
+		interaction: i,
+		options:     opts,
+	}
+}
+
+type CommandHandler interface {
+	Handle(CommandResponder, *CommandContext)
+}

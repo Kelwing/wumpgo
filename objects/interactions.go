@@ -97,7 +97,7 @@ const (
 
 type ApplicationCommand struct {
 	// ID is the unique id of the command
-	ID Snowflake `json:"id"`
+	ID Snowflake `json:"id,omitempty"`
 	// Type is	the type of command, defaults 1 if not set
 	Type *ApplicationCommandType `json:"type,omitempty"`
 	// Application ID is the unique id of the parent application

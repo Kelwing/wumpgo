@@ -1,11 +1,9 @@
-module github.com/kelwing/wumpgo/router/example
+module wumpgo.dev/wumpgo/router/example
 
 go 1.18
 
 require (
-	github.com/kelwing/wumpgo/interactions v0.1.5
-	github.com/kelwing/wumpgo/objects v0.1.4
-	github.com/kelwing/wumpgo/router v0.0.0-20210709051239-15283fd7ff45
+	wumpgo.dev/wumpgo
 )
 
 require (
