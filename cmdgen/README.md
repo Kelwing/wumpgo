@@ -1,3 +1,16 @@
+# cmdgen
+
+cmdgen is a go:generate tool for generating wumpgo.dev/wumpgo/router commands from comments instead of writing the interface implementations yourself.
+
+## Installation
+
+```
+go install wumpgo.dev/wumpgo/cmdgen@latest
+```
+
+## Usage
+
+```go
 package main
 
 import (
@@ -13,34 +26,35 @@ import (
 	"wumpgo.dev/wumpgo/router"
 )
 
+// Echo godoc
+// @Description Echos the message you type back to you
 type Echo struct {
 	Message string `discord:"message,description:Message to echo back"`
 }
 
+// EchoCaps godoc
+// @Description Echos the message you type back to you, but in all uppercase
+// @Option.Message.Name.es_MX mensaje
 type EchoCaps struct {
 	Message string `discord:"message,description:Message to echo back"`
 }
 
+// Log godoc
+// @Description Tests a channel argument
 type Log struct {
 	Channel *objects.Channel `discord:",channelTypes:0"`
 }
 
+// MyCommand godoc
+// @Name testcommand
+// @Description Test base command
+// @Name.en_US testcommand
+// @Name.es_MX commandodepreueba
+// @Type ChatInput
 type MyCommand struct {
 	Echo
 	EchoCaps
 	Log
-}
-
-func (e MyCommand) Description() string {
-	return "Test base command"
-}
-
-func (e Echo) Description() string {
-	return "Echos the message you type back to you"
-}
-
-func (e EchoCaps) Description() string {
-	return "Echos the message you type back to you, but in all uppercase"
 }
 
 func (e Echo) Handle(r router.CommandResponder, ctx *router.CommandContext) {
@@ -88,3 +102,4 @@ func main() {
 	fmt.Println("Listening on :8080")
 	http.ListenAndServe(":8080", app)
 }
+```

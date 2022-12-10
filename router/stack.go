@@ -1,4 +1,4 @@
-package newrouter
+package router
 
 // Stack is a generic stack data structure.
 type Stack[T any] []T

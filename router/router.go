@@ -1,4 +1,4 @@
-package newrouter
+package router
 
 type Router struct {
 	CommandRouter

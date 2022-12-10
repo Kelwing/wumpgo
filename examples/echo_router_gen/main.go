@@ -13,34 +13,39 @@ import (
 	"wumpgo.dev/wumpgo/router"
 )
 
+// go:generate cmdgen
+
+// Echo godoc
+// @Description Echos the message you type back to you
 type Echo struct {
 	Message string `discord:"message,description:Message to echo back"`
 }
 
+// EchoCaps godoc
+// @Description Echos the message you type back to you, but in all uppercase
+// @Option.Message.Name.es_MX mensaje
+// @Option.Message.Name.en_US message
+// @Permissions ManageRoles
 type EchoCaps struct {
 	Message string `discord:"message,description:Message to echo back"`
 }
 
+// Log godoc
+// @Description Tests a channel argument
 type Log struct {
 	Channel *objects.Channel `discord:",channelTypes:0"`
 }
 
+// MyCommand godoc
+// @Name testcommand
+// @Description Test base command
+// @Name.en_US testcommand
+// @Name.es_MX commandodepreueba
+// @Type ChatInput
 type MyCommand struct {
 	Echo
 	EchoCaps
 	Log
-}
-
-func (e MyCommand) Description() string {
-	return "Test base command"
-}
-
-func (e Echo) Description() string {
-	return "Echos the message you type back to you"
-}
-
-func (e EchoCaps) Description() string {
-	return "Echos the message you type back to you, but in all uppercase"
 }
 
 func (e Echo) Handle(r router.CommandResponder, ctx *router.CommandContext) {

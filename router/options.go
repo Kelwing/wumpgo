@@ -1,4 +1,4 @@
-package newrouter
+package router
 
 import (
 	"wumpgo.dev/wumpgo/interactions"

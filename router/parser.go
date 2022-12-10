@@ -1,4 +1,4 @@
-package newrouter
+package router
 
 import (
 	"encoding/json"
@@ -61,6 +61,14 @@ type AutoCompleter interface {
 
 type CommandTyper interface {
 	Type() objects.ApplicationCommandType
+}
+
+type OptionNameLocalizer interface {
+	OptionName(optionName string) map[string]string
+}
+
+type OptionDescriptionLocalizer interface {
+	OptionDescription(optionName string) map[string]string
 }
 
 type ParserError struct {
@@ -412,6 +420,14 @@ func (p *CommandParser) parseOption(v reflect.Value, i, depth int) (*objects.App
 				}
 			}
 		}
+	}
+
+	if onl, ok := v.Interface().(OptionNameLocalizer); ok {
+		option.NameLocalizations = onl.OptionName(t.Name)
+	}
+
+	if odl, ok := v.Interface().(OptionDescriptionLocalizer); ok {
+		option.DescriptionLocalizations = odl.OptionDescription(t.Name)
 	}
 
 	return option, nil
