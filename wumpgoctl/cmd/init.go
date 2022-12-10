@@ -64,7 +64,7 @@ var initCmd = &cobra.Command{
 				return err
 			}
 
-			tmpl.Execute(f, tArgs)
+			_ = tmpl.Execute(f, tArgs)
 
 			f.Close()
 		}
