@@ -49,7 +49,7 @@ type BadCommand struct {
 
 func TestParseCommand(t *testing.T) {
 	p := NewParser()
-	x := reflect.ValueOf(TestRootCommand{})
+	x := reflect.ValueOf(&TestRootCommand{})
 	cmd, err := p.parseCommand(x)
 	require.NoError(t, err)
 	require.Equal(t, "mytestcommand", cmd.Name)
@@ -62,7 +62,7 @@ func TestParseCommand(t *testing.T) {
 
 func TestParseCommand2(t *testing.T) {
 	p := NewParser()
-	x := reflect.ValueOf(TestCommandTwo{})
+	x := reflect.ValueOf(&TestCommandTwo{})
 
 	cmd, err := p.parseCommand(x)
 	require.NoError(t, err)
@@ -73,7 +73,7 @@ func TestParseCommand2(t *testing.T) {
 
 func TestParseCommand3(t *testing.T) {
 	p := NewParser()
-	x := reflect.ValueOf(TestCommandThree{})
+	x := reflect.ValueOf(&TestCommandThree{})
 
 	cmd, err := p.parseCommand(x)
 
@@ -85,7 +85,7 @@ func TestParseCommand3(t *testing.T) {
 
 func TestBadCommand(t *testing.T) {
 	p := NewParser()
-	x := reflect.ValueOf(BadCommand{})
+	x := reflect.ValueOf(&BadCommand{})
 	_, err := p.parseCommand(x)
 	require.Error(t, err)
 }

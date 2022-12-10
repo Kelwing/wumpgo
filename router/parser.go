@@ -140,10 +140,11 @@ func (p *CommandParser) parseCommand(v reflect.Value) (*objects.ApplicationComma
 
 	t := v.Type()
 
-	if t.Kind() == reflect.Ptr {
-		v = v.Elem()
+	if t.Kind() != reflect.Ptr {
+		return nil, newParserErrorf("must be a pointer to a command struct")
 	}
 
+	v = v.Elem()
 	t = v.Type()
 
 	if t.Kind() != reflect.Struct {
