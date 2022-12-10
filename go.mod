@@ -8,7 +8,6 @@ require (
 	github.com/go-redsync/redsync/v4 v4.5.1
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-querystring v1.1.0
-	github.com/jimeh/go-golden v0.1.0
 	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/rs/zerolog v1.27.0
