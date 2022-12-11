@@ -1,4 +1,4 @@
-package bot
+package cmd
 
 import (
     "context"
@@ -23,8 +23,8 @@ type HTTPConfig struct {
 }
 
 type Config struct {
-    Discord *DiscordConfig `env:",prefix=DISCORD_"
-    HTTP *HTTPConfig `env:",prefix=HTTP_"
+    Discord *DiscordConfig `env:",prefix=DISCORD_"`
+    HTTP *HTTPConfig `env:",prefix=HTTP_"`
 }
 
 func Start() {
