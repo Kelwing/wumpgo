@@ -119,22 +119,6 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 	app, priv, _, err := PrepareTest()
 	require.NoError(t, err)
 
-	app.CommandHandler(func(context.Context, *objects.Interaction) *objects.InteractionResponse {
-		return &objects.InteractionResponse{
-			Type: objects.ResponseChannelMessageWithSource,
-			Data: &objects.InteractionMessagesCallbackData{
-				Content: "Success",
-				Files: []*objects.DiscordFile{
-					{
-						Buffer:      bytes.NewBufferString("testing"),
-						Filename:    "test.txt",
-						ContentType: "text/plain",
-					},
-				},
-			},
-		}
-	})
-
 	data, err := json.Marshal(&objects.ApplicationCommandData{
 		ID:   objects.Snowflake(1234),
 		Name: "test",
@@ -163,7 +147,45 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 
 	require.NoError(t, err)
 
+	// First test requesting without a handler set
 	w := httptest.NewRecorder()
+	app.ServeHTTP(w, req)
+
+	req, err = generateValid(&objects.Interaction{
+		ID:            objects.Snowflake(1234),
+		Type:          objects.InteractionApplicationCommand,
+		ApplicationID: objects.Snowflake(1234),
+		Data:          data,
+		GuildID:       objects.Snowflake(1234),
+		ChannelID:     objects.Snowflake(1234),
+		Member: &objects.GuildMember{
+			User: &objects.User{
+				ID:            objects.Snowflake(1234),
+				Username:      "Test",
+				Discriminator: "1234",
+			},
+		},
+		Version: 1,
+	}, priv)
+	require.NoError(t, err)
+
+	app.CommandHandler(func(context.Context, *objects.Interaction) *objects.InteractionResponse {
+		return &objects.InteractionResponse{
+			Type: objects.ResponseChannelMessageWithSource,
+			Data: &objects.InteractionMessagesCallbackData{
+				Content: "Success",
+				Files: []*objects.DiscordFile{
+					{
+						Buffer:      bytes.NewBufferString("testing"),
+						Filename:    "test.txt",
+						ContentType: "text/plain",
+					},
+				},
+			},
+		}
+	})
+
+	w = httptest.NewRecorder()
 	app.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
