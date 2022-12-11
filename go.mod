@@ -3,12 +3,11 @@ module wumpgo.dev/wumpgo
 go 1.19
 
 require (
-	github.com/getsentry/sentry-go v0.13.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redsync/redsync/v4 v4.5.1
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-querystring v1.1.0
-	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
+	github.com/nats-io/nats.go v1.21.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cobra v1.6.1
@@ -24,6 +23,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/gin-gonic/gin v1.7.7 // indirect
 	github.com/gobwas/ws v1.1.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -47,9 +47,9 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
