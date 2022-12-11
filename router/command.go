@@ -148,6 +148,26 @@ func newCommandContext(i *objects.Interaction, opts []*objects.ApplicationComman
 	}
 }
 
+// CommandHandler defines a command handler contract
 type CommandHandler interface {
 	Handle(CommandResponder, *CommandContext)
+}
+
+// CommandHandlerFunc is an adapter to allow using functions
+// as command handlers.  Useful for CommandRouter.SetPreHandler
+// and CommandResponder.Defer
+type CommandHandlerFunc func(CommandResponder, *CommandContext)
+
+// Handle implements the CommandHandler interface
+func (f CommandHandlerFunc) Handle(r CommandResponder, ctx *CommandContext) {
+	f(r, ctx)
+}
+
+// CommandMiddleware defines a middleware structure to wrap command handlers
+type CommandMiddleware func(next CommandHandler) CommandHandler
+
+func defaultMiddleware(next CommandHandler) CommandHandler {
+	return CommandHandlerFunc(func(r CommandResponder, ctx *CommandContext) {
+		next.Handle(r, ctx)
+	})
 }
