@@ -1,0 +1,14 @@
+{{- if .Gateway -}}
+package handlers
+
+import (
+    "fmt"
+    
+    "wumpgo.dev/wumpgo/rest"
+    "wumpgo.dev/wumpgo/objects"
+)
+
+func GuildCreate(c *rest.Client, g *objects.GuildCreate) {
+	fmt.Println("Added to guild", g.Name)
+}
+{{- end }}

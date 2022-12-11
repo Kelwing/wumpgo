@@ -1,0 +1,14 @@
+{{- if .Gateway -}}
+package handlers
+
+import (
+    "fmt"
+    
+    "wumpgo.dev/wumpgo/rest"
+    "wumpgo.dev/wumpgo/objects"
+)
+
+func Ready(c *rest.Client, r *objects.Ready) {
+	fmt.Println("Ready as", r.User.Username)
+}
+{{- end }}

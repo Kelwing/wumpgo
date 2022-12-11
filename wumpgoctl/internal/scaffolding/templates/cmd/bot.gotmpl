@@ -2,29 +2,49 @@ package cmd
 
 import (
     "context"
+    {{- if .HTTP }}
     "net/http"
+    {{- end }}
+    {{- if and .Gateway (not .HTTP) }}
+    "os"
+	"os/signal"
+	"syscall"
+    {{- end }}
 
     "{{ .Package }}/pkg/commands"
+    {{- if .Gateway }}
+    "{{ .Package }}/pkg/handlers"
+    {{- end }}
     "github.com/rs/zerolog/log"
     "github.com/sethvargo/go-envconfig"
+    {{- if .Gateway }}
+    "wumpgo.dev/wumpgo/gateway/dispatcher"
+	"wumpgo.dev/wumpgo/gateway/receiver"
+	"wumpgo.dev/wumpgo/gateway/shard"
+    {{- end }}
+    {{- if .HTTP }}
     "wumpgo.dev/wumpgo/interactions"
+    {{- end }}
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
     "wumpgo.dev/wumpgo/router"
 )
 
 type DiscordConfig struct {
-    Token string `env:"TOKEN"`
+    Token     string `env:"TOKEN,required"`
     PublicKey string `env:"PUBLIC_KEY,required"`
 }
-
+{{ if .HTTP }}
 type HTTPConfig struct {
     ListenAddr string `env:"LISTEN_ADDR,default=:8080"`
 }
+{{- end }}
 
 type Config struct {
     Discord *DiscordConfig `env:",prefix=DISCORD_"`
+    {{- if .HTTP }}
     HTTP *HTTPConfig `env:",prefix=HTTP_"`
+    {{- end }}
 }
 
 func Start() {
@@ -35,32 +55,64 @@ func Start() {
         log.Fatal().Err(err).Msg("")
     }
 
-    app, err := interactions.New(config.Discord.PublicKey)
+    client := rest.New(
+        rest.WithToken(objects.TokenTypeBot, config.Discord.Token),
+        rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
+    )
+
+    {{ if .HTTP }}
+    app, err := interactions.New(config.Discord.PublicKey, interactions.WithClient(client))
     if err != nil {
         log.Fatal().Err(err).Msg("")
     }
+    {{- end }}
+    {{ if .Gateway }}
+    s, rec, err := setupGatewayShard(client, config.Discord.Token)
+    if err != nil {
+        log.Fatal().Err(err).Msg("")
+    }
+    {{- end }}
 
-    r := router.NewCommandRouter(router.WithInteractionsApp(app))
+    routerOpts := []router.CommandRouterOption{
+        router.WithClient(client),
+        {{- if .HTTP }}
+        router.WithInteractionsApp(app),
+        {{- end }}
+        {{- if and .Gateway (not .HTTP) }}
+        router.WithGatewayReceiver(rec),
+        {{- end }}
+    }
+
+    r := router.NewCommandRouter(routerOpts...)
     r.MustRegisterCommand(&commands.Ping{})
 
     if config.Discord.Token != "" {
-        err = initCommands(config.Discord.Token, r.Commands())
+        err = initCommands(client, r.Commands())
         if err != nil {
             log.Warn().Err(err).Msg("failed to register commands")
         }
     }
-
+    log.Info().Msg("{{ .BotName }} is now running")
+    {{ if .Gateway }}
+    go func() {
+        if err := s.Run(); err != nil {
+            log.Fatal().Err(err).Msg("")
+        }
+    }()
+    {{- end }}
+    {{ if and .Gateway (not .HTTP) }}
+    sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sc
+    {{- end }}
+    {{ if .HTTP }}
     log.Info().Str("addr", config.HTTP.ListenAddr).Msg("Listening for Discord Interactions")
     log.Fatal().Err(http.ListenAndServe(config.HTTP.ListenAddr, app)).Msg("")
+    {{- end }}
 }
-
-func initCommands(token string, cmds []*objects.ApplicationCommand) error {
+{{if or .Gateway .HTTP }}
+func initCommands(c *rest.Client, cmds []*objects.ApplicationCommand) error {
     log.Info().Msg("Registering commands with Discord")
-
-    c := rest.New(
-        rest.WithToken(objects.TokenTypeBot, token),
-        rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
-    )
 
     ctx := context.Background()
 
@@ -76,3 +128,34 @@ func initCommands(token string, cmds []*objects.ApplicationCommand) error {
 
     return nil
 }
+{{- end }}
+{{ if .Gateway }}
+func setupGatewayShard(client *rest.Client, token string) (*shard.Shard, receiver.Receiver, error) {
+    gateway, err := client.GatewayBot(context.Background())
+	if err != nil {
+		return nil, nil, err
+	}
+    
+    r := receiver.NewLocalReceiver(receiver.WithClient(client))
+	d := dispatcher.NewLocalDispatcher(r)
+
+    r.On("READY", handlers.Ready)
+	r.On("GUILD_CREATE", handlers.GuildCreate)
+
+    s := shard.New(
+		token,
+		shard.WithGatewayURL(gateway.URL),
+		shard.WithIntents(objects.IntentsAllWithoutPrivileged),
+		shard.WithDispatcher(d),
+		shard.WithInitialPresence(objects.UpdatePresence{
+			Activities: []objects.Activity{
+				{
+					Name: "I'm a bot!",
+				},
+			},
+		}),
+	)
+
+    return s, r, nil
+}
+{{- end }}

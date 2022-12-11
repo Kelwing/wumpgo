@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"path/filepath"
@@ -32,6 +33,9 @@ import (
 
 type tmplArgs struct {
 	Package string
+	HTTP    bool
+	Gateway bool
+	BotName string
 }
 
 // initCmd represents the init command
@@ -43,30 +47,45 @@ var initCmd = &cobra.Command{
 
 		pkg, _ := cmd.Flags().GetString("pkg")
 		root, _ := cmd.Flags().GetString("root")
+		http, _ := cmd.Flags().GetBool("http")
+		gateway, _ := cmd.Flags().GetBool("gateway")
+		name, _ := cmd.Flags().GetString("name")
 
 		tArgs := tmplArgs{
 			Package: pkg,
+			HTTP:    http,
+			Gateway: gateway,
+			BotName: name,
 		}
 
 		for filename, tmpl := range t {
 			filename = root + "/" + filename
-			// Check if the directory exists
-			dir := filepath.Dir(filename)
-			if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
-				err := os.MkdirAll(dir, os.ModePerm)
-				if err != nil {
-					return err
-				}
-			}
 
-			f, err := os.Create(filename)
+			buf := &bytes.Buffer{}
+			err := tmpl.Execute(buf, tArgs)
 			if err != nil {
 				return err
 			}
 
-			_ = tmpl.Execute(f, tArgs)
+			if buf.Len() > 0 {
+				// Check if the directory exists
+				dir := filepath.Dir(filename)
+				if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
+					err := os.MkdirAll(dir, os.ModePerm)
+					if err != nil {
+						return err
+					}
+				}
 
-			f.Close()
+				f, err := os.Create(filename)
+				if err != nil {
+					return err
+				}
+
+				f.Write(buf.Bytes())
+
+				f.Close()
+			}
 		}
 
 		return nil
@@ -86,4 +105,7 @@ func init() {
 	// is called directly, e.g.:
 	initCmd.Flags().StringP("pkg", "p", "github.com/example/examplebot", "Base package for project")
 	initCmd.Flags().StringP("root", "d", ".", "Root directory to create the project in")
+	initCmd.Flags().BoolP("http", "w", false, "Include HTTP interactions support")
+	initCmd.Flags().BoolP("gateway", "g", false, "Include gateway support")
+	initCmd.Flags().StringP("name", "n", "ExampleBot", "Name of your bot")
 }
