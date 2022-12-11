@@ -80,7 +80,7 @@ func FailUnknownError(w http.ResponseWriter, jr *json.Encoder) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = jr.Encode(objects.InteractionResponse{
 		Type: objects.ResponseChannelMessageWithSource,
-		Data: &objects.InteractionApplicationCommandCallbackData{
+		Data: &objects.InteractionMessagesCallbackData{
 			Content: "An unknown error occurred",
 			Flags:   objects.MsgFlagEphemeral,
 		},
@@ -112,11 +112,14 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 
 		if resp.Type == objects.ResponseChannelMessageWithSource ||
 			resp.Type == objects.ResponseUpdateMessage {
-			var data *objects.InteractionMessagesCallbackData = nil
-			if d, ok := resp.Data.(objects.InteractionMessagesCallbackData); ok {
+			var data *objects.InteractionMessagesCallbackData
+			switch d := resp.Data.(type) {
+			case objects.InteractionMessagesCallbackData:
 				data = &d
-			} else if d, ok := resp.Data.(*objects.InteractionMessagesCallbackData); ok {
+			case *objects.InteractionMessagesCallbackData:
 				data = d
+			default:
+				data = nil
 			}
 
 			if data != nil && len(data.Files) > 0 {

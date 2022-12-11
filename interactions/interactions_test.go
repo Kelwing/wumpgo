@@ -119,7 +119,7 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 	app.CommandHandler(func(context.Context, *objects.Interaction) *objects.InteractionResponse {
 		return &objects.InteractionResponse{
 			Type: objects.ResponseChannelMessageWithSource,
-			Data: &objects.InteractionApplicationCommandCallbackData{
+			Data: &objects.InteractionMessagesCallbackData{
 				Content: "Success",
 				Files: []*objects.DiscordFile{
 					{
