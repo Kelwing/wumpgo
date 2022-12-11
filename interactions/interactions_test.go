@@ -19,28 +19,28 @@ import (
 	"wumpgo.dev/wumpgo/rest"
 )
 
-func generateValidKeys() (ed25519.PrivateKey, ed25519.PublicKey) {
+func generateValidKeys() (ed25519.PrivateKey, ed25519.PublicKey, error) {
 	pub, priv, err := ed25519.GenerateKey(nil)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
-	return priv, pub
+	return priv, pub, nil
 }
 
-func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey) {
+func PrepareTest() (*App, ed25519.PrivateKey, ed25519.PublicKey, error) {
 	// Generate a keypair for use in testing
 	pub, priv, err := ed25519.GenerateKey(nil)
 	if err != nil {
-		panic(err)
+		return nil, nil, nil, err
 	}
 
 	app, err := New(hex.EncodeToString(pub))
 	if err != nil {
-		panic(err)
+		return nil, nil, nil, err
 	}
 
-	return app, priv, pub
+	return app, priv, pub, nil
 }
 
 // Generates a valid request for the given interaction
@@ -63,7 +63,8 @@ func generateValid(i *objects.Interaction, priv ed25519.PrivateKey) (*http.Reque
 
 func Test_HTTPHandler(t *testing.T) {
 	// Generate a keypair for use in testing
-	app, priv, _ := PrepareTest()
+	app, priv, _, err := PrepareTest()
+	require.NoError(t, err)
 
 	req, err := generateValid(&objects.Interaction{
 		ID:      objects.Snowflake(1234),
@@ -85,11 +86,12 @@ func Test_HTTPHandler(t *testing.T) {
 
 func Test_HTTPHandler_InvalidSignature(t *testing.T) {
 	// Generate a keypair for use in testing
-	app, _, _ := PrepareTest()
+	app, _, _, err := PrepareTest()
+	require.NoError(t, err)
 
 	buf := bytes.Buffer{}
 	enc := json.NewEncoder(&buf)
-	err := enc.Encode(objects.Interaction{
+	err = enc.Encode(objects.Interaction{
 		ID:      objects.Snowflake(1234),
 		Type:    objects.InteractionRequestPing,
 		Version: 1,
@@ -114,23 +116,8 @@ func Test_HTTPHandler_InvalidSignature(t *testing.T) {
 // Test a full interaction and ensure it is properly handled, and returns a valid response
 func Test_HTTPHandler_FullEvent(t *testing.T) {
 	// Generate a keypair for use in testing
-	app, priv, _ := PrepareTest()
-
-	app.CommandHandler(func(context.Context, *objects.Interaction) *objects.InteractionResponse {
-		return &objects.InteractionResponse{
-			Type: objects.ResponseChannelMessageWithSource,
-			Data: &objects.InteractionMessagesCallbackData{
-				Content: "Success",
-				Files: []*objects.DiscordFile{
-					{
-						Buffer:      bytes.NewBufferString("testing"),
-						Filename:    "test.txt",
-						ContentType: "text/plain",
-					},
-				},
-			},
-		}
-	})
+	app, priv, _, err := PrepareTest()
+	require.NoError(t, err)
 
 	data, err := json.Marshal(&objects.ApplicationCommandData{
 		ID:   objects.Snowflake(1234),
@@ -160,7 +147,45 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 
 	require.NoError(t, err)
 
+	// First test requesting without a handler set
 	w := httptest.NewRecorder()
+	app.ServeHTTP(w, req)
+
+	req, err = generateValid(&objects.Interaction{
+		ID:            objects.Snowflake(1234),
+		Type:          objects.InteractionApplicationCommand,
+		ApplicationID: objects.Snowflake(1234),
+		Data:          data,
+		GuildID:       objects.Snowflake(1234),
+		ChannelID:     objects.Snowflake(1234),
+		Member: &objects.GuildMember{
+			User: &objects.User{
+				ID:            objects.Snowflake(1234),
+				Username:      "Test",
+				Discriminator: "1234",
+			},
+		},
+		Version: 1,
+	}, priv)
+	require.NoError(t, err)
+
+	app.CommandHandler(func(context.Context, *objects.Interaction) *objects.InteractionResponse {
+		return &objects.InteractionResponse{
+			Type: objects.ResponseChannelMessageWithSource,
+			Data: &objects.InteractionMessagesCallbackData{
+				Content: "Success",
+				Files: []*objects.DiscordFile{
+					{
+						Buffer:      bytes.NewBufferString("testing"),
+						Filename:    "test.txt",
+						ContentType: "text/plain",
+					},
+				},
+			},
+		}
+	})
+
+	w = httptest.NewRecorder()
 	app.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -174,7 +199,9 @@ func Test_HTTPHandler_FullEvent(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	pub, _ := generateValidKeys()
+	_, pub, err := generateValidKeys()
+	require.NoError(t, err)
+
 	client := rest.New()
 	tests := []struct {
 		PublicKey string
@@ -221,4 +248,59 @@ func TestNew(t *testing.T) {
 			tc.Require(t, app)
 		}
 	}
+}
+
+func TestComponentHandler(t *testing.T) {
+	app, priv, _, err := PrepareTest()
+	require.NoError(t, err)
+
+	app.ComponentHandler(func(context.Context, *objects.Interaction) *objects.InteractionResponse {
+		return &objects.InteractionResponse{
+			Type: objects.ResponseModal,
+			Data: &objects.InteractionModalCallbackData{
+				CustomID: "mycustomID",
+				Title:    "My Modal",
+				Components: []*objects.Component{
+					{
+						Type: objects.ComponentTypeActionRow,
+						Components: []*objects.Component{
+							{
+								Type:  objects.ComponentTypeButton,
+								Style: objects.ButtonStyleLink,
+								URL:   "https://wumpgo.dev",
+							},
+						},
+					},
+				},
+			},
+		}
+	})
+
+	data, err := json.Marshal(&objects.MessageComponentData{
+		CustomID:      "test",
+		ComponentType: objects.ComponentTypeButton,
+	})
+	require.NoError(t, err)
+
+	req, err := generateValid(&objects.Interaction{
+		ID:            objects.Snowflake(1234),
+		Type:          objects.InteractionComponent,
+		ApplicationID: objects.Snowflake(1234),
+		Data:          data,
+		GuildID:       objects.Snowflake(1234),
+		ChannelID:     objects.Snowflake(1234),
+		Member: &objects.GuildMember{
+			User: &objects.User{
+				ID:            objects.Snowflake(1234),
+				Username:      "Test",
+				Discriminator: "1234",
+			},
+		},
+		Version: 1,
+	}, priv)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+	app.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
 }
