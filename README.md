@@ -6,7 +6,13 @@
 
 A work in progress Golang Discord library.
 
+[![Go Reference](https://pkg.go.dev/badge/wumpgo.dev/wumpgo.svg)](https://pkg.go.dev/wumpgo.dev/wumpgo)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Kelwing/wumpgo)
+![GitHub](https://img.shields.io/github/license/Kelwing/wumpgo)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Kelwing/wumpgo)
+
 [![](https://dcbadge.vercel.app/api/server/eZFEhEH26H)](https://discord.gg/eZFEhEH26H)
+
 
 ## Installation
 

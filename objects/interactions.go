@@ -172,13 +172,13 @@ type ApplicationCommandData struct {
 	ID       Snowflake                       `json:"id"`
 	Name     string                          `json:"name"`
 	Type     ApplicationCommandType          `json:"type"`
-	Resolved ApplicationCommandDataResolved  `json:"resolved"`
+	Resolved ResolvedData                    `json:"resolved"`
 	Options  []*ApplicationCommandDataOption `json:"options"`
 	GuildID  Snowflake                       `json:"guild_id"`
 	TargetID Snowflake                       `json:"target_id"`
 }
 
-type ApplicationCommandDataResolved struct {
+type ResolvedData struct {
 	Users       map[Snowflake]User        `json:"users"`
 	Members     map[Snowflake]GuildMember `json:"members"`
 	Roles       map[Snowflake]Role        `json:"roles"`
@@ -204,6 +204,9 @@ type Interaction struct {
 	GuildLocale    string                    `json:"guild_locale"`
 }
 
+// Deprecated: InteractionApplicationCommandCallbackData is deprecated.
+// Please see InteractionMessagesCallbackData, InteractionAutocompleteCallbackData,
+// and InteractionModalCallbackData
 type InteractionApplicationCommandCallbackData struct {
 	TTS             bool                              `json:"tts,omitempty"`
 	Content         string                            `json:"content,omitempty"`
@@ -219,9 +222,30 @@ type InteractionApplicationCommandCallbackData struct {
 	Title    string `json:"title,omitempty"`
 }
 
+type InteractionMessagesCallbackData struct {
+	TTS             bool             `json:"tts,omitempty"`
+	Content         string           `json:"content,omitempty"`
+	Embeds          []*Embed         `json:"embeds,omitempty"`
+	AllowedMentions *AllowedMentions `json:"allowed_mentions,omitempty"`
+	Flags           MessageFlag      `json:"flags,omitempty"`
+	Components      []*Component     `json:"components"`
+	Attachments     []*Attachment    `json:"attachments,omitempty"`
+	Files           []*DiscordFile   `json:"-"`
+}
+
+type InteractionAutocompleteCallbackData struct {
+	Choices []*ApplicationCommandOptionChoice `json:"choices,omitempty"`
+}
+
+type InteractionModalCallbackData struct {
+	CustomID   string       `json:"custom_id,omitempty"`
+	Title      string       `json:"title,omitempty"`
+	Components []*Component `json:"components"`
+}
+
 type InteractionResponse struct {
-	Type ResponseType                               `json:"type"`
-	Data *InteractionApplicationCommandCallbackData `json:"data,omitempty"`
+	Type ResponseType `json:"type"`
+	Data interface{}  `json:"data,omitempty"`
 }
 
 type MessageComponentData struct {

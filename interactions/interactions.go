@@ -110,37 +110,46 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 			return
 		}
 
-		if (resp.Type == objects.ResponseChannelMessageWithSource ||
-			resp.Type == objects.ResponseUpdateMessage) && len(resp.Data.Files) > 0 {
-			m := multipart.NewWriter(w)
-			w.Header().Set("Content-Type", m.FormDataContentType())
-			for n, file := range resp.Data.Files {
-				// Generate the attachment object, assign a number to it, and write it to the multipart writer
-				attach, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
-				if err != nil {
-					a.logger.Error().Err(err).Msg("failed to generate attachment")
-					continue
-				}
-				resp.Data.Attachments = append(resp.Data.Attachments, attach)
+		if resp.Type == objects.ResponseChannelMessageWithSource ||
+			resp.Type == objects.ResponseUpdateMessage {
+			var data *objects.InteractionMessagesCallbackData = nil
+			if d, ok := resp.Data.(objects.InteractionMessagesCallbackData); ok {
+				data = &d
+			} else if d, ok := resp.Data.(*objects.InteractionMessagesCallbackData); ok {
+				data = d
 			}
 
-			if field, err := m.CreateFormField("payload_json"); err != nil {
-				a.logger.Error().Err(err).Msg("failed to create payload_json form field")
-				FailUnknownError(w, jr)
-				return
-			} else {
-				if err := json.NewEncoder(field).Encode(resp); err != nil {
-					a.logger.Error().Err(err).Msg("failed to encode payload_json")
+			if data != nil && len(data.Files) > 0 {
+				m := multipart.NewWriter(w)
+				w.Header().Set("Content-Type", m.FormDataContentType())
+				for n, file := range data.Files {
+					// Generate the attachment object, assign a number to it, and write it to the multipart writer
+					attach, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+					if err != nil {
+						a.logger.Error().Err(err).Msg("failed to generate attachment")
+						continue
+					}
+					data.Attachments = append(data.Attachments, attach)
+				}
+
+				if field, err := m.CreateFormField("payload_json"); err != nil {
+					a.logger.Error().Err(err).Msg("failed to create payload_json form field")
+					FailUnknownError(w, jr)
+					return
+				} else {
+					if err := json.NewEncoder(field).Encode(resp); err != nil {
+						a.logger.Error().Err(err).Msg("failed to encode payload_json")
+						FailUnknownError(w, jr)
+						return
+					}
+				}
+				if err := m.Close(); err != nil {
+					a.logger.Error().Err(err).Msg("failed to close multipart writer")
 					FailUnknownError(w, jr)
 					return
 				}
-			}
-			if err := m.Close(); err != nil {
-				a.logger.Error().Err(err).Msg("failed to close multipart writer")
-				FailUnknownError(w, jr)
 				return
 			}
-			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		err = jr.Encode(resp)
