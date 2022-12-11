@@ -5,8 +5,6 @@ import (
 
 	"go.uber.org/atomic"
 	"wumpgo.dev/wumpgo/objects"
-
-	"github.com/getsentry/sentry-go"
 )
 
 type Heartbeat struct {
@@ -33,11 +31,6 @@ func (h *Heartbeat) heartbeat(interval int64) {
 		select {
 		case <-ticker.C:
 			if !h.acked.Load() {
-				evt := sentry.NewEvent()
-				evt.Message = "Heartbeat ACK not received"
-				evt.Tags = map[string]string{
-					"last_heartbeat": h.lastHeartbeat.Format(time.RFC3339),
-				}
 				h.gw.logger.Error().Msg("Discord missed last heartbeat")
 				h.gw.conn.Close()
 				return
