@@ -10,6 +10,7 @@ A work in progress Golang Discord library.
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Kelwing/wumpgo)
 ![GitHub](https://img.shields.io/github/license/Kelwing/wumpgo)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Kelwing/wumpgo)
+[![codecov](https://codecov.io/gh/Kelwing/wumpgo/branch/main/graph/badge.svg?token=LBVL76CF41)](https://codecov.io/gh/Kelwing/wumpgo)
 
 [![](https://dcbadge.vercel.app/api/server/eZFEhEH26H)](https://discord.gg/eZFEhEH26H)
 

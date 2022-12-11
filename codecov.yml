@@ -1,12 +1,12 @@
 coverage:
-    range: 50..90
-    round: down
-    precision: 2
-    notify:
-      slack:
-        default:
-          url: secret:v2::bGs5fdiC4yucY3+kqxYoM+JQHHe47qd9xPRVVMnNQGYPTQa0E6H1Rh60MnpsOyEys23Kfm+Jv9iP+s3dRPRty0XIohWX6ElXuFmqC8Dg0hvs51MCFvf3J1ahH8Udbxnpb0WKNQSS3AKucliQUzwIULVk+9VkJOClxBQiOSaU1WX06q5mPO8O4E+WPYruyLJ9ZYiENmAH/3e06TJO+pom/pleFcfcsBLr2c9HG5wsS/c=
-          branches:
-            - main
-          threshold: 1%
-          only_pulls: false
+  range: 50..90
+  round: down
+  precision: 2
+  notify:
+    slack:
+      default:
+        url: secret:v2::bGs5fdiC4yucY3+kqxYoM+JQHHe47qd9xPRVVMnNQGYPTQa0E6H1Rh60MnpsOyEys23Kfm+Jv9iP+s3dRPRty0XIohWX6ElXuFmqC8Dg0hvs51MCFvf3J1ahH8Udbxnpb0WKNQSS3AKucliQUzwIULVk+9VkJOClxBQiOSaU1WX06q5mPO8O4E+WPYruyLJ9ZYiENmAH/3e06TJO+pom/pleFcfcsBLr2c9HG5wsS/c=
+        branches:
+          - main
+        threshold: 1%
+        only_pulls: false
