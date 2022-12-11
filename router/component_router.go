@@ -8,16 +8,29 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 )
 
-// Component is used to define a Discord component which can be inserted into the router.
-// Components should also implement one or many of ComponentHandler and ModalSubmitHandler.
-type Component interface {
-	// Glob is used to define the glob pattern for the component. This should be unique.
-	Glob() string
+// ComponentRouterContext is used to define the context for a component response.
+type ComponentRouterContext struct {
+}
+
+// ComponentResponder is used to respond to a component interaction.
+type ComponentResponder interface {
+}
+
+// ComponentHandler is used to define a handler for a component result.
+type ComponentHandler interface {
+	// Component is used ot handle routing to the component type.
+	Component(ctx *ComponentRouterContext, c ComponentResponder) error
+}
+
+// ModalSubmitHandler is used to define a handler for a modal submit.
+type ModalSubmitHandler interface {
+	// ModalSubmit is used to handle routing to the modal submit type.
+	ModalSubmit(ctx *ComponentRouterContext, c ComponentResponder) error
 }
 
 type globComponent struct {
 	glob glob.Glob
-	c    Component
+	c    any
 }
 
 type routeManager struct {
@@ -27,7 +40,7 @@ type routeManager struct {
 }
 
 // Gets the route. Returns nil if not found.
-func (r *routeManager) getRoute(type_ objects.InteractionType, id string) Component {
+func (r *routeManager) getRoute(type_ objects.InteractionType, id string) any {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -47,7 +60,7 @@ func (r *routeManager) getRoute(type_ objects.InteractionType, id string) Compon
 }
 
 // Sets the route. Returns an error if something goes wrong or if the glob is not unique.
-func (r *routeManager) setRoute(type_ objects.InteractionType, pattern string, c Component) error {
+func (r *routeManager) setRoute(type_ objects.InteractionType, pattern string, c any) error {
 	// Check if the component is nil.
 	if c == nil {
 		return fmt.Errorf("component is nil")
@@ -97,4 +110,42 @@ func (r *routeManager) setRoute(type_ objects.InteractionType, pattern string, c
 // ComponentRouter is used to route Discord components to their respective handlers.
 type ComponentRouter struct {
 	routeManager
+}
+
+// Register is used to register a component handler. The component handler must also implement one or many of
+// ComponentHandler and ModalSubmitHandler.
+func (r *ComponentRouter) Register(pattern string, c any) error {
+	implements := false
+
+	if x, ok := c.(ComponentHandler); ok {
+		if err := r.setRoute(objects.InteractionComponent, pattern, x); err != nil {
+			return err
+		}
+		implements = true
+	}
+
+	if x, ok := c.(ModalSubmitHandler); ok {
+		if err := r.setRoute(objects.InteractionModalSubmit, pattern, x); err != nil {
+			return err
+		}
+		implements = true
+	}
+
+	if !implements {
+		return fmt.Errorf("component does not implement any of ComponentHandler or ModalSubmitHandler")
+	}
+	return nil
+}
+
+// MustRegister is used to register a component handler. The component handler must also implement one or many of
+// ComponentHandler and ModalSubmitHandler. This function panics if an error occurs.
+func (r *ComponentRouter) MustRegister(pattern string, c any) {
+	if err := r.Register(pattern, c); err != nil {
+		panic(err)
+	}
+}
+
+// Route is used to route a component interaction to its respective handler.
+func (r *ComponentRouter) Route() {
+
 }
