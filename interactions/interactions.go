@@ -8,7 +8,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -22,8 +21,6 @@ type (
 
 // App is the primary interactions server
 type App struct {
-	extraProps          map[string]interface{}
-	propsLock           sync.RWMutex
 	logger              zerolog.Logger
 	restClient          *rest.Client
 	commandHandler      HandlerFunc
@@ -41,9 +38,8 @@ func New(publicKey string, opts ...InteractionOption) (*App, error) {
 	}
 
 	a := &App{
-		extraProps: make(map[string]interface{}),
-		pubKey:     pubKey,
-		logger:     zerolog.Nop(),
+		pubKey: pubKey,
+		logger: zerolog.Nop(),
 	}
 
 	for _, o := range opts {
@@ -230,21 +226,6 @@ func (a *App) ProcessRequest(ctx context.Context, data []byte) (resp *objects.In
 	}
 
 	return
-}
-
-// Get retrieves a value from the global context
-func (a *App) Get(key string) (interface{}, bool) {
-	a.propsLock.RLock()
-	defer a.propsLock.RUnlock()
-	obj, ok := a.extraProps[key]
-	return obj, ok
-}
-
-// Set stores a value in the global context.  This is suitable for things like database connections.
-func (a *App) Set(key string, obj interface{}) {
-	a.propsLock.Lock()
-	defer a.propsLock.Unlock()
-	a.extraProps[key] = obj
 }
 
 // Rest exposes the internal Rest client so you can make calls to the Discord API
