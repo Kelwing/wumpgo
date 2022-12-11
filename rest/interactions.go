@@ -9,24 +9,34 @@ import (
 	"net/http"
 	"net/url"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/google/go-querystring/query"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func (c *Client) CreateInteractionResponse(ctx context.Context, interactionID objects.SnowflakeObject, token string, response *objects.InteractionResponse) error {
 	var contentType string
 	var body []byte
 
-	if len(response.Data.Files) > 0 {
+	var data *objects.InteractionMessagesCallbackData
+	switch d := response.Data.(type) {
+	case objects.InteractionMessagesCallbackData:
+		data = &d
+	case *objects.InteractionMessagesCallbackData:
+		data = d
+	default:
+		data = nil
+	}
+
+	if data != nil && len(data.Files) > 0 {
 		buffer := new(bytes.Buffer)
 		m := multipart.NewWriter(buffer)
 
-		for n, file := range response.Data.Files {
+		for n, file := range data.Files {
 			a, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
 			if err != nil {
 				continue
 			}
-			response.Data.Attachments = append(response.Data.Attachments, a)
+			data.Attachments = append(data.Attachments, a)
 		}
 
 		if w, err := m.CreateFormField("payload_json"); err != nil {
