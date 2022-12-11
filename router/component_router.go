@@ -9,6 +9,7 @@ import (
 )
 
 // Component is used to define a Discord component which can be inserted into the router.
+// Components should also implement one or many of ComponentHandler and ModalSubmitHandler.
 type Component interface {
 	// Glob is used to define the glob pattern for the component. This should be unique.
 	Glob() string
@@ -19,15 +20,14 @@ type globComponent struct {
 	c    Component
 }
 
-// ComponentRouter is used to route Discord components to their respective handlers.
-type ComponentRouter struct {
+type routeManager struct {
 	mu       sync.RWMutex
 	routes   map[objects.InteractionType][]globComponent
 	setGlobs map[objects.InteractionType]map[string]struct{}
 }
 
 // Gets the route. Returns nil if not found.
-func (r *ComponentRouter) getRoute(type_ objects.InteractionType, id string) Component {
+func (r *routeManager) getRoute(type_ objects.InteractionType, id string) Component {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -47,7 +47,7 @@ func (r *ComponentRouter) getRoute(type_ objects.InteractionType, id string) Com
 }
 
 // Sets the route. Returns an error if something goes wrong or if the glob is not unique.
-func (r *ComponentRouter) setRoute(type_ objects.InteractionType, pattern string, c Component) error {
+func (r *routeManager) setRoute(type_ objects.InteractionType, pattern string, c Component) error {
 	// Check if the component is nil.
 	if c == nil {
 		return fmt.Errorf("component is nil")
@@ -92,4 +92,9 @@ func (r *ComponentRouter) setRoute(type_ objects.InteractionType, pattern string
 
 	// Return no errors!
 	return nil
+}
+
+// ComponentRouter is used to route Discord components to their respective handlers.
+type ComponentRouter struct {
+	routeManager
 }
