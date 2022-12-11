@@ -1,6 +1,6 @@
 package permissions
 
-//go:generate stringer -type=PermissionBit -trimprefix=PermissionBit -output bits_string.go
+//go:generate enumer -type=PermissionBit -trimprefix=PermissionBit -output bits_string.go
 
 import (
 	"encoding/json"

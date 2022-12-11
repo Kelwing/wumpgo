@@ -1,0 +1,9 @@
+package commands
+
+import "wumpgo.dev/wumpgo/router"
+
+type Ping struct {}
+
+func (p Ping) Handle(r router.CommandResponder, ctx *router.CommandContext) {
+    r.Content("Pong!")
+}

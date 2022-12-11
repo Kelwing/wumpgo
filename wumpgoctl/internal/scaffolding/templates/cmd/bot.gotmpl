@@ -1,0 +1,78 @@
+package cmd
+
+import (
+    "context"
+    "net/http"
+
+    "{{ .Package }}/pkg/commands"
+    "github.com/rs/zerolog/log"
+    "github.com/sethvargo/go-envconfig"
+    "wumpgo.dev/wumpgo/interactions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
+    "wumpgo.dev/wumpgo/router"
+)
+
+type DiscordConfig struct {
+    Token string `env:"TOKEN"`
+    PublicKey string `env:"PUBLIC_KEY,required"`
+}
+
+type HTTPConfig struct {
+    ListenAddr string `env:"LISTEN_ADDR,default=:8080"`
+}
+
+type Config struct {
+    Discord *DiscordConfig `env:",prefix=DISCORD_"`
+    HTTP *HTTPConfig `env:",prefix=HTTP_"`
+}
+
+func Start() {
+    ctx := context.Background()
+
+    var config Config
+    if err := envconfig.Process(ctx, &config); err != nil {
+        log.Fatal().Err(err).Msg("")
+    }
+
+    app, err := interactions.New(config.Discord.PublicKey)
+    if err != nil {
+        log.Fatal().Err(err).Msg("")
+    }
+
+    r := router.NewCommandRouter(router.WithInteractionsApp(app))
+    r.MustRegisterCommand(&commands.Ping{})
+
+    if config.Discord.Token != "" {
+        err = initCommands(config.Discord.Token, r.Commands())
+        if err != nil {
+            log.Warn().Err(err).Msg("failed to register commands")
+        }
+    }
+
+    log.Info().Str("addr", config.HTTP.ListenAddr).Msg("Listening for Discord Interactions")
+    log.Fatal().Err(http.ListenAndServe(config.HTTP.ListenAddr, app)).Msg("")
+}
+
+func initCommands(token string, cmds []*objects.ApplicationCommand) error {
+    log.Info().Msg("Registering commands with Discord")
+
+    c := rest.New(
+        rest.WithToken(objects.TokenTypeBot, token),
+        rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
+    )
+
+    ctx := context.Background()
+
+    me, err := c.GetCurrentUser(ctx)
+    if err != nil {
+        return err
+    }
+
+    _, err = c.BulkOverwriteGlobalCommands(ctx, me.ID, cmds)
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
