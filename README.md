@@ -18,7 +18,7 @@ A work in progress Golang Discord library.
 ## Installation
 
 ```
-go get -u wumpgo.dev/wumpgo@v0.0.2
+go get -u wumpgo.dev/wumpgo@v0.0.3
 ```
 
 ## Usage
