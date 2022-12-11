@@ -11,6 +11,7 @@ import (
 	"go/token"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -64,15 +65,15 @@ func main() {
 
 func processPackage(ctx context.Context, fs *token.FileSet, name string, pkg *ast.Package) {
 	log.Ctx(ctx).Info().Msgf("processing package %s", name)
-	for _, f := range pkg.Files {
+	for fileName, f := range pkg.Files {
 		ctx := log.Ctx(ctx).With().Str("package", name).Logger().WithContext(ctx)
 		ctx = context.WithValue(ctx, ctxKey("package"), name)
-		processFile(ctx, fs, f)
+		processFile(ctx, fs, fileName, f)
 	}
 }
 
-func processFile(ctx context.Context, fs *token.FileSet, file *ast.File) {
-	log.Ctx(ctx).Info().Msgf("processing file %s", file.Name.Name)
+func processFile(ctx context.Context, fs *token.FileSet, name string, file *ast.File) {
+	log.Ctx(ctx).Info().Msgf("processing file %s", filepath.Base(name))
 
 	ctx = log.Ctx(ctx).With().Str("file", file.Name.Name).Logger().WithContext(ctx)
 	p, err := doc.NewFromFiles(fs, []*ast.File{file}, *dir)
@@ -81,7 +82,9 @@ func processFile(ctx context.Context, fs *token.FileSet, file *ast.File) {
 		return
 	}
 
-	generate(ctx, fmt.Sprintf("%s/%s_cmd_gen.go", *dir, file.Name.Name), p.Types)
+	baseName := strings.Split(filepath.Base(name), ".")[0]
+	outputName := fmt.Sprintf("%s/%s_cmd_gen.go", *dir, baseName)
+	generate(ctx, outputName, p.Types)
 }
 
 type tmplStruct struct {
@@ -101,16 +104,10 @@ type tmplArg struct {
 	Package string
 	Structs []tmplStruct
 	CmdLine string
+	Imports []string
 }
 
 func generate(ctx context.Context, outputFileName string, types []*doc.Type) {
-	f, err := os.Create(outputFileName)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("filename", outputFileName).
-			Msg("failed to create output file")
-	}
-	defer f.Close()
-
 	args := tmplArg{
 		Structs: make([]tmplStruct, 0),
 		Package: ctx.Value(ctxKey("package")).(string),
@@ -119,7 +116,10 @@ func generate(ctx context.Context, outputFileName string, types []*doc.Type) {
 
 	for _, t := range types {
 		log.Ctx(ctx).Info().Msgf("parsing comments for type %s", t.Name)
-		args.Structs = append(args.Structs, parseComments(ctx, t))
+		s, ok := parseComments(ctx, &args, t)
+		if ok {
+			args.Structs = append(args.Structs, s)
+		}
 	}
 
 	tmpl, err := template.ParseFS(templates, "templates/*")
@@ -127,8 +127,16 @@ func generate(ctx context.Context, outputFileName string, types []*doc.Type) {
 		log.Fatal().Err(err).Msg("failed to load templates")
 	}
 
-	if err := tmpl.Execute(f, args); err != nil {
-		log.Error().Err(err).Msg("failed to write output")
+	if len(args.Structs) > 0 {
+		f, err := os.Create(outputFileName)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).Str("filename", outputFileName).
+				Msg("failed to create output file")
+		}
+		defer f.Close()
+		if err := tmpl.Execute(f, args); err != nil {
+			log.Error().Err(err).Msg("failed to write output")
+		}
 	}
 }
 
@@ -146,7 +154,7 @@ func parseType(arg string) *objects.ApplicationCommandType {
 	return nil
 }
 
-func parseComments(ctx context.Context, t *doc.Type) tmplStruct {
+func parseComments(ctx context.Context, args *tmplArg, t *doc.Type) (tmplStruct, bool) {
 	s := tmplStruct{
 		Name:                           t.Name,
 		NameLocalizations:              make(map[string]string),
@@ -154,6 +162,8 @@ func parseComments(ctx context.Context, t *doc.Type) tmplStruct {
 		OptionNameLocalizations:        make(map[string]map[string]string),
 		OptionDescriptionLocalizations: make(map[string]map[string]string),
 	}
+
+	hasOpts := false
 
 	commentLines := strings.Split(t.Doc, "\n")
 	for _, line := range commentLines {
@@ -167,6 +177,8 @@ func parseComments(ctx context.Context, t *doc.Type) tmplStruct {
 			option := parts[0]
 			arg := parts[1]
 
+			hasOpts = true
+
 			if OptionName.Match(option) {
 				s.CommandName = arg
 			} else if OptionDescription.Match(option) {
@@ -176,8 +188,9 @@ func parseComments(ctx context.Context, t *doc.Type) tmplStruct {
 				s.NameLocalizations[optionParts[1]] = arg
 			} else if OptionLocalizedDescription.Match(option) {
 				optionParts := strings.Split(option, ".")
-				s.NameLocalizations[optionParts[1]] = arg
+				s.DescriptionLocalizations[optionParts[1]] = arg
 			} else if OptionType.Match(option) {
+				args.Imports = append(args.Imports, "wumpgo.dev/wumpgo/objects")
 				s.Type = parseType(arg)
 			} else if OptionOptionLocalizedName.Match(option) {
 				optionParts := strings.Split(option, ".")
@@ -198,6 +211,7 @@ func parseComments(ctx context.Context, t *doc.Type) tmplStruct {
 				dm, _ := strconv.ParseBool(arg)
 				s.DM = dm
 			} else if OptionPermissions.Match(option) {
+				args.Imports = append(args.Imports, "wumpgo.dev/wumpgo/objects/permissions")
 				perms := strings.Split(arg, ",")
 				for _, p := range perms {
 					bit, err := permissions.PermissionBitString(strings.TrimSpace(p))
@@ -211,5 +225,5 @@ func parseComments(ctx context.Context, t *doc.Type) tmplStruct {
 		}
 	}
 
-	return s
+	return s, hasOpts
 }
