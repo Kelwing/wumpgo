@@ -14,8 +14,6 @@ A work in progress Golang Discord library.
 go get -u wumpgo.dev/wumpgo@v0.0.2
 ```
 
----
-
 ## Usage
 
 Checkout the [examples](examples/) for simple usage examples.  If you're looking to get started quickly, check out [wumpgoctl](#wumpgoctl).
