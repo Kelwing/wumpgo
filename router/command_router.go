@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
 )
@@ -125,7 +126,30 @@ func (r *CommandRouter) routeCommand(ctx context.Context, i *objects.Interaction
 
 	handler.Handle(resp, cmdCtx)
 
+	if resp.modalData != nil {
+		resp.response.Data = resp.modalData
+	} else {
+		resp.response.Data = resp.messageData
+	}
+
 	return resp.response
+}
+
+func (r *CommandRouter) routeGatewayCommand(c *rest.Client, i *objects.Interaction) {
+	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
+	ctx := context.Background()
+
+	if i.Type != objects.InteractionApplicationCommand {
+		return
+	}
+
+	resp := r.routeCommand(ctx, i)
+
+	err := r.client.CreateInteractionResponse(ctx, i.ID, i.Token, resp)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to create interaction response")
+		r.errHandler(nil, err)
+	}
 }
 
 func defaultErrorHandler() ErrorHandler {

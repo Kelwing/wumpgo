@@ -1,6 +1,7 @@
 package router
 
 import (
+	"wumpgo.dev/wumpgo/gateway/receiver"
 	"wumpgo.dev/wumpgo/interactions"
 	"wumpgo.dev/wumpgo/rest"
 )
@@ -29,5 +30,13 @@ func WithInitialCommands(cmds ...any) CommandRouterOption {
 func WithClient(c *rest.Client) CommandRouterOption {
 	return func(r *CommandRouter) {
 		r.client = c
+	}
+}
+
+// WithGatewayReceiver configures the router to listen for interactions from the gateway
+// ass opposed to a webhook
+func WithGatewayReceiver(rec receiver.Receiver) CommandRouterOption {
+	return func(r *CommandRouter) {
+		rec.On("INTERACTION_CREATE", r.routeGatewayCommand)
 	}
 }
