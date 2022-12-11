@@ -6,7 +6,7 @@
 
 A work in progress Golang Discord library.
 
-[![](https://dcbadge.vercel.app/api/server/WEsjKwHqSP)](https://discord.gg/WEsjKwHqSP)
+[![](https://dcbadge.vercel.app/api/server/eZFEhEH26H)](https://discord.gg/eZFEhEH26H)
 
 ## Installation
 
