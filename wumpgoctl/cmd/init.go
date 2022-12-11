@@ -82,7 +82,9 @@ var initCmd = &cobra.Command{
 					return err
 				}
 
-				f.Write(buf.Bytes())
+				if _, err := f.Write(buf.Bytes()); err != nil {
+					return err
+				}
 
 				f.Close()
 			}
