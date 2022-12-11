@@ -14,18 +14,20 @@ import (
 type ErrorHandler func(r CommandResponder, err error)
 
 type CommandRouter struct {
-	commandHandlers map[string]CommandHandler
-	commands        []*objects.ApplicationCommand
-	errHandler      ErrorHandler
-	client          *rest.Client
+	commandHandlers  map[string]CommandHandler
+	commands         []*objects.ApplicationCommand
+	errHandler       ErrorHandler
+	client           *rest.Client
+	globalMiddleware CommandMiddleware
 }
 
 func NewCommandRouter(o ...CommandRouterOption) *CommandRouter {
 	r := &CommandRouter{
-		commandHandlers: make(map[string]CommandHandler),
-		commands:        make([]*objects.ApplicationCommand, 0),
-		errHandler:      defaultErrorHandler(),
-		client:          rest.New(rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter())),
+		commandHandlers:  make(map[string]CommandHandler),
+		commands:         make([]*objects.ApplicationCommand, 0),
+		errHandler:       defaultErrorHandler(),
+		client:           rest.New(rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter())),
+		globalMiddleware: defaultMiddleware,
 	}
 
 	for _, opt := range o {
@@ -65,6 +67,13 @@ func (r *CommandRouter) MustRegisterCommand(cmd any) {
 // rest.Client.BulkOverwriteGlobalCommands
 func (r *CommandRouter) Commands() []*objects.ApplicationCommand {
 	return r.commands
+}
+
+// SetGlobalMiddleware sets a function to be called before the exeuction
+// of any command handler.  Can be used to attach things to the
+// context.
+func (r *CommandRouter) SetGlobalMiddleware(h CommandMiddleware) {
+	r.globalMiddleware = h
 }
 
 func (r *CommandRouter) getCommandHandler(i *objects.Interaction) (CommandHandler, []*objects.ApplicationCommandDataOption, error) {
@@ -123,7 +132,7 @@ func (r *CommandRouter) routeCommand(ctx context.Context, i *objects.Interaction
 		cmdCtx.client = r.client
 	}
 
-	handler.Handle(resp, cmdCtx)
+	r.globalMiddleware(handler).Handle(resp, cmdCtx)
 
 	return resp.response
 }
