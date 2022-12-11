@@ -32,18 +32,21 @@ type CommandResponder interface {
 	View(View) CommandResponder
 	// Attach adds a file attachment to the response by Attachment ID
 	Attach(f *objects.DiscordFile) CommandResponder
+	// Responds with a modal instead of a message
+	// WARNING: this will override all other options you have set
+	Modal(string, string, View) CommandResponder
 }
 
 func newDefaultResponder() *defaultResponder {
 	return &defaultResponder{
 		response: &objects.InteractionResponse{
 			Type: objects.ResponseChannelMessageWithSource,
-			Data: &objects.InteractionApplicationCommandCallbackData{
-				Embeds:      make([]*objects.Embed, 0),
-				Components:  make([]*objects.Component, 0),
-				Attachments: make([]*objects.Attachment, 0),
-				Files:       make([]*objects.DiscordFile, 0),
-			},
+		},
+		messageData: &objects.InteractionMessagesCallbackData{
+			Embeds:      make([]*objects.Embed, 0),
+			Components:  make([]*objects.Component, 0),
+			Attachments: make([]*objects.Attachment, 0),
+			Files:       make([]*objects.DiscordFile, 0),
 		},
 		deferFunc: nil,
 		view:      nil,
@@ -52,10 +55,12 @@ func newDefaultResponder() *defaultResponder {
 }
 
 type defaultResponder struct {
-	response  *objects.InteractionResponse
-	deferFunc CommandHandler
-	view      View
-	files     []*objects.DiscordFile
+	response    *objects.InteractionResponse
+	messageData *objects.InteractionMessagesCallbackData
+	modalData   *objects.InteractionModalCallbackData
+	deferFunc   CommandHandler
+	view        View
+	files       []*objects.DiscordFile
 }
 
 func (r *defaultResponder) WithSource() CommandResponder {
@@ -69,37 +74,37 @@ func (r *defaultResponder) Defer(f CommandHandler) CommandResponder {
 }
 
 func (r *defaultResponder) TTS() CommandResponder {
-	r.response.Data.TTS = true
+	r.messageData.TTS = true
 	return r
 }
 
 func (r *defaultResponder) Content(c string) CommandResponder {
-	r.response.Data.Content = c
+	r.messageData.Content = c
 	return r
 }
 
 func (r *defaultResponder) Embed(e *objects.Embed) CommandResponder {
-	r.response.Data.Embeds = append(r.response.Data.Embeds, e)
+	r.messageData.Embeds = append(r.messageData.Embeds, e)
 	return r
 }
 
 func (r *defaultResponder) Embeds(e []*objects.Embed) CommandResponder {
-	r.response.Data.Embeds = e
+	r.messageData.Embeds = e
 	return r
 }
 
 func (r *defaultResponder) AllowedMentions(m *objects.AllowedMentions) CommandResponder {
-	r.response.Data.AllowedMentions = m
+	r.messageData.AllowedMentions = m
 	return r
 }
 
 func (r *defaultResponder) SupressEmbeds() CommandResponder {
-	r.response.Data.Flags |= objects.MsgFlagSupressEmbeds
+	r.messageData.Flags |= objects.MsgFlagSupressEmbeds
 	return r
 }
 
 func (r *defaultResponder) Ephemeral() CommandResponder {
-	r.response.Data.Flags |= objects.MsgFlagEphemeral
+	r.messageData.Flags |= objects.MsgFlagEphemeral
 	return r
 }
 
@@ -110,6 +115,17 @@ func (r *defaultResponder) View(v View) CommandResponder {
 
 func (r *defaultResponder) Attach(f *objects.DiscordFile) CommandResponder {
 	r.files = append(r.files, f)
+	return r
+}
+
+func (r *defaultResponder) Modal(customID string, title string, v View) CommandResponder {
+	r.response.Type = objects.ResponseModal
+
+	r.modalData = &objects.InteractionModalCallbackData{
+		CustomID: customID,
+		Title:    title,
+	}
+
 	return r
 }
 

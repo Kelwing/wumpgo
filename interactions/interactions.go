@@ -8,7 +8,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -22,8 +21,6 @@ type (
 
 // App is the primary interactions server
 type App struct {
-	extraProps          map[string]interface{}
-	propsLock           sync.RWMutex
 	logger              zerolog.Logger
 	restClient          *rest.Client
 	commandHandler      HandlerFunc
@@ -41,9 +38,8 @@ func New(publicKey string, opts ...InteractionOption) (*App, error) {
 	}
 
 	a := &App{
-		extraProps: make(map[string]interface{}),
-		pubKey:     pubKey,
-		logger:     zerolog.Nop(),
+		pubKey: pubKey,
+		logger: zerolog.Nop(),
 	}
 
 	for _, o := range opts {
@@ -80,7 +76,7 @@ func FailUnknownError(w http.ResponseWriter, jr *json.Encoder) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = jr.Encode(objects.InteractionResponse{
 		Type: objects.ResponseChannelMessageWithSource,
-		Data: &objects.InteractionApplicationCommandCallbackData{
+		Data: &objects.InteractionMessagesCallbackData{
 			Content: "An unknown error occurred",
 			Flags:   objects.MsgFlagEphemeral,
 		},
@@ -110,37 +106,49 @@ func (a *App) HTTPHandler() http.HandlerFunc {
 			return
 		}
 
-		if (resp.Type == objects.ResponseChannelMessageWithSource ||
-			resp.Type == objects.ResponseUpdateMessage) && len(resp.Data.Files) > 0 {
-			m := multipart.NewWriter(w)
-			w.Header().Set("Content-Type", m.FormDataContentType())
-			for n, file := range resp.Data.Files {
-				// Generate the attachment object, assign a number to it, and write it to the multipart writer
-				attach, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
-				if err != nil {
-					a.logger.Error().Err(err).Msg("failed to generate attachment")
-					continue
-				}
-				resp.Data.Attachments = append(resp.Data.Attachments, attach)
+		if resp.Type == objects.ResponseChannelMessageWithSource ||
+			resp.Type == objects.ResponseUpdateMessage {
+			var data *objects.InteractionMessagesCallbackData
+			switch d := resp.Data.(type) {
+			case objects.InteractionMessagesCallbackData:
+				data = &d
+			case *objects.InteractionMessagesCallbackData:
+				data = d
+			default:
+				data = nil
 			}
 
-			if field, err := m.CreateFormField("payload_json"); err != nil {
-				a.logger.Error().Err(err).Msg("failed to create payload_json form field")
-				FailUnknownError(w, jr)
-				return
-			} else {
-				if err := json.NewEncoder(field).Encode(resp); err != nil {
-					a.logger.Error().Err(err).Msg("failed to encode payload_json")
+			if data != nil && len(data.Files) > 0 {
+				m := multipart.NewWriter(w)
+				w.Header().Set("Content-Type", m.FormDataContentType())
+				for n, file := range data.Files {
+					// Generate the attachment object, assign a number to it, and write it to the multipart writer
+					attach, err := file.GenerateAttachment(objects.Snowflake(n+1), m)
+					if err != nil {
+						a.logger.Error().Err(err).Msg("failed to generate attachment")
+						continue
+					}
+					data.Attachments = append(data.Attachments, attach)
+				}
+
+				if field, err := m.CreateFormField("payload_json"); err != nil {
+					a.logger.Error().Err(err).Msg("failed to create payload_json form field")
+					FailUnknownError(w, jr)
+					return
+				} else {
+					if err := json.NewEncoder(field).Encode(resp); err != nil {
+						a.logger.Error().Err(err).Msg("failed to encode payload_json")
+						FailUnknownError(w, jr)
+						return
+					}
+				}
+				if err := m.Close(); err != nil {
+					a.logger.Error().Err(err).Msg("failed to close multipart writer")
 					FailUnknownError(w, jr)
 					return
 				}
-			}
-			if err := m.Close(); err != nil {
-				a.logger.Error().Err(err).Msg("failed to close multipart writer")
-				FailUnknownError(w, jr)
 				return
 			}
-			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		err = jr.Encode(resp)
@@ -218,21 +226,6 @@ func (a *App) ProcessRequest(ctx context.Context, data []byte) (resp *objects.In
 	}
 
 	return
-}
-
-// Get retrieves a value from the global context
-func (a *App) Get(key string) (interface{}, bool) {
-	a.propsLock.RLock()
-	defer a.propsLock.RUnlock()
-	obj, ok := a.extraProps[key]
-	return obj, ok
-}
-
-// Set stores a value in the global context.  This is suitable for things like database connections.
-func (a *App) Set(key string, obj interface{}) {
-	a.propsLock.Lock()
-	defer a.propsLock.Unlock()
-	a.extraProps[key] = obj
 }
 
 // Rest exposes the internal Rest client so you can make calls to the Discord API
