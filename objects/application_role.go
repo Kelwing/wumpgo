@@ -23,7 +23,7 @@ type ApplicationRoleConnectionMetadata struct {
 }
 
 type ApplicationRoleConnection struct {
-	PlatformName     string            `json:"platform_name"`
-	PlatformUsername string            `json:"platform_username"`
-	Metadata         map[string]string `json:"metadata"`
+	PlatformName     string                 `json:"platform_name"`
+	PlatformUsername string                 `json:"platform_username"`
+	Metadata         map[string]interface{} `json:"metadata"`
 }
