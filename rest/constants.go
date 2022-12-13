@@ -127,4 +127,8 @@ const (
 	// AutoModeration
 	AutoModerationRules = GuildBaseFmt + "/auto-moderation/rules"
 	AutoModerationRule  = AutoModerationRules + "/%d"
+
+	// ApplicationRole
+	ApplicationRoleConnection     = ApplicationFmt + "/%d/role-connections/metadata"
+	UserApplicationRoleConnection = UsersMeFmt + "/applications/%d/role-connection"
 )
