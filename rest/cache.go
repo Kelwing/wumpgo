@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -15,8 +16,8 @@ func (c *CacheError) Error() string {
 }
 
 type Cache interface {
-	Get(key string) (*DiscordResponse, error)
-	Put(key string, value *DiscordResponse) error
+	Get(ctx context.Context, key string) (*DiscordResponse, error)
+	Put(ctx context.Context, key string, value *DiscordResponse) error
 }
 
 // Reference in-memory implementation

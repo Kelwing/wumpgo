@@ -1,7 +1,7 @@
 package wumpgo
 
 const (
-	libraryVersion = "1.0.0"
+	libraryVersion = "0.0.3"
 )
 
 func LibraryVersion() string {

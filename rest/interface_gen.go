@@ -74,6 +74,7 @@ type RESTClient interface {
 	Gateway(context.Context) (*objects.Gateway, error)
 	GatewayBot(context.Context) (*objects.Gateway, error)
 	GetApplicationCommandPermissions(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.GuildApplicationCommandPermissions, error)
+	GetApplicationRoleConnectionMetadataRecords(context.Context, objects.SnowflakeObject) ([]*objects.ApplicationRoleConnectionMetadata, error)
 	GetAuditLogs(context.Context, objects.SnowflakeObject, *GetAuditLogParams) (*objects.AuditLog, error)
 	GetAutoModerationRule(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.AutoModerationRule, error)
 	GetAutoModerationRules(context.Context, objects.SnowflakeObject) ([]*objects.AutoModerationRule, error)
@@ -120,6 +121,7 @@ type RESTClient interface {
 	GetTemplate(context.Context, string) (*objects.Template, error)
 	GetThreadMember(context.Context, objects.SnowflakeObject, objects.SnowflakeObject) (*objects.ThreadMember, error)
 	GetUser(context.Context, objects.SnowflakeObject) (*objects.User, error)
+	GetUserApplicationRoleConnection(context.Context, objects.SnowflakeObject) (*objects.ApplicationRoleConnection, error)
 	GetUserConnections(context.Context) ([]*objects.Connection, error)
 	GetVoiceRegions(context.Context) ([]*objects.VoiceRegion, error)
 	GetWebhook(context.Context, objects.SnowflakeObject) (*objects.Webhook, error)
@@ -161,8 +163,10 @@ type RESTClient interface {
 	StartThreadWithMessage(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, *StartThreadParams) (*objects.Channel, error)
 	StartTyping(context.Context, objects.SnowflakeObject) error
 	SyncGuildTemplate(context.Context, objects.SnowflakeObject, string) (*objects.Template, error)
+	UpdateApplicationRoleConnectionMetadataRecords(context.Context, objects.SnowflakeObject, []*objects.ApplicationRoleConnectionMetadata) ([]*objects.ApplicationRoleConnectionMetadata, error)
 	UpdateCommand(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, *objects.ApplicationCommand) (*objects.ApplicationCommand, error)
 	UpdateGuildCommand(context.Context, objects.SnowflakeObject, objects.SnowflakeObject, objects.SnowflakeObject, *objects.ApplicationCommand) (*objects.ApplicationCommand, error)
+	UpdateUserApplicationRoleConnection(context.Context, objects.SnowflakeObject, *objects.ApplicationRoleConnection) (*objects.ApplicationRoleConnection, error)
 }
 
 var _ RESTClient = (*Client)(nil)
