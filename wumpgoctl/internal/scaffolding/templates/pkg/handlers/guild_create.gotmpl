@@ -8,6 +8,7 @@ import (
     "wumpgo.dev/wumpgo/objects"
 )
 
+// GuildCreate listens for a GuildCreate event and prints out the guild name
 func GuildCreate(c *rest.Client, g *objects.GuildCreate) {
 	fmt.Println("Added to guild", g.Name)
 }

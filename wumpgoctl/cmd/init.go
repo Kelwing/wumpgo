@@ -25,6 +25,7 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -90,7 +91,9 @@ var initCmd = &cobra.Command{
 			}
 		}
 
-		return nil
+		tidyCmd := exec.Command("go", "mod", "tidy")
+
+		return tidyCmd.Run()
 	},
 }
 

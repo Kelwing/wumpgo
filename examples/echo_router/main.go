@@ -65,7 +65,7 @@ func main() {
 	app, err := interactions.New(*pubKey)
 	Check(err)
 
-	r := router.NewCommandRouter(router.WithInteractionsApp(app))
+	r := router.New(router.WithInteractionsApp(app))
 	r.MustRegisterCommand(&MyCommand{})
 
 	if *token != "" {

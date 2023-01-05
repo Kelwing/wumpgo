@@ -2,6 +2,7 @@ package commands
 
 import "wumpgo.dev/wumpgo/router"
 
+// Ping is a simple command that returns the string "Pong!"
 type Ping struct {}
 
 func (p Ping) Handle(r router.CommandResponder, ctx *router.CommandContext) {

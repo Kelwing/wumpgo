@@ -7,8 +7,6 @@ import (
 	"wumpgo.dev/wumpgo/rest"
 )
 
-type View interface{}
-
 type CommandResponder interface {
 	// WithSource responses with a channel message upon function return, this is the default behavior.
 	WithSource() CommandResponder
@@ -29,12 +27,12 @@ type CommandResponder interface {
 	// Ephemeral makes the response message ephemeral, only the person who ran the command can see it.
 	Ephemeral() CommandResponder
 	// View sets the component view to respond with
-	View(View) CommandResponder
+	View(Renderable) CommandResponder
 	// Attach adds a file attachment to the response by Attachment ID
 	Attach(f *objects.DiscordFile) CommandResponder
 	// Responds with a modal instead of a message
 	// WARNING: this will override all other options you have set
-	Modal(string, string, View) CommandResponder
+	Modal(string, string, Renderable) CommandResponder
 }
 
 func newDefaultResponder() *defaultResponder {
@@ -59,7 +57,7 @@ type defaultResponder struct {
 	messageData *objects.InteractionMessagesCallbackData
 	modalData   *objects.InteractionModalCallbackData
 	deferFunc   CommandHandler
-	view        View
+	view        Renderable
 	files       []*objects.DiscordFile
 }
 
@@ -69,6 +67,7 @@ func (r *defaultResponder) WithSource() CommandResponder {
 }
 
 func (r *defaultResponder) Defer(f CommandHandler) CommandResponder {
+	r.response.Type = objects.ResponseDeferredChannelMessageWithSource
 	r.deferFunc = f
 	return r
 }
@@ -108,7 +107,7 @@ func (r *defaultResponder) Ephemeral() CommandResponder {
 	return r
 }
 
-func (r *defaultResponder) View(v View) CommandResponder {
+func (r *defaultResponder) View(v Renderable) CommandResponder {
 	r.view = v
 	return r
 }
@@ -118,7 +117,7 @@ func (r *defaultResponder) Attach(f *objects.DiscordFile) CommandResponder {
 	return r
 }
 
-func (r *defaultResponder) Modal(customID string, title string, v View) CommandResponder {
+func (r *defaultResponder) Modal(customID string, title string, v Renderable) CommandResponder {
 	r.response.Type = objects.ResponseModal
 
 	r.modalData = &objects.InteractionModalCallbackData{
@@ -132,6 +131,7 @@ func (r *defaultResponder) Modal(customID string, title string, v View) CommandR
 type CommandContext struct {
 	interaction *objects.Interaction
 	options     []*objects.ApplicationCommandDataOption
+	data        *objects.ApplicationCommandData
 	ctx         context.Context
 	client      *rest.Client
 }
@@ -157,6 +157,63 @@ func (c *CommandContext) Client() *rest.Client {
 	return c.client
 }
 
+func (c *CommandContext) TargetID() objects.Snowflake {
+	return c.data.TargetID
+}
+
+func (c *CommandContext) GuildID() objects.Snowflake {
+	return c.data.GuildID
+}
+
+func (c *CommandContext) ResolveAttachment(id objects.Snowflake) *objects.Attachment {
+	v, ok := c.data.Resolved.Attachments[id]
+	if !ok {
+		return nil
+	}
+	return &v
+}
+
+func (c *CommandContext) ResolveChannel(id objects.Snowflake) *objects.Channel {
+	v, ok := c.data.Resolved.Channels[id]
+	if !ok {
+		return nil
+	}
+	return &v
+}
+
+func (c *CommandContext) ResolveMember(id objects.Snowflake) *objects.GuildMember {
+	v, ok := c.data.Resolved.Members[id]
+	if !ok {
+		return nil
+	}
+	return &v
+}
+
+func (c *CommandContext) ResolveMessage(id objects.Snowflake) *objects.Message {
+	v, ok := c.data.Resolved.Messages[id]
+	if !ok {
+		return nil
+	}
+	return &v
+}
+
+func (c *CommandContext) ResolveRole(id objects.Snowflake) *objects.Role {
+	v, ok := c.data.Resolved.Roles[id]
+	if !ok {
+		return nil
+	}
+
+	return &v
+}
+
+func (c *CommandContext) ResolveUser(id objects.Snowflake) *objects.User {
+	v, ok := c.data.Resolved.Users[id]
+	if !ok {
+		return nil
+	}
+	return &v
+}
+
 func newCommandContext(i *objects.Interaction, opts []*objects.ApplicationCommandDataOption) *CommandContext {
 	return &CommandContext{
 		interaction: i,
@@ -166,4 +223,10 @@ func newCommandContext(i *objects.Interaction, opts []*objects.ApplicationComman
 
 type CommandHandler interface {
 	Handle(CommandResponder, *CommandContext)
+}
+
+type CommandHandlerFunc func(CommandResponder, *CommandContext)
+
+func (f CommandHandlerFunc) Handle(r CommandResponder, ctx *CommandContext) {
+	f(r, ctx)
 }

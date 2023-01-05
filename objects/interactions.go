@@ -251,6 +251,7 @@ type InteractionResponse struct {
 type MessageComponentData struct {
 	CustomID      string        `json:"custom_id"`
 	ComponentType ComponentType `json:"component_type"`
+	Resolved      ResolvedData  `json:"resolved"`
 	Values        []string      `json:"values,omitempty"`
 }
 
@@ -267,15 +268,16 @@ type InteractionResponseComponent struct {
 }
 
 type Component struct {
-	Type        ComponentType    `json:"type"`
-	CustomID    string           `json:"custom_id,omitempty"`
-	Disabled    bool             `json:"disabled,omitempty"`
-	Label       string           `json:"label,omitempty"`
-	Style       ButtonStyle      `json:"style,omitempty"`
-	Emoji       *Emoji           `json:"emoji,omitempty"`
-	URL         string           `json:"url,omitempty"`
-	Options     []*SelectOptions `json:"options,omitempty"`
-	Placeholder string           `json:"placeholder,omitempty"`
+	Type         ComponentType    `json:"type"`
+	CustomID     string           `json:"custom_id,omitempty"`
+	Disabled     bool             `json:"disabled,omitempty"`
+	Label        string           `json:"label,omitempty"`
+	Style        ButtonStyle      `json:"style,omitempty"`
+	Emoji        *Emoji           `json:"emoji,omitempty"`
+	URL          string           `json:"url,omitempty"`
+	Options      []*SelectOptions `json:"options,omitempty"`
+	ChannelTypes []ChannelType    `json:"channel_types,omitempty"`
+	Placeholder  string           `json:"placeholder,omitempty"`
 	// Must be a pointer, discord assumes omitted value = 1
 	MinValues  *int         `json:"min_values,omitempty"`
 	MaxValues  *int         `json:"max_values,omitempty"`

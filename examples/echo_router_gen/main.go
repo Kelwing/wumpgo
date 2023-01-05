@@ -13,7 +13,7 @@ import (
 	"wumpgo.dev/wumpgo/router"
 )
 
-// go:generate cmdgen
+//go:generate wumpgoctl gen
 
 // Echo godoc
 // @Description Echos the message you type back to you
@@ -25,7 +25,6 @@ type Echo struct {
 // @Description Echos the message you type back to you, but in all uppercase
 // @Option.Message.Name.es_MX mensaje
 // @Option.Message.Name.en_US message
-// @Permissions ManageRoles
 type EchoCaps struct {
 	Message string `discord:"message,description:Message to echo back"`
 }
@@ -39,9 +38,10 @@ type Log struct {
 // MyCommand godoc
 // @Name testcommand
 // @Description Test base command
-// @Name.en_US testcommand
-// @Name.es_MX commandodepreueba
+// @Name.en-US testcommand
+// @Name.es-MX commandodepreueba
 // @Type ChatInput
+// @Permissions ManageRoles, KickMembers
 type MyCommand struct {
 	Echo
 	EchoCaps
@@ -70,7 +70,7 @@ func main() {
 	app, err := interactions.New(*pubKey)
 	Check(err)
 
-	r := router.NewCommandRouter(router.WithInteractionsApp(app))
+	r := router.New(router.WithInteractionsApp(app))
 	r.MustRegisterCommand(&MyCommand{})
 
 	if *token != "" {

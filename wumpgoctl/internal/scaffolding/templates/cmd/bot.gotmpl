@@ -48,32 +48,43 @@ type Config struct {
 }
 
 func Start() {
+    // Create a context for parsing the config
     ctx := context.Background()
 
+    // Parse config from environment variables
     var config Config
     if err := envconfig.Process(ctx, &config); err != nil {
         log.Fatal().Err(err).Msg("")
     }
 
+    // Create a REST client with ratelimiting
     client := rest.New(
         rest.WithToken(objects.TokenTypeBot, config.Discord.Token),
         rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
+        rest.WithUserAgent(&rest.UserAgent{
+			Name:    "{{ .BotName }}",
+			URL:     "{{ .Package }}",
+			Version: "0.0.1",
+		}),
     )
 
     {{ if .HTTP }}
+    // Create an HTTP interactions router
     app, err := interactions.New(config.Discord.PublicKey, interactions.WithClient(client))
     if err != nil {
         log.Fatal().Err(err).Msg("")
     }
     {{- end }}
     {{ if .Gateway }}
-    s, rec, err := setupGatewayShard(client, config.Discord.Token)
+    // Create a gateway shard
+    s, {{ if .HTTP }}_{{ else }}rec{{ end }}, err := setupGatewayShard(client, config.Discord.Token)
     if err != nil {
         log.Fatal().Err(err).Msg("")
     }
     {{- end }}
 
-    routerOpts := []router.CommandRouterOption{
+    // Set up options for the interactions router
+    routerOpts := []router.RouterOption{
         router.WithClient(client),
         {{- if .HTTP }}
         router.WithInteractionsApp(app),
@@ -83,9 +94,11 @@ func Start() {
         {{- end }}
     }
 
-    r := router.NewCommandRouter(routerOpts...)
+    // Create the router and register the commands
+    r := router.New(routerOpts...)
     r.MustRegisterCommand(&commands.Ping{})
 
+    // If we have a token, we should bulk overwrite the commands with Discord
     if config.Discord.Token != "" {
         err = initCommands(client, r.Commands())
         if err != nil {
@@ -94,6 +107,7 @@ func Start() {
     }
     log.Info().Msg("{{ .BotName }} is now running")
     {{ if .Gateway }}
+    // Spin off a goroutine to handle the Gateway connection
     go func() {
         if err := s.Run(); err != nil {
             log.Fatal().Err(err).Msg("")
@@ -101,16 +115,19 @@ func Start() {
     }()
     {{- end }}
     {{ if and .Gateway (not .HTTP) }}
+    // Wait forever
     sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
     {{- end }}
     {{ if .HTTP }}
     log.Info().Str("addr", config.HTTP.ListenAddr).Msg("Listening for Discord Interactions")
+    // The interactions router behaves like a standard net/http handler, so lets listen
     log.Fatal().Err(http.ListenAndServe(config.HTTP.ListenAddr, app)).Msg("")
     {{- end }}
 }
 {{if or .Gateway .HTTP }}
+// initCommands is a helper function to register the commands with Discord
 func initCommands(c *rest.Client, cmds []*objects.ApplicationCommand) error {
     log.Info().Msg("Registering commands with Discord")
 
@@ -130,6 +147,8 @@ func initCommands(c *rest.Client, cmds []*objects.ApplicationCommand) error {
 }
 {{- end }}
 {{ if .Gateway }}
+// setupGatewayShard is a helper function to create the gateway shard with some basic options
+// and set up some basic event handlers
 func setupGatewayShard(client *rest.Client, token string) (*shard.Shard, receiver.Receiver, error) {
     gateway, err := client.GatewayBot(context.Background())
 	if err != nil {

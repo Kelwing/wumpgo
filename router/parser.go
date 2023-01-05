@@ -12,7 +12,7 @@ import (
 )
 
 type CommandParser struct {
-	currentPath *Stack[string]
+	currentPath *stack[string]
 	handlers    map[string]CommandHandler
 }
 
@@ -22,7 +22,7 @@ func (p *CommandParser) Handlers() map[string]CommandHandler {
 
 func NewParser() *CommandParser {
 	return &CommandParser{
-		currentPath: ptr(Stack[string](make([]string, 0))),
+		currentPath: ptr(stack[string](make([]string, 0))),
 		handlers:    make(map[string]CommandHandler),
 	}
 }
@@ -56,7 +56,7 @@ type DMPermissioner interface {
 }
 
 type AutoCompleter interface {
-	AutoComplete(optionName string, value string) []string
+	AutoComplete(optionName string, value interface{}) []*objects.ApplicationCommandOptionChoice
 }
 
 type CommandTyper interface {
@@ -189,6 +189,7 @@ func (p *CommandParser) parseCommand(v reflect.Value) (*objects.ApplicationComma
 				"options are not allowed for command type %s", t.Type().String(),
 			)
 		}
+		command.Description = ""
 		command.Type = ptr(t.Type())
 	}
 
@@ -402,23 +403,23 @@ func (p *CommandParser) parseOption(v reflect.Value, i, depth int) (*objects.App
 				option.ChannelTypes[i] = realct
 			}
 		}
+	}
 
-		choicesTagData, ok := t.Tag.Lookup("choices")
-		if ok {
-			choicesTagParts := strings.Split(choicesTagData, ",")
-			option.Choices = make([]objects.ApplicationCommandOptionChoice, len(choicesTagParts))
-			for i, p := range choicesTagParts {
-				keyValue := strings.Split(p, ":")
-				if len(keyValue) != 2 {
-					return nil, newFieldErrorf(t.Name, "choices tag must be a comma separate list of name:value pairs")
-				}
-				name := keyValue[0]
-				value := keyValue[1]
+	choicesTagData, ok := t.Tag.Lookup("choices")
+	if ok {
+		choicesTagParts := strings.Split(choicesTagData, ",")
+		option.Choices = make([]objects.ApplicationCommandOptionChoice, len(choicesTagParts))
+		for i, p := range choicesTagParts {
+			keyValue := strings.Split(p, ":")
+			if len(keyValue) != 2 {
+				return nil, newFieldErrorf(t.Name, "choices tag must be a comma separate list of name:value pairs")
+			}
+			name := keyValue[0]
+			value := keyValue[1]
 
-				option.Choices[i] = objects.ApplicationCommandOptionChoice{
-					Name:  name,
-					Value: value,
-				}
+			option.Choices[i] = objects.ApplicationCommandOptionChoice{
+				Name:  name,
+				Value: value,
 			}
 		}
 	}
@@ -434,7 +435,7 @@ func (p *CommandParser) parseOption(v reflect.Value, i, depth int) (*objects.App
 	return option, nil
 }
 
-func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption) error {
+func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, resolvable *objects.ResolvedData) error {
 	val := reflect.ValueOf(dst)
 
 	if !val.IsValid() {
@@ -476,6 +477,36 @@ func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption) 
 		}
 
 		vv := reflect.ValueOf(c.Value)
+
+		if fv.Type().Kind() == reflect.Struct {
+			if vv.Type().Kind() == reflect.String {
+				// Value should be a Snowflake
+				sn, err := objects.SnowflakeFromString(vv.String())
+				if err == nil {
+					if fv.Type().AssignableTo(userType) {
+						u, ok := resolvable.Users[sn]
+						if ok {
+							fv.Set(reflect.ValueOf(u))
+						}
+					} else if fv.Type().AssignableTo(channelType) {
+						c, ok := resolvable.Channels[sn]
+						if ok {
+							fv.Set(reflect.ValueOf(c))
+						}
+					} else if fv.Type().AssignableTo(roleType) {
+						r, ok := resolvable.Roles[sn]
+						if ok {
+							fv.Set(reflect.ValueOf(r))
+						}
+					} else if fv.Type().AssignableTo(attachType) {
+						a, ok := resolvable.Attachments[sn]
+						if ok {
+							fv.Set(reflect.ValueOf(a))
+						}
+					}
+				}
+			}
+		}
 
 		if fv.CanSet() && fv.Type().AssignableTo(vv.Type()) {
 			fv.Set(vv)

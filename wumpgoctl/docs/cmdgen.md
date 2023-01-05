@@ -1,12 +1,6 @@
-# cmdgen
+# wumpgoctl gen
 
-cmdgen is a go:generate tool for generating wumpgo.dev/wumpgo/router commands from comments instead of writing the interface implementations yourself.
-
-## Installation
-
-```
-go install wumpgo.dev/wumpgo/cmdgen@latest
-```
+wumpgoctl gen is a go:generate tool for generating wumpgo.dev/wumpgo/router commands from comments instead of writing the interface implementations yourself.
 
 ## Usage
 
@@ -25,6 +19,8 @@ import (
 	"wumpgo.dev/wumpgo/rest"
 	"wumpgo.dev/wumpgo/router"
 )
+
+// go:generate wumpgoctl gen
 
 // Echo godoc
 // @Description Echos the message you type back to you
