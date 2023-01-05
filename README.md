@@ -49,7 +49,7 @@ In the [Gateway](gateway/) package you will find a simple and pluggable gateway 
 
 The [router](router/) package is a very opinionated Discord Interactions ([application commands](https://discord.com/developers/docs/interactions/application-commands) and [components](https://discord.com/developers/docs/interactions/message-components)) framework built on the rest of the library.  This package runs contrary to the open-endedness of the rest of the library, but is completely optional.  It is designed to get you up and running quickly, at the sacrifice of developer freedom.
 
-Slash commands are defined using Go structs that conform to specific interfaces to set different options on your command.  [cmdgen](cmdgen/) is a go:generate tool provided to allow you to define your slash command options as formatted comments, and automatically generate the interface implemntations from those comments, reducing the amount of boilerplate required to define commands.
+Slash commands are defined using Go structs that conform to specific interfaces to set different options on your command.  [wumpgoctl](wumpgoctl/) contains a go:generate tool provided to allow you to define your slash command options as formatted comments, and automatically generate the interface implemntations from those comments, reducing the amount of boilerplate required to define commands.
 
 ### Wumpgoctl
 
