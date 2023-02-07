@@ -31,6 +31,7 @@ type eventRouter struct {
 	log        zerolog.Logger
 	client     *rest.Client
 	errHandler func(error)
+	groupName  string
 }
 
 func newEventRouter(opts ...ReceiverOption) *eventRouter {

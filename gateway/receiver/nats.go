@@ -26,7 +26,13 @@ func NewNATSReceiver(url string, natsOptions []nats.Option, opts ...ReceiverOpti
 
 func (r *NATSReceiver) Run(ctx context.Context) error {
 	ch := make(chan *nats.Msg, 64)
-	sub, err := r.conn.ChanSubscribe("discord.*", ch)
+	var sub *nats.Subscription
+	var err error
+	if r.groupName != "" {
+		sub, err = r.conn.QueueSubscribeSyncWithChan("discord.*", r.groupName, ch)
+	} else {
+		sub, err = r.conn.ChanSubscribe("discord.*", ch)
+	}
 	if err != nil {
 		return nil
 	}

@@ -17,10 +17,8 @@ func NewLocalReceiver(opts ...ReceiverOption) *LocalReceiver {
 }
 
 func (r *LocalReceiver) Run(ctx context.Context) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		}
+	for range ctx.Done() {
 	}
+
+	return nil
 }

@@ -24,3 +24,9 @@ func WithErrorHandler(h func(error)) ReceiverOption {
 		e.errHandler = h
 	}
 }
+
+func WithGroupName(name string) ReceiverOption {
+	return func(e *eventRouter) {
+		e.groupName = name
+	}
+}
