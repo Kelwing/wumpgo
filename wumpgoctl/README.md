@@ -13,7 +13,7 @@ go install wumpgo.dev/wumpgo/wumpgoctl@latest
 You can scaffold a new project
 ```bash
 mkdir mybot && cd mybot
-wumpgoctl init --pkg github.com/USERNAME/mybot --name MyBot --gateway --http
+wumpgoctl init -p github.com/USERNAME/mybot -n MyBot -w -g --nats --codegen
 ```
 
 See `wumpgoctl init --help` for more information.
