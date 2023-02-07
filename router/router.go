@@ -13,7 +13,7 @@ type ComponentErrorHandler func(r ComponentResponder, err error)
 type ModalErrorHandler func(r ModalResponder, err error)
 
 type Router struct {
-	commandHandlers       map[string]CommandHandler
+	commandHandlers       map[string]*commandHandler
 	commands              []*objects.ApplicationCommand
 	componentErrorHandler ComponentErrorHandler
 	commandErrorHandler   CommandErrorHandler
@@ -26,7 +26,7 @@ type Router struct {
 
 func New(opts ...RouterOption) *Router {
 	r := &Router{
-		commandHandlers:       make(map[string]CommandHandler),
+		commandHandlers:       make(map[string]*commandHandler),
 		commands:              make([]*objects.ApplicationCommand, 0),
 		componentErrorHandler: defaultComponentErrorHandler,
 		commandErrorHandler:   defaultCommandErrorHandler,

@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/objects"
@@ -78,12 +79,13 @@ var defaultModalErrorHandler = func(r ModalResponder, err error) {
 }
 
 func (r *Router) routeGatewayModal(c *rest.Client, i *objects.Interaction) {
-	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx := context.Background()
-
-	if i.Type != objects.InteractionApplicationCommand {
+	if i.Type != objects.InteractionModalSubmit {
 		return
 	}
+
+	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	resp := r.routeModal(ctx, i)
 

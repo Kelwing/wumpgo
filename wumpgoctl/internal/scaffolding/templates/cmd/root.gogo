@@ -1,0 +1,53 @@
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+    "github.com/rs/zerolog/log"
+)
+
+var cfgFile string
+
+var rootCmd = &cobra.Command{
+    Use:    "{{ .Meta.Name | Bashify }}",
+    Short:  "{{ .Meta.Summary }}",
+    Long:   "{{ .Meta.Description }}",
+}
+
+func Execute() {
+    err := rootCmd.Execute()
+    if err != nil {
+        log.Fatal().Err(err).Msg("")
+    }
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.{{ .Meta.Name | Bashify }}.yaml)")
+    rootCmd.PersistentFlags().Bool("debug", false, "enable debug logging")
+    viper.BindPFlag("debug", rootCmd.Flags().Lookup("debug"))
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+
+		viper.AddConfigPath(home)
+		viper.SetConfigType("yaml")
+		viper.SetConfigName(".{{ .Meta.Name | Bashify }}")
+	}
+
+    viper.SetEnvPrefix("bot")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	}
+}

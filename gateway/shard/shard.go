@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -17,22 +18,28 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 )
 
+type IdentifyLocker interface {
+	Lock()
+	Unlock()
+}
+
 // Shard represents a single Shard connection
 type Shard struct {
-	conn        *Websocket
-	seq         *atomic.Uint64
-	identify    objects.Identify
-	dispatcher  dispatcher.Dispatcher
-	session_id  string
-	resume_url  string
-	resume      *atomic.Bool
-	gateway_url string
-	hello       *atomic.Bool
-	limiter     *rate.Limiter
-	identified  *atomic.Bool
-	stopping    *atomic.Bool
-	done        chan error
-	processors  map[objects.OpCode]packetProcessor
+	conn         *Websocket
+	seq          *atomic.Uint64
+	identify     objects.Identify
+	dispatcher   dispatcher.Dispatcher
+	session_id   string
+	resume_url   string
+	resume       *atomic.Bool
+	gateway_url  string
+	hello        *atomic.Bool
+	limiter      *rate.Limiter
+	identified   *atomic.Bool
+	stopping     *atomic.Bool
+	done         chan error
+	processors   map[objects.OpCode]packetProcessor
+	identifyLock IdentifyLocker
 
 	heartbeat *Heartbeat
 
@@ -54,15 +61,16 @@ func New(token string, opts ...ShardOption) *Shard {
 				Device:  "wumpgo",
 			},
 		},
-		resume:      atomic.NewBool(false),
-		hello:       atomic.NewBool(false),
-		dispatcher:  dispatcher.NewNOOPDispatcher(),
-		gateway_url: fmt.Sprintf(GatewayAddressFmt, GatewayDefaultURL, GatewayVersion, GatewayEncoding),
-		limiter:     rate.NewLimiter(2, 120),
-		identified:  atomic.NewBool(false),
-		stopping:    atomic.NewBool(false),
-		logger:      zerolog.Nop(), // By default log nothing
-		processors:  make(map[objects.OpCode]packetProcessor),
+		resume:       atomic.NewBool(false),
+		hello:        atomic.NewBool(false),
+		dispatcher:   dispatcher.NewNOOPDispatcher(),
+		gateway_url:  fmt.Sprintf(GatewayAddressFmt, GatewayDefaultURL, GatewayVersion, GatewayEncoding),
+		limiter:      rate.NewLimiter(2, 120),
+		identified:   atomic.NewBool(false),
+		stopping:     atomic.NewBool(false),
+		logger:       zerolog.Nop(), // By default log nothing
+		processors:   make(map[objects.OpCode]packetProcessor),
+		identifyLock: nil,
 	}
 
 	for _, o := range opts {
@@ -81,6 +89,14 @@ func New(token string, opts ...ShardOption) *Shard {
 	s.conn = NewWebsocket(&s.logger)
 
 	return s
+}
+
+func (s *Shard) MarshalZerologObject(e *zerolog.Event) {
+	e.Int("shard_id", s.identify.Shard[0]).Bool("identified", s.IsIdentified())
+}
+
+func (s *Shard) String() string {
+	return "Shard " + strconv.Itoa(s.identify.Shard[0])
 }
 
 func (s *Shard) addProcessors(processors ...packetProcessor) {
@@ -127,12 +143,20 @@ func (s *Shard) setResume() {
 }
 
 func (s *Shard) sendIdentify() error {
+	if s.identifyLock != nil {
+		s.identifyLock.Lock()
+		defer func() {
+			time.Sleep(time.Second * 5)
+			s.identifyLock.Unlock()
+		}()
+	}
 	err := s.Send(objects.OpIdentify, s.identify)
 	if err != nil {
 		s.logger.Err(err).Msg("failed to send identify payload")
 		return err
 	}
 	s.identified.Store(true)
+
 	return nil
 }
 
@@ -169,6 +193,9 @@ func (s *Shard) connect() error {
 	if s.resume.Load() {
 		url = s.resume_url
 	}
+
+	log.Debug().Str("url", url).Msg("opening websocket connection")
+
 	return s.conn.Open(ctx, url, header)
 }
 

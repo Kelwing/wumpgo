@@ -1,0 +1,122 @@
+{{- if .Features.HTTP.Enabled }}
+package cmd
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+
+    "{{ .Meta.Package }}/pkg/commands"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"wumpgo.dev/wumpgo/interactions"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
+	"wumpgo.dev/wumpgo/router"
+)
+
+var httpCmd = &cobra.Command{
+    Use: "http",
+    Short: "Listen for HTTP interactions",
+    RunE: func(cmd *cobra.Command, args []string) error {
+        logLevel := zerolog.InfoLevel
+        if viper.GetBool("debug") {
+            logLevel = zerolog.DebugLevel
+        }
+
+        logger := log.Level(logLevel)
+
+        clientOpts := []interactions.InteractionOption{interactions.WithLogger(logger)}
+        routerOpts := []router.RouterOption{router.WithLogger(logger)}
+        
+        var client *rest.Client
+
+        if viper.IsSet("token") {
+            client = rest.New(
+                rest.WithToken(objects.TokenTypeBot, viper.GetString("token")),
+                rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
+                rest.WithUserAgent(&rest.UserAgent{
+                    Name:    "{{ .Meta.Name }}",
+                    URL:     "{{ .Meta.Package }}",
+                    Version: "0.0.1",
+                }),
+                rest.WithLogger(logger),
+            )
+
+            clientOpts = append(clientOpts, interactions.WithClient(client))
+            routerOpts = append(routerOpts, router.WithClient(client))
+        }
+
+        if !viper.IsSet("publickey") {
+            log.Fatal().Msg("BOT_PUBLICKEY must be set")
+        }
+
+        // Create an HTTP interactions router
+        app, err := interactions.New(
+            viper.GetString("publickey"),
+            clientOpts...,
+        )
+        if err != nil {
+            return err
+        }
+
+        routerOpts = append(routerOpts, router.WithInteractionsApp(app))
+
+        // Create the router and register the commands
+        r := router.New(routerOpts...)
+		r.MustRegisterCommand(&commands.Ping{})
+
+        if viper.IsSet("token") {
+            err = initCommands(client, r.Commands())
+            if err != nil {
+                log.Warn().Err(err).Msg("failed to register commands")
+            }
+        }
+
+        log.Info().
+            Str("host", viper.GetString("http.host")).
+            Int("port", viper.GetInt("http.port")).
+            Msg("{{ .Meta.Name }} is now listening for Discord Interactions")
+        // The interactions router behaves like a standard net/http handler, so lets listen
+        log.Fatal().Err(
+            http.ListenAndServe(fmt.Sprintf(
+                "%s:%d",
+                viper.GetString("http.host"),
+                viper.GetInt("http.port"),
+            ), app),
+        ).Msg("")
+
+        return nil
+    },
+}
+
+func init() {
+    rootCmd.AddCommand(httpCmd)
+
+    httpCmd.Flags().IntP("port", "p", 8080, "Port to listen on")
+    httpCmd.Flags().StringP("address", "a", "", "Address to listen on")
+    viper.BindPFlag("http.port", httpCmd.Flags().Lookup("port"))
+    viper.BindPFlag("http.host", httpCmd.Flags().Lookup("address"))
+}
+
+// initCommands is a helper function to register the commands with Discord
+func initCommands(c *rest.Client, cmds []*objects.ApplicationCommand) error {
+    log.Info().Msg("Registering commands with Discord")
+
+    ctx := context.Background()
+
+    me, err := c.GetCurrentUser(ctx)
+    if err != nil {
+        return err
+    }
+
+    _, err = c.BulkOverwriteGlobalCommands(ctx, me.ID, cmds)
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+{{- end }}

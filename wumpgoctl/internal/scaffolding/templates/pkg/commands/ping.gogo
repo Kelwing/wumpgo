@@ -1,0 +1,32 @@
+package commands
+
+import "wumpgo.dev/wumpgo/router"
+{{ if .Features.Codegen }}
+//go:generate wumpgoctl gen
+{{- end }}
+
+// Ping is a simple command that returns the string "Pong!"
+{{- if .Features.Codegen }}
+// @Name ping
+// @Description Check to see if the bot is responding
+// @DM true
+{{- end }}
+type Ping struct {}
+
+{{- if not .Features.Codegen }}
+func (c Ping) CommandName() string {
+    return "ping"
+}
+
+func (c Ping) Description() string {
+    return "Check to see if the bot is responding"
+}
+
+func (c Ping) AllowInDMs() bool {
+    return true
+}
+{{- end }}
+
+func (p Ping) Handle(r router.CommandResponder, ctx *router.CommandContext) {
+    r.Content("Pong!")
+}

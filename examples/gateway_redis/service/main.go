@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog"
-	"wumpgo.dev/wumpgo/gateway/receiver"
+	"wumpgo.dev/wumpgo/gateway"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
 )
@@ -17,7 +15,7 @@ import (
 func main() {
 	logger := zerolog.New(os.Stdout)
 
-	r, err := receiver.NewRedisReceiver(&redis.Options{
+	r, err := gateway.NewRedisReceiver(&redis.Options{
 		Addr: "127.0.0.1:6379",
 		DB:   0,
 	})
@@ -26,18 +24,20 @@ func main() {
 	}
 
 	r.On("READY", ready)
+	r.On("GUILD_CREATE", guildCreate)
 
-	stop, err := r.Receive(context.Background())
-	if err != nil {
-		logger.Fatal().Err(err).Msg("")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	if err := r.Run(ctx); err != nil {
+		logger.Fatal().Err(err).Msg("failed to run")
 	}
-	defer stop()
-
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sc
 }
 
-func ready(c *rest.Client, r *objects.Ready) {
+func ready(ctx context.Context, c *rest.Client, r *objects.Ready) {
 	fmt.Println("Ready as", r.User.Username)
+}
+
+func guildCreate(ctx context.Context, c *rest.Client, g *objects.GuildCreate) {
+	fmt.Println("Added to guild", g.Name)
 }

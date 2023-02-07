@@ -3,11 +3,11 @@ module wumpgo.dev/wumpgo
 go 1.19
 
 require (
+	github.com/Masterminds/semver v1.5.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redsync/redsync/v4 v4.7.1
 	github.com/google/go-querystring v1.1.0
 	github.com/nats-io/nats.go v1.21.0
-	github.com/nsqio/go-nsq v1.1.0
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
@@ -24,7 +24,6 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gin-gonic/gin v1.8.1 // indirect
 	github.com/gobwas/ws v1.1.0 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/objects"
@@ -73,12 +74,13 @@ func (r *Router) routeComponent(ctx context.Context, i *objects.Interaction) (re
 }
 
 func (r *Router) routeGatewayComponent(c *rest.Client, i *objects.Interaction) {
-	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx := context.Background()
-
 	if i.Type != objects.InteractionComponent {
 		return
 	}
+
+	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	resp := r.routeComponent(ctx, i)
 

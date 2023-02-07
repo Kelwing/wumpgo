@@ -13,8 +13,10 @@ import (
 	"wumpgo.dev/wumpgo/rest"
 )
 
+type Middleware func(next CommandHandlerFunc) CommandHandlerFunc
+
 // RegisterCommand parses a struct and builds a Discord Application command from it
-func (r *Router) RegisterCommand(cmd any) error {
+func (r *Router) RegisterCommand(cmd any, m ...Middleware) error {
 	p := NewParser()
 	cmdObj, err := p.parseCommand(reflect.ValueOf(cmd))
 	if err != nil {
@@ -25,7 +27,10 @@ func (r *Router) RegisterCommand(cmd any) error {
 
 	// Merge handlers into router handler map
 	for k, v := range p.Handlers() {
-		r.commandHandlers[k] = v
+		r.commandHandlers[k] = &commandHandler{
+			h:          v,
+			middleware: m,
+		}
 	}
 
 	return nil
@@ -33,8 +38,8 @@ func (r *Router) RegisterCommand(cmd any) error {
 
 // MustRegisterCommand parses a struct and builds a Discord Application command from it.
 // Panics on failure.
-func (r *Router) MustRegisterCommand(cmd any) {
-	if err := r.RegisterCommand(cmd); err != nil {
+func (r *Router) MustRegisterCommand(cmd any, m ...Middleware) {
+	if err := r.RegisterCommand(cmd, m...); err != nil {
 		panic(fmt.Errorf("could not register command: %v", err))
 	}
 }
@@ -45,7 +50,7 @@ func (r *Router) Commands() []*objects.ApplicationCommand {
 	return r.commands
 }
 
-func (r *Router) getCommandHandler(data *objects.ApplicationCommandData) (CommandHandler, []*objects.ApplicationCommandDataOption, error) {
+func (r *Router) getCommandHandler(data *objects.ApplicationCommandData) (*commandHandler, []*objects.ApplicationCommandDataOption, error) {
 	if len(data.Options) == 0 || data.Options[0].Type > objects.TypeSubCommandGroup {
 		// This is definitely meant to be run as a root command
 		h, ok := r.commandHandlers[data.Name]
@@ -105,8 +110,17 @@ func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (resp
 	}
 
 	cmdCtx.data = &data
+	cmdCtx.ctx = ctx
 
-	handler.Handle(resp, cmdCtx)
+	h := handler.h.Handle
+
+	log.Debug().Msgf("chaining %d middleware", len(handler.middleware))
+
+	for i := len(handler.middleware) - 1; i >= 0; i-- {
+		h = handler.middleware[i](h)
+	}
+
+	h(resp, cmdCtx)
 
 	if resp.view != nil {
 		components := resp.view.Render()
@@ -158,12 +172,13 @@ func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (resp
 }
 
 func (r *Router) routeGatewayCommand(c *rest.Client, i *objects.Interaction) {
-	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx := context.Background()
-
 	if i.Type != objects.InteractionApplicationCommand {
 		return
 	}
+
+	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	resp := r.routeCommand(ctx, i)
 
@@ -213,7 +228,7 @@ func (r *Router) routeAutocomplete(ctx context.Context, i *objects.Interaction) 
 		return resp
 	}
 
-	ac, ok := handler.(AutoCompleter)
+	ac, ok := handler.h.(AutoCompleter)
 	if !ok {
 		return resp
 	}
@@ -238,12 +253,13 @@ func (r *Router) routeAutocomplete(ctx context.Context, i *objects.Interaction) 
 }
 
 func (r *Router) routeGatewayAutocomplete(c *rest.Client, i *objects.Interaction) {
-	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx := context.Background()
-
-	if i.Type != objects.InteractionApplicationCommand {
+	if i.Type != objects.InteractionAutoComplete {
 		return
 	}
+
+	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	resp := r.routeAutocomplete(ctx, i)
 

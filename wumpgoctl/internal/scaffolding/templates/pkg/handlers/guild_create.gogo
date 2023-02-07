@@ -1,7 +1,8 @@
-{{- if .Gateway -}}
+{{- if .Features.Gateway.Enabled -}}
 package handlers
 
 import (
+    "context"
     "fmt"
     
     "wumpgo.dev/wumpgo/rest"
@@ -9,7 +10,7 @@ import (
 )
 
 // GuildCreate listens for a GuildCreate event and prints out the guild name
-func GuildCreate(c *rest.Client, g *objects.GuildCreate) {
+func GuildCreate(ctx context.Context, c *rest.Client, g *objects.GuildCreate) {
 	fmt.Println("Added to guild", g.Name)
 }
 {{- end }}

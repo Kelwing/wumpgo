@@ -5,7 +5,7 @@ import (
 	"flag"
 
 	"github.com/go-redis/redis/v8"
-	"wumpgo.dev/wumpgo/gateway/dispatcher"
+	"wumpgo.dev/wumpgo/gateway"
 	"wumpgo.dev/wumpgo/gateway/shard"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
@@ -17,11 +17,11 @@ func main() {
 
 	client := rest.New(rest.WithToken(objects.TokenTypeBot, *token))
 
-	gateway, err := client.GatewayBot(context.Background())
+	gw, err := client.GatewayBot(context.Background())
 	if err != nil {
 		panic(err.Error())
 	}
-	d, err := dispatcher.NewRedisDispatcher(&redis.Options{
+	d, err := gateway.NewRedisDispatcher(&redis.Options{
 		Addr: "127.0.0.1:6379",
 		DB:   0,
 	})
@@ -29,10 +29,10 @@ func main() {
 		panic(err.Error())
 	}
 
-	s := shard.New(
+	s := gateway.NewShard(
 		*token,
-		shard.WithGatewayURL(gateway.URL),
-		shard.WithIntents(objects.IntentsAllWithoutPrivileged),
+		shard.WithGatewayURL(gw.URL),
+		shard.WithIntents(objects.IntentsAllWithoutPrivileged|objects.IntentsGuildMessages),
 		shard.WithDispatcher(d),
 		shard.WithInitialPresence(objects.UpdatePresence{
 			Activities: []objects.Activity{

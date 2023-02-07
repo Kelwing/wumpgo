@@ -1,6 +1,8 @@
 package shard
 
 import (
+	"fmt"
+
 	"github.com/rs/zerolog"
 	"wumpgo.dev/wumpgo/gateway/dispatcher"
 	"wumpgo.dev/wumpgo/objects"
@@ -10,7 +12,7 @@ type ShardOption func(*Shard)
 
 func WithGatewayURL(u string) ShardOption {
 	return func(s *Shard) {
-		s.gateway_url = u
+		s.gateway_url = fmt.Sprintf(GatewayAddressFmt, u, GatewayVersion, GatewayEncoding)
 	}
 }
 
@@ -41,5 +43,11 @@ func WithLogger(l zerolog.Logger) ShardOption {
 func WithInitialPresence(p objects.UpdatePresence) ShardOption {
 	return func(s *Shard) {
 		s.identify.Presence = p
+	}
+}
+
+func WithIdentifyLock(l IdentifyLocker) ShardOption {
+	return func(s *Shard) {
+		s.identifyLock = l
 	}
 }

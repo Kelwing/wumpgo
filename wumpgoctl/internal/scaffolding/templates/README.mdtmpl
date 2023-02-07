@@ -1,7 +1,0 @@
-# {{ .BotName }}
-
-## Running
-
-```sh
-DISCORD_PUBLIC_KEY=xxx DISCORD_TOKEN=xxx go run .
-```

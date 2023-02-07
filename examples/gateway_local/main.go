@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/gateway/dispatcher"
 	"wumpgo.dev/wumpgo/gateway/receiver"
 	"wumpgo.dev/wumpgo/gateway/shard"
@@ -18,14 +20,17 @@ func main() {
 
 	client := rest.New(rest.WithToken(objects.TokenTypeBot, *token))
 
+	logger := log.Logger.Level(zerolog.DebugLevel)
+
 	gateway, err := client.GatewayBot(context.Background())
 	if err != nil {
 		panic(err.Error())
 	}
-	r := receiver.NewLocalReceiver(receiver.WithClient(client))
+	r := receiver.NewLocalReceiver(receiver.WithClient(client), receiver.WithLogger(logger))
 	d := dispatcher.NewLocalDispatcher(r)
 	r.On("READY", ready)
 	r.On("GUILD_CREATE", guildCreate)
+	r.On("TYPING_START", typing)
 
 	s := shard.New(
 		*token,
@@ -39,6 +44,7 @@ func main() {
 				},
 			},
 		}),
+		shard.WithLogger(logger),
 	)
 
 	if err := s.Run(); err != nil {
@@ -46,10 +52,14 @@ func main() {
 	}
 }
 
-func ready(c *rest.Client, r *objects.Ready) {
+func ready(ctx context.Context, c *rest.Client, r *objects.Ready) {
 	fmt.Println("Ready as", r.User.Username)
 }
 
-func guildCreate(c *rest.Client, g *objects.GuildCreate) {
+func guildCreate(ctx context.Context, c *rest.Client, g *objects.GuildCreate) {
 	fmt.Println("Added to guild", g.Name)
+}
+
+func typing(ctx context.Context, c *rest.Client, t *objects.TypingStart) {
+	fmt.Println(t.Member.User.Username, "started typing")
 }

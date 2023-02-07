@@ -106,6 +106,11 @@ func (p *CommandParser) parseFields(v reflect.Value, depth int) ([]objects.Appli
 	optionals := make([]objects.ApplicationCommandOption, 0)
 
 	for i := 0; i < v.NumField(); i++ {
+		// Ignore unexported fields
+		if !v.Type().Field(i).IsExported() {
+			continue
+		}
+
 		o, err := p.parseOption(v, i, depth)
 		if err != nil {
 			return nil, err

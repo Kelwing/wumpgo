@@ -1,0 +1,105 @@
+{{- if .Features.Gateway.Enabled }}
+package cmd
+
+import (
+	"context"
+
+    {{- if .Features.Gateway.NATS }}
+    "github.com/nats-io/nats.go"
+    {{- end }}
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"wumpgo.dev/wumpgo/gateway/dispatcher"
+    {{- if .Features.Gateway.Local }}
+    "{{ .Meta.Package }}/pkg/handlers"
+    {{- end }}
+	"wumpgo.dev/wumpgo/gateway/shard"
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
+    {{- if .Features.Gateway.Redis }}
+    "github.com/go-redis/redis/v8"
+    {{- end }}
+)
+
+var gatewayCmd = &cobra.Command{
+    Use: "gateway",
+    Short: "Start a websocket connection and wait for events",
+    RunE: func(cmd *cobra.Command, args []string) error {
+        logLevel := zerolog.InfoLevel
+        if viper.GetBool("debug") {
+            logLevel = zerolog.DebugLevel
+        }
+
+        logger := log.Level(logLevel)
+
+        if !viper.IsSet("token") {
+            logger.Fatal().Msg("BOT_TOKEN must be set")
+        }
+
+        // Create a REST client with ratelimiting
+        client := rest.New(
+            rest.WithToken(objects.TokenTypeBot, viper.GetString("token")),
+            rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
+            rest.WithUserAgent(&rest.UserAgent{
+                Name:    "{{ .Meta.Name }}",
+                URL:     "{{ .Meta.Package }}",
+                Version: "0.0.1",
+            }),
+            rest.WithLogger(logger),
+        )
+
+        gateway, err := client.GatewayBot(context.Background())
+        if err != nil {
+            return err
+        }
+        {{ if .Features.Gateway.Redis }}
+        // Uses go-redis.Options, see https://pkg.go.dev/github.com/redis/go-redis/v9#Options for more info
+        d, err := dispatcher.NewRedisDispatcher(&redis.Options{
+            Addr: viper.GetString("redis.url"),
+            DB: viper.GetInt("redis.db"),
+        })
+        if err != nil {
+            return err
+        }
+        {{ else if .Features.Gateway.NATS }}
+        d, err := dispatcher.NewNATSDispatcher(viper.GetString("nats.url"))
+        if err != nil {
+            return err
+        }
+        {{ else if .Features.Gateway.Local }}
+        r, _ := handlers.Setup(client, logger)
+        d := dispatcher.NewLocalDispatcher(r)
+        {{ else }}
+        d := dispatcher.NewNOOPDispatcher()
+        {{- end }}
+        s := shard.New(
+            viper.GetString("token"),
+            shard.WithGatewayURL(gateway.URL),
+            shard.WithIntents(objects.IntentsAllWithoutPrivileged),
+            shard.WithDispatcher(d),
+            shard.WithInitialPresence(objects.UpdatePresence{
+                Activities: []objects.Activity{
+                    {
+                        Name: "I'm a bot!",
+                    },
+                },
+            }),
+        )
+
+        return s.Run()
+    },
+}
+
+func init() {
+    rootCmd.AddCommand(gatewayCmd)
+    {{- if .Features.Gateway.Redis }}
+    gatewayCmd.Flags().String("redisaddr", "localhost:6379", "Redis address to connect to")
+    viper.BindPFlag("redis.url", gatewayCmd.Flags().Lookup("redisaddr"))
+    {{- else if .Features.Gateway.NATS }}
+    gatewayCmd.Flags().String("natsurl", nats.DefaultURL, "NATS URL to connect to")
+    viper.BindPFlag("nats.url", gatewayCmd.Flags().Lookup("natsurl"))
+    {{- end }}
+}
+{{- end }}

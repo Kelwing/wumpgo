@@ -24,46 +24,44 @@ package cmd
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
+	"github.com/Masterminds/semver"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"wumpgo.dev/wumpgo/wumpgoctl/internal/config"
 	"wumpgo.dev/wumpgo/wumpgoctl/internal/scaffolding"
 )
-
-type tmplArgs struct {
-	Package string
-	HTTP    bool
-	Gateway bool
-	BotName string
-}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize a new bot built around wumpgo",
+	Short: "Scaffold a new bot built using wumpgo",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		t := scaffolding.Templates()
 
-		pkg, _ := cmd.Flags().GetString("pkg")
-		root, _ := cmd.Flags().GetString("root")
-		http, _ := cmd.Flags().GetBool("http")
-		gateway, _ := cmd.Flags().GetBool("gateway")
-		name, _ := cmd.Flags().GetString("name")
+		cfg := config.Config{}
 
-		tArgs := tmplArgs{
-			Package: pkg,
-			HTTP:    http,
-			Gateway: gateway,
-			BotName: name,
+		if err := viper.Unmarshal(&cfg); err != nil {
+			return err
 		}
 
+		v, err := semver.NewVersion(strings.Replace(runtime.Version(), "go", "", 1))
+		if err != nil {
+			return err
+		}
+
+		cfg.GoVersion = fmt.Sprintf("%d.%d", v.Major(), v.Minor())
 		for filename, tmpl := range t {
-			filename = root + "/" + filename
+			filename = viper.GetString("root") + "/" + filename
 
 			buf := &bytes.Buffer{}
-			err := tmpl.Execute(buf, tArgs)
+			err := tmpl.Execute(buf, &cfg)
 			if err != nil {
 				return err
 			}
@@ -91,6 +89,11 @@ var initCmd = &cobra.Command{
 			}
 		}
 
+		// Save the config
+		if err := viper.SafeWriteConfig(); err != nil {
+			return err
+		}
+
 		tidyCmd := exec.Command("go", "mod", "tidy")
 
 		return tidyCmd.Run()
@@ -113,4 +116,22 @@ func init() {
 	initCmd.Flags().BoolP("http", "w", false, "Include HTTP interactions support")
 	initCmd.Flags().BoolP("gateway", "g", false, "Include gateway support")
 	initCmd.Flags().StringP("name", "n", "ExampleBot", "Name of your bot")
+	initCmd.Flags().Bool("nats", false, "Use NATS to forward gateway events")
+	initCmd.Flags().Bool("redis", false, "Use Redis to forward gateway events")
+	initCmd.Flags().Bool("local", false, "Use the local dispatcher for events")
+	initCmd.Flags().Bool("codegen", false, "Use codegen for slash commands")
+	initCmd.Flags().StringP("summary", "s", "A bot made with wumpgo (wumpgo.dev)", "Summary of the bots functionalty")
+	initCmd.Flags().String("descrption", "", "Long description of the bots functionalty")
+	initCmd.MarkFlagsMutuallyExclusive("nats", "redis", "local")
+	viper.BindPFlag("meta.package", initCmd.Flags().Lookup("pkg"))
+	viper.BindPFlag("meta.name", initCmd.Flags().Lookup("name"))
+	viper.BindPFlag("features.http.enabled", initCmd.Flags().Lookup("http"))
+	viper.BindPFlag("features.gateway.enabled", initCmd.Flags().Lookup("gateway"))
+	viper.BindPFlag("features.gateway.nats", initCmd.Flags().Lookup("nats"))
+	viper.BindPFlag("features.gateway.redis", initCmd.Flags().Lookup("redis"))
+	viper.BindPFlag("features.gateway.local", initCmd.Flags().Lookup("local"))
+	viper.BindPFlag("features.codegen", initCmd.Flags().Lookup("codegen"))
+	viper.BindPFlag("root", initCmd.Flags().Lookup("root"))
+	viper.BindPFlag("meta.summary", initCmd.Flags().Lookup("summary"))
+	viper.BindPFlag("meta.description", initCmd.Flags().Lookup("descrption"))
 }

@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -41,20 +42,17 @@ Example:
 type MyCommand struct {}
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		dir, _ := cmd.Flags().GetString("dir")
+		file := os.Getenv("GOFILE")
 
 		logger := log.Level(zerolog.WarnLevel)
 		ctx := logger.WithContext(context.Background())
 
-		cmdgen.Gen(ctx, dir)
+		cmdgen.Gen(ctx, file)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(genCmd)
-
-	genCmd.Flags().StringP("dir", "d", ".", "Directory to process, you can omit this if your go:generate comment is in the same directory as the commands you want to process")
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

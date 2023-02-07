@@ -1,0 +1,19 @@
+{{- if .Features.Gateway.Enabled -}}
+package handlers
+
+import (
+    "context"
+    "fmt"
+    
+    "wumpgo.dev/wumpgo/rest"
+    "wumpgo.dev/wumpgo/objects"
+)
+
+// MemberAdd posts a welcome message to the guilds first channel
+// when a new member joins
+func MemberAdd(ctx context.Context, c *rest.Client, m *objects.GuildMemberAdd) {
+	c.CreateMessage(ctx, m.GuildID, &rest.CreateMessageParams{
+        Content: fmt.Sprintf("Welcome %s!", m.User.Username),
+    })
+}
+{{- end }}

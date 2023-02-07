@@ -2,7 +2,10 @@ package scaffolding
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
+	"path"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -19,7 +22,31 @@ var (
 	//go:embed templates/*
 	files     embed.FS
 	templates LoadedTemplates
+	funcMap   = template.FuncMap{
+		"ToLower": strings.ToLower,
+		"ToUpper": strings.ToUpper,
+		"Bashify": Bashify,
+	}
 )
+
+var (
+	nameExtRe   = regexp.MustCompile(`(?P<Name>[A-Za-z]+)\.go(?P<Ext>[a-z]+)`)
+	nameNoExtRe = regexp.MustCompile(`(?P<Name>[A-Za-z]+)\.gotemplate`)
+)
+
+func resolveFilename(s string) (string, error) {
+	matches := nameNoExtRe.FindStringSubmatch(s)
+	if matches != nil {
+		return matches[nameNoExtRe.SubexpIndex("Name")], nil
+	}
+
+	matches = nameExtRe.FindStringSubmatch(s)
+	if matches != nil {
+		return matches[nameExtRe.SubexpIndex("Name")] + "." + matches[nameExtRe.SubexpIndex("Ext")], nil
+	}
+
+	return "", fmt.Errorf("invalid filename: %s", s)
+}
 
 func init() {
 	err := loadTemplates()
@@ -33,7 +60,7 @@ func loadTemplates() error {
 		templates = make(LoadedTemplates)
 	}
 
-	return fs.WalkDir(files, templatesDir, func(path string, d fs.DirEntry, err error) error {
+	return fs.WalkDir(files, templatesDir, func(fp string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -42,18 +69,20 @@ func loadTemplates() error {
 			return nil
 		}
 
-		pt, err := template.ParseFS(files, path)
+		templateName, err := resolveFilename(strings.TrimPrefix(fp, templatesDir+"/"))
 		if err != nil {
 			return err
 		}
 
-		templateName := strings.ReplaceAll(
-			strings.TrimPrefix(path, templatesDir+"/"),
-			"tmpl",
-			"",
-		)
+		pt, err := template.New(path.Base(fp)).Funcs(funcMap).ParseFS(files, fp)
+		if err != nil {
+			return err
+		}
 
-		templates[templateName] = pt
+		rootPath, _ := path.Split(fp)
+		relRoot := strings.SplitN(rootPath, "/", 2)[1]
+
+		templates[path.Join(relRoot, templateName)] = pt
 
 		return nil
 	})

@@ -1,0 +1,66 @@
+{{- if or .Features.Gateway.Redis .Features.Gateway.NATS }}
+package cmd
+
+import (
+	"context"
+
+    "{{ .Meta.Package }}/pkg/handlers"
+    {{- if .Features.Gateway.NATS }}
+    "github.com/nats-io/nats.go"
+    {{- end }}
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"wumpgo.dev/wumpgo/objects"
+	"wumpgo.dev/wumpgo/rest"
+)
+
+var receiveCmd = &cobra.Command{
+    Use: "receive",
+    Short: "Start a connection to the dispatcher and listen for events",
+    RunE: func(cmd *cobra.Command, args []string) error {
+        logLevel := zerolog.InfoLevel
+        if viper.GetBool("debug") {
+            logLevel = zerolog.DebugLevel
+        }
+
+        logger := log.Level(logLevel)
+
+        if !viper.IsSet("token") {
+            logger.Fatal().Msg("BOT_TOKEN must be set")
+        }
+
+        // Create a REST client with ratelimiting
+        client := rest.New(
+            rest.WithToken(objects.TokenTypeBot, viper.GetString("token")),
+            rest.WithRateLimiter(rest.NewLeakyBucketRatelimiter()),
+            rest.WithUserAgent(&rest.UserAgent{
+                Name:    "{{ .Meta.Name }}",
+                URL:     "{{ .Meta.Package }}",
+                Version: "0.0.1",
+            }),
+            rest.WithLogger(logger),
+        )
+        r, err := handlers.Setup(client, logger)
+        if err != nil {
+            log.Fatal().Err(err).Msg("failed to setup receiver")
+        }
+
+        return r.Run(context.Background())
+    },
+}
+
+func init() {
+    rootCmd.AddCommand(receiveCmd)
+
+    {{- if .Features.Gateway.Redis }}
+    receiveCmd.Flags().String("redisaddr", "localhost:6379", "Redis address to connect to")
+    viper.BindPFlag("redis.url", receiveCmd.Flags().Lookup("redisaddr"))
+    {{- else if .Features.Gateway.NATS }}
+    receiveCmd.Flags().String("natsurl", nats.DefaultURL, "NATS URL to connect to")
+    viper.BindPFlag("nats.url", receiveCmd.Flags().Lookup("natsurl"))
+    {{- end }}
+}
+{{- end }}

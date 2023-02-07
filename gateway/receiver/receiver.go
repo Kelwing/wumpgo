@@ -1,10 +1,12 @@
 package receiver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 	"wumpgo.dev/wumpgo/rest"
@@ -12,9 +14,16 @@ import (
 
 type HandlerFunc interface{}
 
+var (
+	contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
+	clientType  = reflect.TypeOf((*rest.Client)(nil))
+)
+
 // Receiver is a generic interface for receiving events from a Dispatcher
 type Receiver interface {
 	On(evt string, handler HandlerFunc)
+	Route(event string, data json.RawMessage) error
+	Run(ctx context.Context) error
 }
 
 type eventRouter struct {
@@ -74,24 +83,27 @@ func (e *eventRouter) Route(event string, data json.RawMessage) error {
 		numIn := x.NumIn()
 		numOut := x.NumOut()
 
-		if numIn != 2 || numOut != 0 {
+		if numIn != 3 || numOut != 0 || !x.In(0).Implements(contextType) || !x.In(1).AssignableTo(clientType) {
 			e.log.Warn().Msgf("Invalid function signature for event %s. Handler: %s ", event, x.Name())
 			return nil
 		}
 
-		inType := x.In(1)
+		inType := x.In(2)
 		typePtr := reflect.New(inType.Elem())
 
 		obj := typePtr.Interface()
 
 		err := json.Unmarshal(data, obj)
 		if err != nil {
-			e.log.Warn().Str("event", event).Str("obj", typePtr.Type().Name()).Msgf("failed to unmarshal")
+			e.log.Warn().Err(err).Str("event", event).RawJSON("payload", data).Str("obj", typePtr.Type().Name()).Msgf("failed to unmarshal")
 			return nil
 		}
 
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
 		f := reflect.ValueOf(h)
-		f.Call([]reflect.Value{reflect.ValueOf(e.client), typePtr})
+		f.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(e.client), typePtr})
 	}
 	return nil
 }

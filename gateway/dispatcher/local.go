@@ -7,10 +7,10 @@ import (
 )
 
 type LocalDispatcher struct {
-	receiver *receiver.LocalReceiver
+	receiver receiver.Receiver
 }
 
-func NewLocalDispatcher(receiver *receiver.LocalReceiver) *LocalDispatcher {
+func NewLocalDispatcher(receiver receiver.Receiver) *LocalDispatcher {
 	return &LocalDispatcher{
 		receiver: receiver,
 	}

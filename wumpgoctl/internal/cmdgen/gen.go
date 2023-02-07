@@ -8,7 +8,6 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -36,46 +35,34 @@ var (
 	OptionPermissionsRe                = regexp.MustCompile(`@Permissions (?P<value>([A-Za-z]+,? ?)+|[0-9]+)`)
 )
 
-func Gen(ctx context.Context, dir string) {
-	log.Ctx(ctx).Info().Str("dir", dir).Msg("parsing directory")
+func Gen(ctx context.Context, f string) {
+	log.Ctx(ctx).Info().Str("dir", f).Msg("parsing file")
 
 	fset := token.NewFileSet()
-
-	pkgs, err := parser.ParseDir(fset, dir, func(fi fs.FileInfo) bool {
-		return !strings.HasSuffix(fi.Name(), "_gen.go")
-	}, parser.ParseComments)
+	srcFile, err := parser.ParseFile(fset, f, nil, parser.ParseComments)
 	if err != nil {
-		log.Ctx(ctx).Fatal().Err(err).Msg("failed to parse dir")
+		log.Ctx(ctx).Fatal().Err(err).Msg("failed to parse file")
 	}
 
-	for pkgName, pkg := range pkgs {
-		processPackage(ctx, fset, pkgName, pkg, dir)
-	}
+	pkgName := os.Getenv("GOPACKAGE")
+	ctx = context.WithValue(ctx, ctxKey("package"), pkgName)
+	processFile(ctx, fset, f, srcFile)
 }
 
 type ctxKey string
 
-func processPackage(ctx context.Context, fs *token.FileSet, name string, pkg *ast.Package, dir string) {
-	log.Ctx(ctx).Info().Msgf("processing package %s", name)
-	for fileName, f := range pkg.Files {
-		ctx := log.Ctx(ctx).With().Str("package", name).Logger().WithContext(ctx)
-		ctx = context.WithValue(ctx, ctxKey("package"), name)
-		processFile(ctx, fs, fileName, f, dir)
-	}
-}
-
-func processFile(ctx context.Context, fs *token.FileSet, name string, file *ast.File, dir string) {
+func processFile(ctx context.Context, fs *token.FileSet, name string, file *ast.File) {
 	log.Ctx(ctx).Info().Msgf("processing file %s", filepath.Base(name))
 
 	ctx = log.Ctx(ctx).With().Str("file", file.Name.Name).Logger().WithContext(ctx)
-	p, err := doc.NewFromFiles(fs, []*ast.File{file}, dir)
+	p, err := doc.NewFromFiles(fs, []*ast.File{file}, ".")
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("failed to parse comments")
 		return
 	}
 
 	baseName := strings.Split(filepath.Base(name), ".")[0]
-	outputName := fmt.Sprintf("%s/%s_cmd_gen.go", dir, baseName)
+	outputName := fmt.Sprintf("%s_cmd_gen.go", baseName)
 	generate(ctx, outputName, p.Types)
 }
 

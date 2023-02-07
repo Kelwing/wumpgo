@@ -8,6 +8,8 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+var _ Receiver = (*RedisReceiver)(nil)
+
 type RedisReceiver struct {
 	*eventRouter
 	conn *redis.Client
@@ -32,32 +34,22 @@ func NewRedisReceiver(connectOpts *redis.Options, opts ...ReceiverOption) (*Redi
 	}, nil
 }
 
-// Receive is a blocking function to receive events and pass them to handlers
-func (r *RedisReceiver) Receive(ctx context.Context) (func(), error) {
+func (r *RedisReceiver) Run(ctx context.Context) error {
 	r.log.Debug().Msg("starting receive")
 	pubsub := r.conn.PSubscribe(ctx, "discord.*")
 	ch := pubsub.Channel()
 	r.log.Debug().Str("pubsub", pubsub.String()).Msg("subscribed")
 
-	stop := make(chan bool)
-
-	func() {
+	for {
 		r.log.Debug().Msg("Listening for messages")
-		for {
-			select {
-			case msg := <-ch:
-				r.log.Debug().Str("channel", msg.Channel).Msg("received message")
-				if err := r.Route(msg.Channel, json.RawMessage(msg.Payload)); err != nil {
-					r.log.Warn().Err(err).Str("event", msg.Channel).Msg("failed to route event")
-				}
-			case <-stop:
-				return
+		select {
+		case msg := <-ch:
+			r.log.Debug().Str("channel", msg.Channel).Msg("received message")
+			if err := r.Route(msg.Channel, json.RawMessage(msg.Payload)); err != nil {
+				r.log.Warn().Err(err).Str("event", msg.Channel).Msg("failed to route event")
 			}
+		case <-ctx.Done():
+			return nil
 		}
-	}()
-
-	return func() {
-		stop <- true
-		pubsub.Close()
-	}, nil
+	}
 }

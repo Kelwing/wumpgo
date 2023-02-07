@@ -1,0 +1,50 @@
+package handlers
+
+import (
+    {{- if .Features.Gateway.NATS }}
+    "github.com/nats-io/nats.go"
+    {{- end }}
+	"github.com/rs/zerolog"
+    "github.com/spf13/viper"
+	"wumpgo.dev/wumpgo/gateway/receiver"
+	"wumpgo.dev/wumpgo/rest"
+)
+
+func Setup(c *rest.Client, l zerolog.Logger) (receiver.Receiver, error) {
+    {{- if .Features.Gateway.Redis }}
+    r := receiver.NewRedisReceiver(
+        &redis.Options{
+            Addr: viper.GetString("redis.url"),
+            DB: viper.GetInt("redis.db"),
+        }, 
+        receiver.WithClient(c),
+		receiver.WithLogger(l),
+    )
+    {{- else if .Features.Gateway.NATS }}
+    r, err := receiver.NewNATSReceiver(
+        viper.GetString("natsurl"),
+        []nats.Option{},
+        receiver.WithClient(c),
+		receiver.WithLogger(l),
+    )
+    if err != nil {
+        return nil, err
+    }
+    {{- else if .Features.Gateway.Local }}
+    r, err := receiver.NewLocalReceiver(
+		receiver.WithClient(c),
+		receiver.WithLogger(l),
+	)
+    if err != nil {
+        return nil, err
+    }
+    {{- else }}
+    // NOOP dispatcher selected, events will never fire
+    // enable a dispatcher to get the full functionality
+    {{ end }}
+	r.On("READY", Ready)
+	r.On("GUILD_CREATE", GuildCreate)
+    r.On("GUILD_MEMBER_ADD", MemberAdd)
+
+	return r, nil
+}

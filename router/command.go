@@ -162,7 +162,15 @@ func (c *CommandContext) TargetID() objects.Snowflake {
 }
 
 func (c *CommandContext) GuildID() objects.Snowflake {
-	return c.data.GuildID
+	return c.interaction.GuildID
+}
+
+func (c *CommandContext) UserID() objects.Snowflake {
+	if c.interaction.User != nil {
+		return c.interaction.User.ID
+	} else {
+		return c.interaction.Member.User.ID
+	}
 }
 
 func (c *CommandContext) ResolveAttachment(id objects.Snowflake) *objects.Attachment {
@@ -229,4 +237,9 @@ type CommandHandlerFunc func(CommandResponder, *CommandContext)
 
 func (f CommandHandlerFunc) Handle(r CommandResponder, ctx *CommandContext) {
 	f(r, ctx)
+}
+
+type commandHandler struct {
+	h          CommandHandler
+	middleware []Middleware
 }

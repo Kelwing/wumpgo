@@ -1,7 +1,8 @@
-{{- if .Gateway -}}
+{{- if .Features.Gateway.Enabled -}}
 package handlers
 
 import (
+    "context"
     "fmt"
     
     "wumpgo.dev/wumpgo/rest"
@@ -9,7 +10,7 @@ import (
 )
 
 // Ready handles a Ready event and prints out the current username
-func Ready(c *rest.Client, r *objects.Ready) {
+func Ready(ctx context.Context, c *rest.Client, r *objects.Ready) {
 	fmt.Println("Ready as", r.User.Username)
 }
 {{- end }}

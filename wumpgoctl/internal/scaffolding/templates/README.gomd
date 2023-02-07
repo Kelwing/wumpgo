@@ -1,0 +1,17 @@
+# {{ .Meta.Name }}
+
+{{ .Meta.Summary }}
+
+## Running
+
+```sh
+{{- if .Features.Codegen }}
+go generate ./...
+{{- end }}
+{{- if .Features.Gateway.Enabled }}
+DISCORD_PUBLIC_KEY=xxx DISCORD_TOKEN=xxx go run . gateway
+{{- end }}
+{{- if .Features.HTTP.Enabled }}
+DISCORD_PUBLIC_KEY=xxx DISCORD_TOKEN=xxx go run . http
+{{- end }}
+```
