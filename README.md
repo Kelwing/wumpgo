@@ -21,6 +21,19 @@ A work in progress Golang Discord library.
 go get -u wumpgo.dev/wumpgo@v0.0.3
 ```
 
+## Quick Start
+
+To get started quickly we recommend using wumpgoctl.
+```bash
+go install wumpgo.dev/wumpgo/wumpgoctl@latest
+```
+
+Then initialize a new project
+```bash
+mkdir mybot && cd mybot
+wumpgoctl init -p github.com/USERNAME/mybot -n MyBot -g --nats --codegen
+```
+
 ## Usage
 
 Checkout the [examples](examples/) for simple usage examples.  If you're looking to get started quickly, check out [wumpgoctl](#wumpgoctl).
