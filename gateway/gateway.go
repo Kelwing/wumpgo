@@ -17,19 +17,19 @@ func NewShardManager(token string, opts ...manager.ManagerOption) *manager.Shard
 	return manager.New(token, opts...)
 }
 
-func NewLocalDispatcher(receiver receiver.Receiver) dispatcher.Dispatcher {
+func NewLocalDispatcher(receiver receiver.Receiver, opts ...dispatcher.DispatcherOption) dispatcher.Dispatcher {
 	return dispatcher.NewLocalDispatcher(receiver)
 }
 
-func NewNATSDispatcher(url string, opts ...nats.Option) (dispatcher.Dispatcher, error) {
-	return dispatcher.NewNATSDispatcher(url, opts...)
+func NewNATSDispatcher(url string, natsOpts []nats.Option, opts ...dispatcher.DispatcherOption) (dispatcher.Dispatcher, error) {
+	return dispatcher.NewNATSDispatcher(url, natsOpts, opts...)
 }
 
-func NewNOOPDispatcher() dispatcher.Dispatcher {
+func NewNOOPDispatcher(opts ...dispatcher.DispatcherOption) dispatcher.Dispatcher {
 	return dispatcher.NewNOOPDispatcher()
 }
 
-func NewRedisDispatcher(connectOpts *redis.Options) (dispatcher.Dispatcher, error) {
+func NewRedisDispatcher(connectOpts *redis.Options, opts ...dispatcher.DispatcherOption) (dispatcher.Dispatcher, error) {
 	return dispatcher.NewRedisDispatcher(connectOpts)
 }
 

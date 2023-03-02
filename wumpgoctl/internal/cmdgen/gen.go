@@ -133,6 +133,23 @@ func parseType(arg string) *objects.ApplicationCommandType {
 	return nil
 }
 
+func in[T comparable](s []T, v T) bool {
+	for _, i := range s {
+		if i == v {
+			return true
+		}
+	}
+	return false
+}
+
+func AddOnce[T comparable](s []T, v T) []T {
+	if in(s, v) {
+		return s
+	}
+
+	return append(s, v)
+}
+
 func parseComments(ctx context.Context, args *tmplArg, t *doc.Type) (tmplStruct, bool) {
 	s := tmplStruct{
 		Name:                           t.Name,
@@ -182,7 +199,7 @@ func parseComments(ctx context.Context, args *tmplArg, t *doc.Type) (tmplStruct,
 				dm, _ := strconv.ParseBool(matches[OptionDMRe.SubexpIndex("value")])
 				s.DM = dm
 			} else if matches := OptionPermissionsRe.FindStringSubmatch(line); len(matches) > 0 {
-				args.Imports = append(args.Imports, "wumpgo.dev/wumpgo/objects/permissions")
+				args.Imports = AddOnce(args.Imports, "wumpgo.dev/wumpgo/objects/permissions")
 
 				value := matches[OptionPermissionsRe.SubexpIndex("value")]
 

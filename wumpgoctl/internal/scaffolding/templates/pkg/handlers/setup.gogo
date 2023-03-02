@@ -42,9 +42,9 @@ func Setup(c *rest.Client, l zerolog.Logger) (receiver.Receiver, error) {
     // NOOP dispatcher selected, events will never fire
     // enable a dispatcher to get the full functionality
     {{ end }}
-	r.On("READY", Ready)
-	r.On("GUILD_CREATE", GuildCreate)
-    r.On("GUILD_MEMBER_ADD", MemberAdd)
+	r.On(Ready)
+	r.On(GuildCreate)
+    r.On(MemberAdd)
 
 	return r, nil
 }

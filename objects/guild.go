@@ -94,7 +94,7 @@ const (
 type Guild struct {
 	ID                          Snowflake                  `json:"id"`
 	Name                        string                     `json:"name"`
-	Icon                        string                     `json:"icon,omitempty"`
+	Icon                        Asset[GuildIcon]           `json:"icon,omitempty"`
 	IconHash                    string                     `json:"icon_hash,omitempty"`
 	Splash                      string                     `json:"splash,omitempty"`
 	DiscoverySplash             string                     `json:"discovery_splash,omitempty"`
@@ -231,3 +231,29 @@ type MembershipScreeningField struct {
 	Values    []string            `json:"values,omitempty"`
 	Required  bool                `json:"required"`
 }
+
+type GuildOnboarding struct {
+	GuildID      Snowflake                `json:"guild_id"`
+	Options      []*GuildOnboardingPrompt `json:"options"`
+	Title        string                   `json:"title"`
+	SingleSelect bool                     `json:"single_select"`
+	InOnboarding bool                     `json:"in_onboarding"`
+	Type         PromptType               `json:"type"`
+}
+
+type GuildOnboardingPrompt struct {
+	ID          Snowflake   `json:"id"`
+	ChannelIDs  []Snowflake `json:"channel_ids"`
+	RoleIDs     []Snowflake `json:"role_ids"`
+	EmojiID     Snowflake   `json:"emoji_id"`
+	EmojiName   string      `json:"emoji_name"`
+	Title       string      `json:"tile"`
+	Description string      `json:"description"`
+}
+
+type PromptType uint
+
+const (
+	PromptTypeMultipleChoice PromptType = iota
+	PromptTypeDropdown
+)

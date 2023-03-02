@@ -7,12 +7,14 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 )
 
-var _ packetProcessor = (*dispatchProcessor)(nil)
-var _ packetProcessor = (*helloProcessor)(nil)
-var _ packetProcessor = (*heartbeatProcessor)(nil)
-var _ packetProcessor = (*reconnectProcessor)(nil)
-var _ packetProcessor = (*invalidSessionProcessor)(nil)
-var _ packetProcessor = (*heartbeatAckProcessor)(nil)
+var (
+	_ packetProcessor = (*dispatchProcessor)(nil)
+	_ packetProcessor = (*helloProcessor)(nil)
+	_ packetProcessor = (*heartbeatProcessor)(nil)
+	_ packetProcessor = (*reconnectProcessor)(nil)
+	_ packetProcessor = (*invalidSessionProcessor)(nil)
+	_ packetProcessor = (*heartbeatAckProcessor)(nil)
+)
 
 type packetProcessor interface {
 	op() objects.OpCode
@@ -64,7 +66,7 @@ func (h *helloProcessor) process(s *Shard, p objects.Payload) error {
 		s.logger.Err(err).Msg("Failed to unmarshal hello")
 		return err
 	}
-	s.heartbeat = NewHeartbeat(hello.HeartbeatInterval, s)
+	s.heartbeat = NewHeartbeat(hello.HeartbeatInterval, s, s.logger)
 	s.heartbeat.Start()
 
 	if s.resume.Load() && s.session_id != "" {
@@ -108,8 +110,9 @@ func (r *reconnectProcessor) op() objects.OpCode {
 
 func (r *reconnectProcessor) process(s *Shard, p objects.Payload) error {
 	s.logger.Info().Msg("Received reconnect")
+	s.resume.Store(true)
 	s.Close()
-	return errReconnect()
+	return shardError("reconnect")
 }
 
 type invalidSessionProcessor struct{}
@@ -121,7 +124,7 @@ func (i *invalidSessionProcessor) op() objects.OpCode {
 func (i *invalidSessionProcessor) process(s *Shard, p objects.Payload) error {
 	s.logger.Info().Msg("Invalid session")
 	s.Close()
-	return errInvalidSession()
+	return shardError("invalid session")
 }
 
 type heartbeatAckProcessor struct{}

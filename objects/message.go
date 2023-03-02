@@ -1,5 +1,10 @@
 package objects
 
+import (
+	"fmt"
+	"strconv"
+)
+
 //go:generate stringer -type=MessageType,MessageActivityType,MessageFlag,MessageStickerFormat -output message_string.go
 
 type MessageType uint
@@ -93,6 +98,14 @@ type Message struct {
 	Stickers          []*Sticker          `json:"stickers,omitempty"`
 }
 
+func (m *Message) URL() string {
+	guild := "@me"
+	if m.GuildID != Snowflake(0) {
+		guild = strconv.FormatUint(uint64(m.GuildID), 10)
+	}
+	return fmt.Sprintf("https://discord.com/channels/%s/%d/%d", guild, m.ChannelID, m.ID)
+}
+
 type MessageInteraction struct {
 	ID   Snowflake       `json:"id"`
 	Type InteractionType `json:"type"`
@@ -106,9 +119,10 @@ type MessageActivity struct {
 }
 
 type MessageReference struct {
-	MessageID Snowflake `json:"message_id,omitempty"`
-	ChannelID Snowflake `json:"channel_id,omitempty"`
-	GuildID   Snowflake `json:"guild_id,omitempty"`
+	MessageID       Snowflake `json:"message_id,omitempty"`
+	ChannelID       Snowflake `json:"channel_id,omitempty"`
+	GuildID         Snowflake `json:"guild_id,omitempty"`
+	FailIfNotExists *bool     `json:"fail_if_not_exists,omitempty"`
 }
 
 type MessageApplication struct {

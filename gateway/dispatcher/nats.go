@@ -6,24 +6,42 @@ import (
 	"strings"
 
 	"github.com/nats-io/nats.go"
-	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog"
 )
 
+var _ Dispatcher = (*NATSDispatcher)(nil)
+
 type NATSDispatcher struct {
-	conn *nats.Conn
+	conn   *nats.Conn
+	logger *zerolog.Logger
 }
 
-func NewNATSDispatcher(url string, opts ...nats.Option) (*NATSDispatcher, error) {
-	conn, err := nats.Connect(url, opts...)
+func NewNATSDispatcher(url string, natsOpts []nats.Option, opts ...DispatcherOption) (*NATSDispatcher, error) {
+	conn, err := nats.Connect(url, natsOpts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &NATSDispatcher{conn: conn}, nil
+	logger := zerolog.Nop()
+
+	d := &NATSDispatcher{
+		conn:   conn,
+		logger: &logger,
+	}
+
+	for _, o := range opts {
+		o(d)
+	}
+
+	return d, nil
 }
 
 func (d *NATSDispatcher) Dispatch(event string, data json.RawMessage) error {
 	eventName := fmt.Sprintf("discord.%s", strings.ToLower(event))
-	log.Debug().Msgf("Dispatching event %s to NATS", eventName)
+	d.logger.Debug().Msgf("Dispatching event %s to NATS", eventName)
 	return d.conn.Publish(eventName, data)
+}
+
+func (d *NATSDispatcher) setLogger(logger *zerolog.Logger) {
+	d.logger = logger
 }

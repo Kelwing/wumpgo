@@ -2,6 +2,10 @@ package router
 
 import (
 	"context"
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"wumpgo.dev/wumpgo/objects"
 )
@@ -15,6 +19,8 @@ type ModalResponder interface {
 	TTS() ModalResponder
 	// Content sets the content for the response.
 	Content(string) ModalResponder
+	// Contentf sets the content to the formatted value.
+	Contentf(string, ...any) ModalResponder
 	// Embed adds an embed to the response, can be called up to 10 times.
 	Embed(*objects.Embed) ModalResponder
 	// Embeds overwrites all embeds in the response with the provided array.
@@ -53,7 +59,6 @@ func newDefaultModalResponder() *defaultModalResponder {
 type defaultModalResponder struct {
 	response    *objects.InteractionResponse
 	messageData *objects.InteractionMessagesCallbackData
-	modalData   *objects.InteractionModalCallbackData
 	deferFunc   ModalHandler
 	view        Renderable
 	files       []*objects.DiscordFile
@@ -77,6 +82,11 @@ func (r *defaultModalResponder) TTS() ModalResponder {
 
 func (r *defaultModalResponder) Content(c string) ModalResponder {
 	r.messageData.Content = c
+	return r
+}
+
+func (r *defaultModalResponder) Contentf(format string, a ...any) ModalResponder {
+	r.messageData.Content = fmt.Sprintf(format, a...)
 	return r
 }
 
@@ -117,22 +127,72 @@ func (r *defaultModalResponder) Attach(f *objects.DiscordFile) ModalResponder {
 
 func newModalContext(ctx context.Context, i *objects.Interaction) *ModalContext {
 	return &ModalContext{
-		values: make(map[string]string),
+		InteractionContext: InteractionContext{
+			interaction: i,
+			ctx:         ctx,
+		},
+		values: make(map[string]ModalValue),
+		params: make(map[string]ModalValue),
 	}
 }
 
 type ModalContext struct {
 	InteractionContext
-	values map[string]string
-	params map[string]string
+	values map[string]ModalValue
+	params map[string]ModalValue
 }
 
 // Value returns the value of a text input component within the modal
-func (c *ModalContext) Value(customID string) string {
+func (c *ModalContext) Value(customID string) ModalValue {
 	v, ok := c.values[customID]
 	if !ok {
 		return ""
 	}
 
 	return v
+}
+
+func (c *ModalContext) Param(name string) ModalValue {
+	v, ok := c.params[name]
+	if !ok {
+		return ""
+	}
+
+	return v
+}
+
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+func ToSnakeCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
+}
+
+type ModalValue string
+
+func (v ModalValue) String() string {
+	return string(v)
+}
+
+func (v ModalValue) Int() (int, error) {
+	i, err := strconv.ParseInt(v.String(), 10, 64)
+	return int(i), err
+}
+
+func (v ModalValue) Snowflake() (objects.Snowflake, error) {
+	return objects.SnowflakeFromString(v.String())
+}
+
+func (v ModalValue) Bool() (bool, error) {
+	return strconv.ParseBool(v.String())
+}
+
+func (v ModalValue) Int64() (int64, error) {
+	return strconv.ParseInt(v.String(), 10, 64)
+}
+
+func (v ModalValue) Float64() (float64, error) {
+	return strconv.ParseFloat(v.String(), 64)
 }

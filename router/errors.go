@@ -1,5 +1,7 @@
 package router
 
+import "fmt"
+
 type errCommandNotFound struct{}
 
 func (e *errCommandNotFound) Error() string {
@@ -23,7 +25,7 @@ type errInternalCommand struct {
 }
 
 func (e *errInternalCommand) Error() string {
-	return "internal command error"
+	return fmt.Sprintf("internal command error: %v", e.rec)
 }
 
 func (e *errInternalCommand) Recover() any {

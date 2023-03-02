@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 
 	"wumpgo.dev/wumpgo/objects"
 )
@@ -17,6 +18,8 @@ type ComponentResponder interface {
 	TTS() ComponentResponder
 	// Content sets the content for the response.
 	Content(string) ComponentResponder
+	// Contentf sets the content to the formatted value.
+	Contentf(string, ...any) ComponentResponder
 	// Embed adds an embed to the response, can be called up to 10 times.
 	Embed(*objects.Embed) ComponentResponder
 	// Embeds overwrites all embeds in the response with the provided array.
@@ -86,6 +89,11 @@ func (r *defaultComponentResponder) TTS() ComponentResponder {
 
 func (r *defaultComponentResponder) Content(c string) ComponentResponder {
 	r.messageData.Content = c
+	return r
+}
+
+func (r *defaultComponentResponder) Contentf(format string, a ...any) ComponentResponder {
+	r.messageData.Content = fmt.Sprintf(format, a...)
 	return r
 }
 
@@ -244,8 +252,9 @@ func NewView() *View {
 	return &View{components: make([]Renderable, 0)}
 }
 
-func (v *View) Add(r ...Renderable) {
+func (v *View) Add(r ...Renderable) *View {
 	v.components = append(v.components, r...)
+	return v
 }
 
 func (v *View) Render() []*objects.Component {
@@ -258,15 +267,22 @@ func (v *View) Render() []*objects.Component {
 	return components
 }
 
-func NewButton(customID string) *Button {
-	return &Button{
+func (v *View) ToRows(maxPerRow int) []*objects.Component {
+	return ComponentsToRows(v.Render(), maxPerRow)
+}
+
+func NewButton(customID ...string) *Button {
+	btn := &Button{
 		component: &objects.Component{
-			Type:     objects.ComponentTypeButton,
-			Style:    objects.ButtonStylePrimary,
-			Label:    "Button",
-			CustomID: customID,
+			Type:  objects.ComponentTypeButton,
+			Style: objects.ButtonStylePrimary,
+			Label: "Button",
 		},
 	}
+	if len(customID) > 0 {
+		btn.component.CustomID = customID[0]
+	}
+	return btn
 }
 
 type Button struct {
@@ -372,8 +388,8 @@ func (s *SelectMenu) Render() []*objects.Component {
 	return []*objects.Component{s.component}
 }
 
-func NewTextInput(customID string) *SelectMenu {
-	return &SelectMenu{
+func NewTextInput(customID string) *TextInput {
+	return &TextInput{
 		component: &objects.Component{
 			CustomID: customID,
 			Type:     objects.ComponentTypeInputText,

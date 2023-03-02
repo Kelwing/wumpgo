@@ -1,11 +1,14 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"runtime/debug"
 	"time"
 
-	"github.com/rs/zerolog/log"
+	"github.com/DataDog/gostackparse"
+	"github.com/rs/zerolog"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
 )
@@ -16,16 +19,33 @@ func (r *Router) AddModalHandler(custom_id string, h ModalHandler) {
 	r.modalHandlers.Insert(custom_id, h)
 }
 
+func (r Router) executeModal(f func(ModalResponder, *ModalContext), cr *defaultModalResponder, ctx *ModalContext) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			routines, errs := gostackparse.Parse(bytes.NewReader(debug.Stack()))
+			if len(errs) > 0 {
+				r.logger.Warn().Interface("error", rec).Msg("")
+			} else {
+				arr := zerolog.Arr()
+				for _, f := range routines[0].Stack {
+					arr.Interface(f)
+				}
+				r.logger.Warn().
+					Interface("error", rec).
+					Array("stack", arr).
+					Msg("")
+			}
+
+			*cr = *newDefaultModalResponder()
+			r.modalErrorHandler(cr, &errInternalCommand{rec: rec})
+		}
+	}()
+	f(cr, ctx)
+}
+
 func (r *Router) routeModal(ctx context.Context, i *objects.Interaction) (response *objects.InteractionResponse) {
 	var data objects.ModalSubmitData
 	resp := newDefaultModalResponder()
-
-	defer func() {
-		if rec := recover(); rec != nil {
-			r.modalErrorHandler(resp, &errInternalCommand{rec: rec})
-			response = resp.response
-		}
-	}()
 
 	err := json.Unmarshal(i.Data, &data)
 	if err != nil {
@@ -33,43 +53,46 @@ func (r *Router) routeModal(ctx context.Context, i *objects.Interaction) (respon
 	}
 
 	mCtx := newModalContext(ctx, i)
-	for _, c := range data.Components {
-		mCtx.values[c.CustomID] = c.Value
+	mCtx.client = r.client
+	for _, row := range data.Components {
+		for _, c := range row.Components {
+			mCtx.values[c.CustomID] = ModalValue(c.Value)
+		}
 	}
+
+	r.logger.Debug().Interface("values", mCtx.values).Msg("using component values")
 
 	h, ph, ok := r.modalHandlers.Search(data.CustomID)
 	if !ok {
+		r.logger.Warn().Str("custom_id", data.CustomID).Msg("failed to find handler")
 		r.modalErrorHandler(resp, ErrCustomIDNotFound)
+		resp.response.Data = resp.messageData
 		return resp.response
 	}
 
-	mCtx.params = ph
+	params := make(map[string]ModalValue)
+	for k, v := range ph {
+		params[k] = ModalValue(v)
+	}
 
-	h(resp, mCtx)
+	mCtx.params = params
+
+	r.executeModal(h, resp, mCtx)
+
+	r.logger.Debug().Interface("message_data", resp.messageData).Msg("handler returned")
 
 	if resp.view != nil {
 		components := resp.view.Render()
-
-		if resp.response.Type != objects.ResponseModal {
-			components = ComponentsToRows(components)
-		}
+		components = ComponentsToRows(components)
 
 		if len(components) > 5 {
 			components = components[:5]
 		}
 
-		if resp.response.Type == objects.ResponseModal {
-			resp.modalData.Components = components
-		} else {
-			resp.messageData.Components = components
-		}
+		resp.messageData.Components = components
 	}
 
-	if resp.modalData != nil {
-		resp.response.Data = resp.modalData
-	} else {
-		resp.response.Data = resp.messageData
-	}
+	resp.response.Data = resp.messageData
 
 	return resp.response
 }
@@ -78,22 +101,21 @@ var defaultModalErrorHandler = func(r ModalResponder, err error) {
 	r.Ephemeral().Content(err.Error())
 }
 
-func (r *Router) routeGatewayModal(c *rest.Client, i *objects.Interaction) {
+func (r *Router) routeGatewayModal(ctx context.Context, c *rest.Client, i *objects.InteractionCreate) {
 	if i.Type != objects.InteractionModalSubmit {
 		return
 	}
 
-	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	r.logger.Debug().Str("id", i.ID.String()).Interface("interaction", i).Msg("Interaction modal gateway event")
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	resp := r.routeModal(ctx, i)
+	resp := r.routeModal(ctx, i.Interaction)
 
-	log.Debug().Interface("response", resp).Msg("responding")
+	r.logger.Debug().Interface("response", resp).Msg("responding")
 
 	err := r.client.CreateInteractionResponse(ctx, i.ID, i.Token, resp)
 	if err != nil {
-		log.Warn().Err(err).Msg("failed to create interaction response")
-		r.commandErrorHandler(nil, err)
+		r.logger.Warn().Err(err).Msg("failed to create modal interaction response")
 	}
 }

@@ -1,10 +1,14 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"runtime/debug"
 	"time"
 
+	"github.com/DataDog/gostackparse"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
@@ -16,16 +20,33 @@ func (r *Router) AddHandler(custom_id string, h ComponentHandler) {
 	r.componentHandlers.Insert(custom_id, h)
 }
 
+func (r Router) executeComponent(f func(ComponentResponder, *ComponentContext), cr *defaultComponentResponder, ctx *ComponentContext) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			routines, errs := gostackparse.Parse(bytes.NewReader(debug.Stack()))
+			if len(errs) > 0 {
+				r.logger.Warn().Interface("error", rec).Msg("")
+			} else {
+				arr := zerolog.Arr()
+				for _, f := range routines[0].Stack {
+					arr.Interface(f)
+				}
+				r.logger.Warn().
+					Interface("error", rec).
+					Array("stack", arr).
+					Msg("")
+			}
+
+			*cr = *newDefaultComponentResponder()
+			r.componentErrorHandler(cr, &errInternalCommand{rec: rec})
+		}
+	}()
+	f(cr, ctx)
+}
+
 func (r *Router) routeComponent(ctx context.Context, i *objects.Interaction) (response *objects.InteractionResponse) {
 	var data objects.MessageComponentData
 	resp := newDefaultComponentResponder()
-
-	defer func() {
-		if rec := recover(); rec != nil {
-			r.componentErrorHandler(resp, &errInternalCommand{rec: rec})
-			response = resp.response
-		}
-	}()
 
 	err := json.Unmarshal(i.Data, &data)
 	if err != nil {
@@ -44,7 +65,7 @@ func (r *Router) routeComponent(ctx context.Context, i *objects.Interaction) (re
 
 	cmpCtx.params = ph
 
-	h(resp, cmpCtx)
+	r.executeComponent(h, resp, cmpCtx)
 
 	if resp.view != nil {
 		components := resp.view.Render()
@@ -73,16 +94,16 @@ func (r *Router) routeComponent(ctx context.Context, i *objects.Interaction) (re
 	return resp.response
 }
 
-func (r *Router) routeGatewayComponent(c *rest.Client, i *objects.Interaction) {
+func (r *Router) routeGatewayComponent(ctx context.Context, c *rest.Client, i *objects.InteractionCreate) {
 	if i.Type != objects.InteractionComponent {
 		return
 	}
 
 	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	resp := r.routeComponent(ctx, i)
+	resp := r.routeComponent(ctx, i.Interaction)
 
 	err := r.client.CreateInteractionResponse(ctx, i.ID, i.Token, resp)
 	if err != nil {

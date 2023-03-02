@@ -3,7 +3,10 @@ module wumpgo.dev/wumpgo
 go 1.19
 
 require (
+	github.com/DataDog/gostackparse v0.6.0
 	github.com/Masterminds/semver v1.5.0
+	github.com/cenkalti/backoff/v4 v4.2.0
+	github.com/dave/jennifer v1.6.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redsync/redsync/v4 v4.7.1
 	github.com/google/go-querystring v1.1.0
@@ -13,6 +16,7 @@ require (
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/atomic v1.10.0
+	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 	golang.org/x/time v0.3.0
 	nhooyr.io/websocket v1.8.7
 )
@@ -47,7 +51,8 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/net v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

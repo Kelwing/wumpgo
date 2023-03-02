@@ -41,10 +41,10 @@ func WithClient(c *rest.Client) RouterOption {
 // as opposed to a webhook
 func WithGatewayReceiver(rec receiver.Receiver) RouterOption {
 	return func(r *Router) {
-		rec.On("INTERACTION_CREATE", r.routeGatewayCommand)
-		rec.On("INTERACTION_CREATE", r.routeGatewayComponent)
-		rec.On("INTERACTION_CREATE", r.routeGatewayAutocomplete)
-		rec.On("INTERACTION_CREATE", r.routeGatewayModal)
+		rec.On(r.routeGatewayCommand)
+		rec.On(r.routeGatewayComponent)
+		rec.On(r.routeGatewayAutocomplete)
+		rec.On(r.routeGatewayModal)
 	}
 }
 

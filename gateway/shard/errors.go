@@ -1,17 +1,15 @@
 package shard
 
-import gatewayerrors "wumpgo.dev/wumpgo/gateway/internal/gateway_errors"
+import "fmt"
 
-var (
-	ErrGeneric                  = errGeneric("")
-	ErrReconnect                = errReconnect()
-	ErrInvalidSession           = errInvalidSession()
-	ErrSessionStartLimitReached = errSessionStartLimitReached(0)
-)
+type ShardError struct {
+	Message string
+}
 
-func errGeneric(message string) error { return &gatewayerrors.ErrGenericError{Message: message} }
-func errReconnect() error             { return &gatewayerrors.ErrReconnect{} }
-func errInvalidSession() error        { return &gatewayerrors.ErrInvalidSession{} }
-func errSessionStartLimitReached(resetAfter int) error {
-	return &gatewayerrors.ErrSessionStartLimitReached{ResetAfter: resetAfter}
+func (s ShardError) Error() string {
+	return fmt.Sprintf("ShardError: %s", s.Message)
+}
+
+func shardError(m string) ShardError {
+	return ShardError{Message: m}
 }

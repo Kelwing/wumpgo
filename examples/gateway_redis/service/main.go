@@ -23,8 +23,8 @@ func main() {
 		logger.Fatal().Err(err).Msg("")
 	}
 
-	r.On("READY", ready)
-	r.On("GUILD_CREATE", guildCreate)
+	r.On(ready)
+	r.On(guildCreate)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

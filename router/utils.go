@@ -18,8 +18,12 @@ func Chunk[T any](s []T, size int) [][]T {
 	return divided
 }
 
-func ComponentsToRows(in []*objects.Component) []*objects.Component {
-	chunks := Chunk(in, 5)
+func ComponentsToRows(in []*objects.Component, maxPerRow ...int) []*objects.Component {
+	size := 5
+	if len(maxPerRow) > 0 {
+		size = maxPerRow[0]
+	}
+	chunks := Chunk(in, size)
 
 	componentRows := make([]*objects.Component, len(chunks))
 

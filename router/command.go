@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
@@ -16,6 +17,8 @@ type CommandResponder interface {
 	TTS() CommandResponder
 	// Content sets the content for the response.
 	Content(string) CommandResponder
+	// Contentf sets the content to the formatted value.
+	Contentf(string, ...any) CommandResponder
 	// Embed adds an embed to the response, can be called up to 10 times.
 	Embed(*objects.Embed) CommandResponder
 	// Embeds overwrites all embeds in the response with the provided array.
@@ -82,6 +85,11 @@ func (r *defaultResponder) Content(c string) CommandResponder {
 	return r
 }
 
+func (r *defaultResponder) Contentf(format string, a ...any) CommandResponder {
+	r.messageData.Content = fmt.Sprintf(format, a...)
+	return r
+}
+
 func (r *defaultResponder) Embed(e *objects.Embed) CommandResponder {
 	r.messageData.Embeds = append(r.messageData.Embeds, e)
 	return r
@@ -119,6 +127,7 @@ func (r *defaultResponder) Attach(f *objects.DiscordFile) CommandResponder {
 
 func (r *defaultResponder) Modal(customID string, title string, v Renderable) CommandResponder {
 	r.response.Type = objects.ResponseModal
+	r.view = v
 
 	r.modalData = &objects.InteractionModalCallbackData{
 		CustomID: customID,
@@ -129,28 +138,13 @@ func (r *defaultResponder) Modal(customID string, title string, v Renderable) Co
 }
 
 type CommandContext struct {
-	interaction *objects.Interaction
-	options     []*objects.ApplicationCommandDataOption
-	data        *objects.ApplicationCommandData
-	ctx         context.Context
-	client      *rest.Client
-}
-
-func (c *CommandContext) Interaction() *objects.Interaction {
-	return c.interaction
+	InteractionContext
+	options []*objects.ApplicationCommandDataOption
+	data    *objects.ApplicationCommandData
 }
 
 func (c *CommandContext) Options() []*objects.ApplicationCommandDataOption {
 	return c.options
-}
-
-func (c *CommandContext) Context() context.Context {
-	return c.ctx
-}
-
-func (c *CommandContext) WithContext(ctx context.Context) *CommandContext {
-	c.ctx = ctx
-	return c
 }
 
 func (c *CommandContext) Client() *rest.Client {
@@ -159,18 +153,6 @@ func (c *CommandContext) Client() *rest.Client {
 
 func (c *CommandContext) TargetID() objects.Snowflake {
 	return c.data.TargetID
-}
-
-func (c *CommandContext) GuildID() objects.Snowflake {
-	return c.interaction.GuildID
-}
-
-func (c *CommandContext) UserID() objects.Snowflake {
-	if c.interaction.User != nil {
-		return c.interaction.User.ID
-	} else {
-		return c.interaction.Member.User.ID
-	}
 }
 
 func (c *CommandContext) ResolveAttachment(id objects.Snowflake) *objects.Attachment {
@@ -222,10 +204,10 @@ func (c *CommandContext) ResolveUser(id objects.Snowflake) *objects.User {
 	return &v
 }
 
-func newCommandContext(i *objects.Interaction, opts []*objects.ApplicationCommandDataOption) *CommandContext {
+func newCommandContext(ctx context.Context, i *objects.Interaction, opts []*objects.ApplicationCommandDataOption) *CommandContext {
 	return &CommandContext{
-		interaction: i,
-		options:     opts,
+		InteractionContext: InteractionContext{interaction: i, ctx: ctx},
+		options:            opts,
 	}
 }
 

@@ -28,9 +28,9 @@ func main() {
 	}
 	r := receiver.NewLocalReceiver(receiver.WithClient(client), receiver.WithLogger(logger))
 	d := dispatcher.NewLocalDispatcher(r)
-	r.On("READY", ready)
-	r.On("GUILD_CREATE", guildCreate)
-	r.On("TYPING_START", typing)
+	r.On(ready)
+	r.On(guildCreate)
+	r.On(typing)
 
 	s := shard.New(
 		*token,

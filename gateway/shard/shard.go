@@ -3,13 +3,13 @@ package shard
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"runtime"
 	"strconv"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/atomic"
@@ -37,7 +37,6 @@ type Shard struct {
 	limiter      *rate.Limiter
 	identified   *atomic.Bool
 	stopping     *atomic.Bool
-	done         chan error
 	processors   map[objects.OpCode]packetProcessor
 	identifyLock IdentifyLocker
 
@@ -131,15 +130,11 @@ func (s *Shard) IsIdentified() bool {
 }
 
 func (s *Shard) Close() {
-	s.done <- errGeneric("connection closed")
+	s.close()
 }
 
 func (s *Shard) close() error {
 	return s.conn.Close()
-}
-
-func (s *Shard) setResume() {
-	s.resume.Store(true)
 }
 
 func (s *Shard) sendIdentify() error {
@@ -199,46 +194,63 @@ func (s *Shard) connect() error {
 	return s.conn.Open(ctx, url, header)
 }
 
-func (s *Shard) read(out chan objects.Payload) error {
-	for {
-		packet, err := s.conn.Read(context.Background())
-		if err != nil {
-			return err
-		}
-
-		var p objects.Payload
-		err = json.Unmarshal(packet, &p)
-		if err != nil {
-			return err
-		}
-
-		out <- p
+func (s *Shard) read() ReadResult {
+	packet, err := s.conn.Read(context.Background())
+	if err != nil {
+		return ReadResult{Err: shardError(err.Error())}
 	}
+
+	var p objects.Payload
+	err = json.Unmarshal(packet, &p)
+	if err != nil {
+		return ReadResult{Err: err}
+	}
+
+	return ReadResult{Payload: p}
+}
+
+type ReadResult struct {
+	Payload objects.Payload
+	Err     error
 }
 
 func (s *Shard) receive() error {
-	s.done = make(chan error)
-	msgs := make(chan objects.Payload, 10)
+	msgs := make(chan ReadResult, 10)
+	done := make(chan bool)
+	defer s.close()
+	defer func() {
+		s.logger.Debug().Msg("requesting heartbeat to stop")
+		s.heartbeat.Stop()
+		s.logger.Debug().Msg("heartbeat stopped")
+	}()
 
 	go func() {
 		s.logger.Debug().Msg("starting read loop")
-		if err := s.read(msgs); err != nil {
-			s.logger.Err(err).Msg("read failed")
-			s.done <- err
+		defer s.logger.Debug().Msg("read loop stopped")
+		result := s.read()
+		for {
+			select {
+			case msgs <- result:
+				if result.Err != nil {
+					return
+				}
+				result = s.read()
+			case <-done:
+				return
+			}
 		}
-		s.logger.Debug().Msg("read loop stopped")
 	}()
 
 	for {
-		select {
-		case err := <-s.done:
-			s.close()
+		p := <-msgs
+		if p.Err != nil {
+			s.logger.Warn().Err(p.Err).Msg("error getting payload")
+			close(done)
+			return p.Err
+		}
+		s.logger.Debug().Interface("payload", p).Msg("received payload")
+		if err := s.process(p.Payload); err != nil {
 			return err
-		case p := <-msgs:
-			if err := s.process(p); err != nil {
-				s.close()
-				return err
-			}
 		}
 	}
 }
@@ -252,7 +264,7 @@ func (s *Shard) process(p objects.Payload) error {
 
 	if !s.hello.Load() && p.Op != objects.OpHello {
 		s.logger.Error().Int64("op", int64(p.Op)).Msg("expected Hello Op")
-		return errGeneric("no hello")
+		return shardError("no hello")
 	}
 
 	if processor, ok := s.processors[p.Op]; ok {
@@ -260,7 +272,7 @@ func (s *Shard) process(p objects.Payload) error {
 			return err
 		}
 	} else {
-		log.Warn().Int64("op", int64(p.Op)).Msg("no process found for op")
+		log.Warn().Int64("op", int64(p.Op)).Msg("no processor found for op")
 	}
 
 	return nil
@@ -269,22 +281,18 @@ func (s *Shard) process(p objects.Payload) error {
 func (s *Shard) Run() error {
 	var err error
 	for {
-		err = s.connect()
+		b := backoff.NewExponentialBackOff()
+		b.MaxElapsedTime = 3 * time.Minute
+		err = backoff.Retry(s.connect, b)
 		if err != nil {
 			s.logger.Error().Err(err).Msg("failed to connect")
-			time.Sleep(time.Second * 3)
-			continue
+			return err
 		}
 
 		err = s.receive()
 		if err != nil {
 			s.logger.Error().Err(err).Msg("failed to receive")
-			if errors.Is(err, ErrReconnect) {
-				time.Sleep(time.Second * 3)
-				s.setResume()
-				continue
-			}
-			return err
+			time.Sleep(time.Second * 3)
 		}
 	}
 }

@@ -1,13 +1,17 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
+	"runtime/debug"
 	"time"
 
+	"github.com/DataDog/gostackparse"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
@@ -51,18 +55,21 @@ func (r *Router) Commands() []*objects.ApplicationCommand {
 }
 
 func (r *Router) getCommandHandler(data *objects.ApplicationCommandData) (*commandHandler, []*objects.ApplicationCommandDataOption, error) {
+	r.logger.Debug().Interface("data", data).Interface("handlers", r.commandHandlers).Msg("getting command handler")
 	if len(data.Options) == 0 || data.Options[0].Type > objects.TypeSubCommandGroup {
 		// This is definitely meant to be run as a root command
 		h, ok := r.commandHandlers[data.Name]
 		if ok {
 			return h, data.Options, nil
+		} else {
+			return nil, nil, fmt.Errorf("command not registered")
 		}
 	}
 
 	if data.Options[0].Type == objects.TypeSubCommand {
 		h, ok := r.commandHandlers[data.Name+"/"+data.Options[0].Name]
 		if !ok {
-			return nil, nil, errors.New("failed to find command")
+			return nil, nil, errors.New("command not registered")
 		}
 
 		return h, data.Options[0].Options, nil
@@ -76,14 +83,32 @@ func (r *Router) getCommandHandler(data *objects.ApplicationCommandData) (*comma
 	return h, data.Options[0].Options[0].Options, nil
 }
 
-func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (response *objects.InteractionResponse) {
-	resp := newDefaultResponder()
+func (r Router) executeCommand(f func(CommandResponder, *CommandContext), cr *defaultResponder, ctx *CommandContext) {
 	defer func() {
 		if rec := recover(); rec != nil {
-			r.commandErrorHandler(resp, &errInternalCommand{rec: rec})
-			response = resp.response
+			routines, errs := gostackparse.Parse(bytes.NewReader(debug.Stack()))
+			if len(errs) > 0 {
+				r.logger.Warn().Interface("error", rec).Msg("")
+			} else {
+				arr := zerolog.Arr()
+				for _, f := range routines[0].Stack {
+					arr.Interface(f)
+				}
+				r.logger.Warn().
+					Interface("error", rec).
+					Array("stack", arr).
+					Msg("")
+			}
+
+			*cr = *newDefaultResponder()
+			r.commandErrorHandler(cr, &errInternalCommand{rec: rec})
 		}
 	}()
+	f(cr, ctx)
+}
+
+func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (response *objects.InteractionResponse) {
+	resp := newDefaultResponder()
 
 	var data objects.ApplicationCommandData
 
@@ -99,20 +124,25 @@ func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (resp
 		return resp.response
 	}
 
-	if err := unmarshalOptions(handler, choices, &data.Resolved); err != nil {
+	handlerType := reflect.TypeOf(handler.h)
+	if handlerType.Kind() == reflect.Ptr {
+		handlerType = handlerType.Elem()
+	}
+	newHandler := reflect.New(handlerType).Interface().(CommandHandler)
+
+	if err := unmarshalOptions(newHandler, choices, &data.Resolved, r.logger); err != nil {
 		r.commandErrorHandler(resp, ErrArgumentMismatch)
 		return resp.response
 	}
 
-	cmdCtx := newCommandContext(i, choices)
+	cmdCtx := newCommandContext(ctx, i, choices)
 	if r.client != nil {
 		cmdCtx.client = r.client
 	}
 
 	cmdCtx.data = &data
-	cmdCtx.ctx = ctx
 
-	h := handler.h.Handle
+	h := newHandler.Handle
 
 	log.Debug().Msgf("chaining %d middleware", len(handler.middleware))
 
@@ -120,13 +150,15 @@ func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (resp
 		h = handler.middleware[i](h)
 	}
 
-	h(resp, cmdCtx)
+	r.executeCommand(h, resp, cmdCtx)
 
 	if resp.view != nil {
 		components := resp.view.Render()
 
 		if resp.response.Type != objects.ResponseModal {
 			components = ComponentsToRows(components)
+		} else {
+			components = ComponentsToRows(components, 1)
 		}
 
 		if len(components) > 5 {
@@ -171,23 +203,22 @@ func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (resp
 	return resp.response
 }
 
-func (r *Router) routeGatewayCommand(c *rest.Client, i *objects.Interaction) {
+func (r *Router) routeGatewayCommand(ctx context.Context, c *rest.Client, i *objects.InteractionCreate) {
 	if i.Type != objects.InteractionApplicationCommand {
 		return
 	}
 
 	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	resp := r.routeCommand(ctx, i)
+	resp := r.routeCommand(ctx, i.Interaction)
 
 	log.Debug().Interface("response", resp).Msg("responding")
 
 	err := r.client.CreateInteractionResponse(ctx, i.ID, i.Token, resp)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to create interaction response")
-		r.commandErrorHandler(nil, err)
 	}
 }
 
@@ -233,7 +264,7 @@ func (r *Router) routeAutocomplete(ctx context.Context, i *objects.Interaction) 
 		return resp
 	}
 
-	if err := unmarshalOptions(handler, choices, &data.Resolved); err != nil {
+	if err := unmarshalOptions(handler.h, choices, &data.Resolved); err != nil {
 		return resp
 	}
 
@@ -252,22 +283,21 @@ func (r *Router) routeAutocomplete(ctx context.Context, i *objects.Interaction) 
 	return resp
 }
 
-func (r *Router) routeGatewayAutocomplete(c *rest.Client, i *objects.Interaction) {
+func (r *Router) routeGatewayAutocomplete(ctx context.Context, c *rest.Client, i *objects.InteractionCreate) {
 	if i.Type != objects.InteractionAutoComplete {
 		return
 	}
 
 	log.Info().Str("id", i.ID.String()).Msg("Interaction gateway event")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	resp := r.routeAutocomplete(ctx, i)
+	resp := r.routeAutocomplete(ctx, i.Interaction)
 
 	log.Debug().Interface("response", resp).Msg("responding")
 
 	err := r.client.CreateInteractionResponse(ctx, i.ID, i.Token, resp)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to create interaction response")
-		r.commandErrorHandler(nil, err)
 	}
 }

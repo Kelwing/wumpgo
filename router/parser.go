@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rs/zerolog"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/objects/permissions"
 )
@@ -440,10 +441,16 @@ func (p *CommandParser) parseOption(v reflect.Value, i, depth int) (*objects.App
 	return option, nil
 }
 
-func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, resolvable *objects.ResolvedData) error {
+func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, resolvable *objects.ResolvedData, logger ...zerolog.Logger) error {
+	log := zerolog.Nop()
+	if len(logger) > 0 {
+		log = logger[0]
+		log.Debug().Msg("logging unmarshalling")
+	}
 	val := reflect.ValueOf(dst)
 
 	if !val.IsValid() {
+		log.Warn().Msg("destination is not valid")
 		return newParserErrorf("dst is not valid")
 	}
 
@@ -452,10 +459,12 @@ func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, 
 	}
 
 	if val.Type().Kind() != reflect.Ptr {
+		log.Warn().Msg("destination is not a pointer")
 		return newParserErrorf("dst must be a pointer")
 	}
 
 	if val.Type().Elem().Kind() != reflect.Struct {
+		log.Warn().Msg("destination must be a pointer to a command definition struct")
 		return newParserErrorf("dst must be a pointer to a command definition struct")
 	}
 
@@ -469,6 +478,10 @@ func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, 
 		fv := val.Elem().Field(i)
 		tag := f.Tag
 
+		l := log.With().Str("field_name", fv.Type().Name()).Logger()
+
+		l.Debug().Msg("processing field")
+
 		tagVal, ok := tag.Lookup("discord")
 		v := strings.Split(tagVal, ",")[0]
 		if !ok || v == "" {
@@ -478,20 +491,32 @@ func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, 
 
 		c, ok := choiceMap[v]
 		if !ok {
+			l.Debug().Msg("tag not found in users choices")
 			continue
 		}
 
 		vv := reflect.ValueOf(c.Value)
+		if fv.Type().Kind() == reflect.Ptr {
+			l.Debug().Msg("field value is a pointer")
+			fv = fv.Elem()
+		}
 
 		if fv.Type().Kind() == reflect.Struct {
+			l.Debug().Msg("field is a struct")
 			if vv.Type().Kind() == reflect.String {
 				// Value should be a Snowflake
 				sn, err := objects.SnowflakeFromString(vv.String())
+				l.Debug().Str("snowflake", vv.String()).Msg("resolving snowflake")
 				if err == nil {
 					if fv.Type().AssignableTo(userType) {
+						log.Debug().Msg("is assignable to user")
 						u, ok := resolvable.Users[sn]
 						if ok {
-							fv.Set(reflect.ValueOf(u))
+							if fv.Kind() == reflect.Ptr {
+								fv.Set(reflect.ValueOf(&u))
+							} else {
+								fv.Set(reflect.ValueOf(u))
+							}
 						}
 					} else if fv.Type().AssignableTo(channelType) {
 						c, ok := resolvable.Channels[sn]
@@ -510,11 +535,18 @@ func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, 
 						}
 					}
 				}
+			} else {
+				l.Debug().Str("field_type", vv.Type().Kind().String()).Msg("field is not a string")
 			}
 		}
 
 		if fv.CanSet() && fv.Type().AssignableTo(vv.Type()) {
 			fv.Set(vv)
+		} else if vv.CanConvert(fv.Type()) {
+			nv := vv.Convert(fv.Type())
+			fv.Set(nv)
+		} else {
+			l.Warn().Str("value_type", vv.Type().Name()).Msg("value not assignable or convertable to field")
 		}
 	}
 
