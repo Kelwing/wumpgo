@@ -28,6 +28,7 @@ const (
 	EarlyVerifiedBotDeveloper
 	DiscordCertifiedModerator
 	BotHTTPInteractions
+	ActiveDeveloper
 )
 
 type PremiumType uint

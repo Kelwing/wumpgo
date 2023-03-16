@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -15,9 +16,11 @@ func (c *CacheError) Error() string {
 }
 
 type Cache interface {
-	Get(key string) (*DiscordResponse, error)
-	Put(key string, value *DiscordResponse) error
+	Get(ctx context.Context, key string) (*DiscordResponse, error)
+	Put(ctx context.Context, key string, value *DiscordResponse) error
 }
+
+var _ Cache = (*MemoryCache)(nil)
 
 // Reference in-memory implementation
 type MemoryCache struct {
@@ -48,7 +51,7 @@ func NewMemoryCache() *MemoryCache {
 	return cache
 }
 
-func (m *MemoryCache) Get(key string) (*DiscordResponse, error) {
+func (m *MemoryCache) Get(ctx context.Context, key string) (*DiscordResponse, error) {
 	m.RLock()
 	defer m.RUnlock()
 	data, ok := m.cacheMap[key]
@@ -59,7 +62,7 @@ func (m *MemoryCache) Get(key string) (*DiscordResponse, error) {
 	return data.resp, nil
 }
 
-func (m *MemoryCache) Put(key string, resp *DiscordResponse) error {
+func (m *MemoryCache) Put(ctx context.Context, key string, resp *DiscordResponse) error {
 	m.Lock()
 	defer m.Unlock()
 

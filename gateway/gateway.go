@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"github.com/go-redis/redis/v8"
 	"github.com/nats-io/nats.go"
+	"github.com/redis/go-redis/v9"
 	"wumpgo.dev/wumpgo/gateway/dispatcher"
 	"wumpgo.dev/wumpgo/gateway/manager"
 	"wumpgo.dev/wumpgo/gateway/receiver"

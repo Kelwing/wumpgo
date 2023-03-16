@@ -11,7 +11,7 @@ type ErrorREST struct {
 	Body    json.RawMessage
 }
 
-func (r *ErrorREST) Error() string {
+func (r ErrorREST) Error() string {
 	return r.Message
 }
 

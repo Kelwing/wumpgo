@@ -123,6 +123,8 @@ func (i *invalidSessionProcessor) op() objects.OpCode {
 
 func (i *invalidSessionProcessor) process(s *Shard, p objects.Payload) error {
 	s.logger.Info().Msg("Invalid session")
+	// Ensure we're not resuming
+	s.resume.Store(false)
 	s.Close()
 	return shardError("invalid session")
 }

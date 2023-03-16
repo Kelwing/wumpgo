@@ -95,7 +95,7 @@ func (r *request) Reason(reason string) *request {
 
 func (r *request) SendRaw(c *Client) (*DiscordResponse, error) {
 	if r.method == "GET" && c.cache != nil {
-		data, err := c.cache.Get(r.path)
+		data, err := c.cache.Get(r.ctx, r.path)
 		if err == nil {
 			return data, nil
 		}
@@ -122,7 +122,7 @@ func (r *request) SendRaw(c *Client) (*DiscordResponse, error) {
 
 	if r.method == "GET" && c.cache != nil {
 		// if this fails, there's not much of a recovery that can be done
-		_ = c.cache.Put(r.path, resp)
+		_ = c.cache.Put(r.ctx, r.path, resp)
 	}
 
 	return resp, err

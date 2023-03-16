@@ -19,7 +19,7 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/rest"
     {{- if .Features.Gateway.Redis }}
-    "github.com/go-redis/redis/v8"
+    "github.com/redis/go-redis/v9"
     {{- end }}
 )
 

@@ -24,10 +24,15 @@ func (r *Router) RegisterCommand(cmd any, m ...Middleware) error {
 	p := NewParser()
 	cmdObj, err := p.parseCommand(reflect.ValueOf(cmd))
 	if err != nil {
+		r.logger.Warn().Err(err).Msg("failed to add command")
 		return err
 	}
 
 	r.commands = append(r.commands, cmdObj)
+
+	if len(p.Handlers()) == 0 {
+		r.logger.Warn().Msgf("no handlers registered for command %s", cmdObj.Name)
+	}
 
 	// Merge handlers into router handler map
 	for k, v := range p.Handlers() {

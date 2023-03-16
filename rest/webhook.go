@@ -245,16 +245,18 @@ func (c *Client) ExecuteWebhook(ctx context.Context, id objects.SnowflakeObject,
 	u.RawQuery = v.Encode()
 
 	msg := &objects.Message{}
-	err = NewRequest().
+	req := NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
 		Path(u.String()).
 		ContentType(contentType).
 		Body(body).
-		Bind(msg).
-		OmitAuth().Send(c)
+		OmitAuth()
+	if params.Wait {
+		req.Bind(msg)
+	}
 
-	return msg, err
+	return msg, req.Send(c)
 }
 
 func (c *Client) GetWebhookMesssage(ctx context.Context, messageID, webhookID objects.SnowflakeObject, token string) (*objects.Message, error) {

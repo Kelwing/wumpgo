@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"wumpgo.dev/wumpgo/gateway"
 	"wumpgo.dev/wumpgo/gateway/shard"
 	"wumpgo.dev/wumpgo/objects"
