@@ -31,13 +31,10 @@ func Setup(c *rest.Client, l zerolog.Logger) (receiver.Receiver, error) {
         return nil, err
     }
     {{- else if .Features.Gateway.Local }}
-    r, err := receiver.NewLocalReceiver(
+    r := receiver.NewLocalReceiver(
 		receiver.WithClient(c),
 		receiver.WithLogger(l),
 	)
-    if err != nil {
-        return nil, err
-    }
     {{- else }}
     // NOOP dispatcher selected, events will never fire
     // enable a dispatcher to get the full functionality

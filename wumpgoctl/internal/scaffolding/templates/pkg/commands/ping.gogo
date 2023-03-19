@@ -28,5 +28,19 @@ func (c Ping) AllowInDMs() bool {
 {{- end }}
 
 func (p Ping) Handle(r router.CommandResponder, ctx *router.CommandContext) {
-    r.Content("Pong!")
+    pingTime := time.Since(ctx.Interaction().ID.CreatedAt().Time)
+
+	r.Contentf("Pong! %s", pingTime.String()).
+		View(router.NewView().Add(
+			router.NewButton("/ping").Label("Ping Again"),
+		))
+}
+
+func PingAgain(r router.ComponentResponder, ctx *router.ComponentContext) {
+	pingTime := time.Since(ctx.Interaction().ID.CreatedAt().Time)
+
+	r.UpdateMessage().Contentf("Pong! %s", pingTime.String()).
+		View(router.NewView().Add(
+			router.NewButton("/ping").Label("Ping Again"),
+		))
 }

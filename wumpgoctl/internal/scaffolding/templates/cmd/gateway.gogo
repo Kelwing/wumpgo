@@ -71,6 +71,14 @@ var gatewayCmd = &cobra.Command{
         {{ else if .Features.Gateway.Local }}
         r, _ := handlers.Setup(client, logger)
         d := dispatcher.NewLocalDispatcher(r)
+
+        {{- if not .Features.HTTP.Enabled }}
+        commands.NewRouter(
+            router.WithClient(client),
+            router.WithLogger(logger),
+            router.WithGatewayReceiver(r),
+        )
+        {{- end }}
         {{ else }}
         d := dispatcher.NewNOOPDispatcher()
         {{- end }}

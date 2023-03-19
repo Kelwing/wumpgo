@@ -65,8 +65,7 @@ var httpCmd = &cobra.Command{
         routerOpts = append(routerOpts, router.WithInteractionsApp(app))
 
         // Create the router and register the commands
-        r := router.New(routerOpts...)
-		r.MustRegisterCommand(&commands.Ping{})
+        r := commands.NewRouter(routerOpts...)
 
         if viper.IsSet("token") {
             err = initCommands(client, r.Commands())

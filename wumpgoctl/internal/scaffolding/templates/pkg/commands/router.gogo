@@ -1,0 +1,13 @@
+package commands
+
+import (
+	"wumpgo.dev/wumpgo/router"
+)
+
+func NewRouter(opts ...router.RouterOption) *router.Router {
+	r := router.New(opts...)
+	r.MustRegisterCommand(&Ping{})
+	r.AddHandler("/ping", PingAgain)
+
+	return r
+}

@@ -43,10 +43,19 @@ var receiveCmd = &cobra.Command{
             }),
             rest.WithLogger(logger),
         )
+
         r, err := handlers.Setup(client, logger)
         if err != nil {
             log.Fatal().Err(err).Msg("failed to setup receiver")
         }
+
+        {{- if not .Features.HTTP.Enabled }}
+        commands.NewRouter(
+            router.WithClient(client),
+            router.WithLogger(logger),
+            router.WithGatewayReceiver(r),
+        )
+        {{- end }}
 
         return r.Run(context.Background())
     },
