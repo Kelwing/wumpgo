@@ -1,4 +1,4 @@
-# Quick Start
+# wumpgoctl
 
 wumpgo is modular, but that leads to it also having many moving parts.  Getting started quickly by hand can a complicated process.  To speed that up and reduce the time it takes to get started to near-zero we provide a tool called `wumpgoctl`.  This tool provides both scaffolding for getting started quickly, and a codegen tool for generating interface implementations for slash commands.  As such, installing it is highly recommended.
 
