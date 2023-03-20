@@ -33,11 +33,8 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::483691633045:role/wumpgo-docs-publish
           aws-region: us-east-2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - run: (test -x $HOME/.cargo/bin/mdbook || cargo install --vers "^0.4" mdbook)
-      - run: mdbook build docs/ && mdbook test docs/
+      - run: curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.28/mdbook-v0.4.28-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+      - run: bin/mdbook build docs/ && bin/mdbook test docs/
       - name: Copy docs to the bucket
         run: |
           aws s3 sync --acl public-read docs/book/ s3://dev.wumpgo
