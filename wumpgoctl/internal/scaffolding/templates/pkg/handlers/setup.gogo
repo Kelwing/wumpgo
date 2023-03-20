@@ -4,8 +4,13 @@ import (
     {{- if .Features.Gateway.NATS }}
     "github.com/nats-io/nats.go"
     {{- end }}
+    {{- if .Features.Gateway.Redis }}
+    "github.com/redis/go-redis/v9"
+    {{- end }}
 	"github.com/rs/zerolog"
+    {{- if not .Features.Gateway.Local }}
     "github.com/spf13/viper"
+    {{- end }}
 	"wumpgo.dev/wumpgo/gateway/receiver"
 	"wumpgo.dev/wumpgo/rest"
 )

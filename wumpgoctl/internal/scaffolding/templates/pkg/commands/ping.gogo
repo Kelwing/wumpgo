@@ -1,6 +1,10 @@
 package commands
 
-import "wumpgo.dev/wumpgo/router"
+import (
+	"time"
+
+	"wumpgo.dev/wumpgo/router"
+)
 {{ if .Features.Codegen }}
 //go:generate wumpgoctl gen
 {{- end }}
