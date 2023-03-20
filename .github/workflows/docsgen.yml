@@ -40,5 +40,5 @@ jobs:
       - run: mdbook build docs/ && mdbook test docs/
       - name: Copy docs to the bucket
         run: |
-          aws s3 sync docs/book/ s3://dev.wumpgo
+          aws s3 sync --acl public-read docs/book/ s3://dev.wumpgo
 
