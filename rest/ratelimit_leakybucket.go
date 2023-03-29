@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"errors"
+	"math"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -32,13 +34,23 @@ func (c *LeakyBucketRatelimiter) Request(httpClient HTTPClient, req *request) (*
 	if err != nil {
 		return nil, err
 	}
-	bucket := c.GetBucket(url.Path)
-	if bucket != nil {
+	bucket, err := c.GetBucket(url.Path)
+	if err == nil {
+		zerolog.Ctx(req.ctx).
+			Debug().
+			Interface("bucket", bucket).
+			Int("burst", bucket.Burst()).
+			Float64("limit", float64(bucket.Limit())).
+			Float64("tokens", bucket.Tokens()).
+			Msgf("Processing ratelimit for %s", url.Path)
 		res := bucket.Reserve()
 		if !res.OK() {
 			return nil, ErrMaxRetriesExceeded
 		}
-		zerolog.Ctx(req.ctx).Debug().Msgf("Ratelimited request to %s, waiting %v", url.Path, res.Delay())
+		zerolog.Ctx(req.ctx).Debug().
+			Dur("delay", res.Delay()).
+			Str("path", url.Path).
+			Msg("Ratelimited request")
 		time.Sleep(res.Delay())
 	}
 
@@ -47,7 +59,7 @@ func (c *LeakyBucketRatelimiter) Request(httpClient HTTPClient, req *request) (*
 		return nil, err
 	}
 
-	c.updateFromResponse(resp.Header, req.path)
+	c.updateFromResponse(resp.Header, url.Path)
 
 	return resp, nil
 }
@@ -66,12 +78,12 @@ func (c *LeakyBucketRatelimiter) mappingExists(name string) bool {
 	return ok
 }
 
-func (c *LeakyBucketRatelimiter) addBucket(name string, r int, count int) {
+func (c *LeakyBucketRatelimiter) addBucket(name string, r float64, count float64) {
 	c.Lock()
 	defer c.Unlock()
-	c.buckets[name] = rate.NewLimiter(rate.Limit(count/r), count)
+	c.buckets[name] = rate.NewLimiter(rate.Every(time.Second*time.Duration(r)), int(count)-1)
 	// Reserve a ticket since we JUST made a request
-	c.buckets[name].Reserve()
+	c.buckets[name].ReserveN(time.Now(), int(count))
 }
 
 func (c *LeakyBucketRatelimiter) addMapping(routeKey, bucket string) {
@@ -80,15 +92,21 @@ func (c *LeakyBucketRatelimiter) addMapping(routeKey, bucket string) {
 	c.routeMap[routeKey] = bucket
 }
 
-func (c *LeakyBucketRatelimiter) GetBucket(path string) *rate.Limiter {
+func (c *LeakyBucketRatelimiter) GetBucket(path string) (*rate.Limiter, error) {
 	c.RLock()
 	defer c.RUnlock()
+
 	routeKey := parseRoute(path)
-	b, ok := c.buckets[c.routeMap[routeKey]]
+	bucketName, ok := c.routeMap[routeKey]
 	if !ok {
-		return nil
+		return nil, errors.New("no bucket mapping found")
 	}
-	return b
+
+	if bucket, ok := c.buckets[bucketName]; ok {
+		return bucket, nil
+	}
+
+	return nil, errors.New("no bucket found")
 }
 
 func (c *LeakyBucketRatelimiter) updateFromResponse(h http.Header, path string) {
@@ -101,14 +119,16 @@ func (c *LeakyBucketRatelimiter) updateFromResponse(h http.Header, path string) 
 		return
 	}
 
-	reset, err := strconv.ParseInt(resetAfter, 10, 64)
+	reset, err := strconv.ParseFloat(resetAfter, 64)
 	if err != nil {
 		return
 	}
 
+	reset = math.Round(reset/0.25) * 0.25
+
 	if !c.bucketExists(bucket) {
 		// Upon first request, limit and resetAfter should be actual values
-		c.addBucket(bucket, int(reset), int(count))
+		c.addBucket(bucket, reset, float64(count))
 	}
 
 	routeKey := parseRoute(path)
@@ -121,6 +141,7 @@ func (c *LeakyBucketRatelimiter) updateFromResponse(h http.Header, path string) 
 var snowRe = regexp.MustCompile(`\d{17,19}`)
 
 func parseRoute(path string) string {
+	path, _, _ = strings.Cut(path, "?")
 	splitPath := strings.Split(path, "/")
 	includeNext := true
 	routeKeyParts := []string{}
