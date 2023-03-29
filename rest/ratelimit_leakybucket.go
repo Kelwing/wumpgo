@@ -81,7 +81,7 @@ func (c *LeakyBucketRatelimiter) mappingExists(name string) bool {
 func (c *LeakyBucketRatelimiter) addBucket(name string, r float64, count float64) {
 	c.Lock()
 	defer c.Unlock()
-	c.buckets[name] = rate.NewLimiter(rate.Every(time.Second*time.Duration(r)), int(count)-1)
+	c.buckets[name] = rate.NewLimiter(rate.Every(time.Second*time.Duration(r)), int(count))
 	// Reserve a ticket since we JUST made a request
 	c.buckets[name].ReserveN(time.Now(), int(count))
 }
