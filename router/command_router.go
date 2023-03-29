@@ -187,6 +187,7 @@ func (r *Router) routeCommand(ctx context.Context, i *objects.Interaction) (resp
 		go func() {
 			log.Debug().Msg("Starting defer handler")
 			dr := newDefaultResponder()
+			cmdCtx.ctx = context.Background()
 			resp.deferFunc.Handle(dr, cmdCtx)
 			log.Debug().Msg("Defer handler finished")
 
