@@ -15,7 +15,7 @@ import (
 	"wumpgo.dev/wumpgo/rest"
 )
 
-func Setup(c *rest.Client, l zerolog.Logger) (receiver.Receiver, error) {
+func Setup(c rest.RESTClient, l zerolog.Logger) (receiver.Receiver, error) {
     {{- if .Features.Gateway.Redis }}
     r := receiver.NewRedisReceiver(
         &redis.Options{

@@ -7,7 +7,7 @@ import (
 
 type ReceiverOption func(*eventRouter)
 
-func WithClient(c *rest.Client) ReceiverOption {
+func WithClient(c rest.RESTClient) ReceiverOption {
 	return func(e *eventRouter) {
 		e.client = c
 	}

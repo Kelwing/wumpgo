@@ -13,7 +13,7 @@ func WithLogger(l zerolog.Logger) InteractionOption {
 	}
 }
 
-func WithClient(c *rest.Client) InteractionOption {
+func WithClient(c rest.RESTClient) InteractionOption {
 	return func(a *App) {
 		a.restClient = c
 	}

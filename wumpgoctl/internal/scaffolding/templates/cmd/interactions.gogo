@@ -31,7 +31,7 @@ var httpCmd = &cobra.Command{
         clientOpts := []interactions.InteractionOption{interactions.WithLogger(logger)}
         routerOpts := []router.RouterOption{router.WithLogger(logger)}
         
-        var client *rest.Client
+        var client rest.RESTClient
 
         if viper.IsSet("token") {
             client = rest.New(
@@ -101,7 +101,7 @@ func init() {
 }
 
 // initCommands is a helper function to register the commands with Discord
-func initCommands(c *rest.Client, cmds []*objects.ApplicationCommand) error {
+func initCommands(c rest.RESTClient, cmds []*objects.ApplicationCommand) error {
     log.Info().Msg("Registering commands with Discord")
 
     ctx := context.Background()

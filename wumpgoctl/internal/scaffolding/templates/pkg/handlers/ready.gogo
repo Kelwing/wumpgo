@@ -10,7 +10,7 @@ import (
 )
 
 // Ready handles a Ready event and prints out the current username
-func Ready(ctx context.Context, c *rest.Client, r *objects.Ready) {
+func Ready(ctx context.Context, c rest.RESTClient, r *objects.Ready) {
 	fmt.Println("Ready as", r.User.Username)
 }
 {{- end }}

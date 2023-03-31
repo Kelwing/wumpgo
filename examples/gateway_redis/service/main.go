@@ -34,10 +34,10 @@ func main() {
 	}
 }
 
-func ready(ctx context.Context, c *rest.Client, r *objects.Ready) {
+func ready(ctx context.Context, c rest.RESTClient, r *objects.Ready) {
 	fmt.Println("Ready as", r.User.Username)
 }
 
-func guildCreate(ctx context.Context, c *rest.Client, g *objects.GuildCreate) {
+func guildCreate(ctx context.Context, c rest.RESTClient, g *objects.GuildCreate) {
 	fmt.Println("Added to guild", g.Name)
 }

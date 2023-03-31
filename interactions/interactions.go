@@ -22,7 +22,7 @@ type (
 // App is the primary interactions server
 type App struct {
 	logger              zerolog.Logger
-	restClient          *rest.Client
+	restClient          rest.RESTClient
 	commandHandler      HandlerFunc
 	componentHandler    HandlerFunc
 	autocompleteHandler HandlerFunc
@@ -229,6 +229,6 @@ func (a *App) ProcessRequest(ctx context.Context, data []byte) (resp *objects.In
 }
 
 // Rest exposes the internal Rest client so you can make calls to the Discord API
-func (a *App) Rest() *rest.Client {
+func (a *App) Rest() rest.RESTClient {
 	return a.restClient
 }
