@@ -11,22 +11,26 @@ func TestNew(t *testing.T) {
 	rl := NewLeakyBucketRatelimiter()
 	tests := []struct {
 		Options []RestOption
-		Expect  func(t *testing.T, c *Client)
+		Expect  func(t *testing.T, c RESTClient)
 	}{
 		{
 			Options: []RestOption{
 				WithToken(objects.TokenTypeBot, "test"),
 			},
-			Expect: func(t *testing.T, c *Client) {
-				require.Equal(t, "Bot test", c.token)
+			Expect: func(t *testing.T, c RESTClient) {
+				cc, ok := c.(*Client)
+				require.True(t, ok)
+				require.Equal(t, "Bot test", cc.token)
 			},
 		},
 		{
 			Options: []RestOption{
 				WithRateLimiter(rl),
 			},
-			Expect: func(t *testing.T, c *Client) {
-				require.Equal(t, rl, c.rateLimiter)
+			Expect: func(t *testing.T, c RESTClient) {
+				cc, ok := c.(*Client)
+				require.True(t, ok)
+				require.Equal(t, rl, cc.rateLimiter)
 			},
 		},
 		{
@@ -37,8 +41,10 @@ func TestNew(t *testing.T) {
 					Version: "0.0.1",
 				}),
 			},
-			Expect: func(t *testing.T, c *Client) {
-				require.Equal(t, "wumpgo (https://wumpgo.dev, 0.0.1)", c.userAgent.String())
+			Expect: func(t *testing.T, c RESTClient) {
+				cc, ok := c.(*Client)
+				require.True(t, ok)
+				require.Equal(t, "wumpgo (https://wumpgo.dev, 0.0.1)", cc.userAgent.String())
 			},
 		},
 	}

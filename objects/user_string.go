@@ -23,26 +23,28 @@ func _() {
 	_ = x[EarlyVerifiedBotDeveloper-131072]
 	_ = x[DiscordCertifiedModerator-262144]
 	_ = x[BotHTTPInteractions-524288]
+	_ = x[ActiveDeveloper-1048576]
 }
 
-const _UserFlags_name = "UserFlagsNoneDiscordEmployeePartneredServerOwnerHypesquadEventsBugHunterLevel1HouseBraveryHouseBrillianceHouseBalanceEarlySupporterTeamUserBugHunterLevel2VerifiedBotEarlyVerifiedBotDeveloperDiscordCertifiedModeratorBotHTTPInteractions"
+const _UserFlags_name = "UserFlagsNoneDiscordEmployeePartneredServerOwnerHypesquadEventsBugHunterLevel1HouseBraveryHouseBrillianceHouseBalanceEarlySupporterTeamUserBugHunterLevel2VerifiedBotEarlyVerifiedBotDeveloperDiscordCertifiedModeratorBotHTTPInteractionsActiveDeveloper"
 
 var _UserFlags_map = map[UserFlags]string{
-	0:      _UserFlags_name[0:13],
-	1:      _UserFlags_name[13:28],
-	2:      _UserFlags_name[28:48],
-	4:      _UserFlags_name[48:63],
-	8:      _UserFlags_name[63:78],
-	64:     _UserFlags_name[78:90],
-	128:    _UserFlags_name[90:105],
-	256:    _UserFlags_name[105:117],
-	512:    _UserFlags_name[117:131],
-	1024:   _UserFlags_name[131:139],
-	16384:  _UserFlags_name[139:154],
-	65536:  _UserFlags_name[154:165],
-	131072: _UserFlags_name[165:190],
-	262144: _UserFlags_name[190:215],
-	524288: _UserFlags_name[215:234],
+	0:       _UserFlags_name[0:13],
+	1:       _UserFlags_name[13:28],
+	2:       _UserFlags_name[28:48],
+	4:       _UserFlags_name[48:63],
+	8:       _UserFlags_name[63:78],
+	64:      _UserFlags_name[78:90],
+	128:     _UserFlags_name[90:105],
+	256:     _UserFlags_name[105:117],
+	512:     _UserFlags_name[117:131],
+	1024:    _UserFlags_name[131:139],
+	16384:   _UserFlags_name[139:154],
+	65536:   _UserFlags_name[154:165],
+	131072:  _UserFlags_name[165:190],
+	262144:  _UserFlags_name[190:215],
+	524288:  _UserFlags_name[215:234],
+	1048576: _UserFlags_name[234:249],
 }
 
 func (i UserFlags) String() string {

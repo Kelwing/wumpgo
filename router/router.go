@@ -19,7 +19,7 @@ type Router struct {
 	componentErrorHandler ComponentErrorHandler
 	commandErrorHandler   CommandErrorHandler
 	modalErrorHandler     ModalErrorHandler
-	client                *rest.Client
+	client                rest.RESTClient
 	componentHandlers     *trieNode[ComponentHandler]
 	modalHandlers         *trieNode[ModalHandler]
 	logger                zerolog.Logger
@@ -49,7 +49,7 @@ type Context interface {
 	Interaction() *objects.Interaction
 	Context() context.Context
 	WithContext(ctx context.Context) Context
-	Client() *rest.Client
+	Client() rest.RESTClient
 	Message() *objects.Message
 	Member() *objects.GuildMember
 	User() *objects.User
@@ -60,7 +60,7 @@ var _ Context = (*InteractionContext)(nil)
 type InteractionContext struct {
 	interaction *objects.Interaction
 	ctx         context.Context
-	client      *rest.Client
+	client      rest.RESTClient
 }
 
 // Interaction payload
@@ -69,7 +69,7 @@ func (c *InteractionContext) Interaction() *objects.Interaction {
 }
 
 // Client is a Discord REST client, nil if not configured
-func (c *InteractionContext) Client() *rest.Client {
+func (c *InteractionContext) Client() rest.RESTClient {
 	return c.client
 }
 

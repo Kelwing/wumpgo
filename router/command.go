@@ -147,7 +147,7 @@ func (c *CommandContext) Options() []*objects.ApplicationCommandDataOption {
 	return c.options
 }
 
-func (c *CommandContext) Client() *rest.Client {
+func (c *CommandContext) Client() rest.RESTClient {
 	return c.client
 }
 

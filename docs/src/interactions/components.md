@@ -32,3 +32,11 @@ ctx.Content("Click a button!").View(v)
 By default, views will render the components in order, filling out the component rows before adding another, up to 5.  Beyond 25 components, the view will be truncated.  The exception to this is when using a View in a modal, then it will only have 1 component per row, up to 5.  The only valid component type for modals is a Text Input component.
 
 [^unsecure]: Be aware that custom IDs are inherently not secure.  You cannot trust the contents of a custom ID.  Be sure you validate the data you get as part of a custom ID.  For example, if building a reaction role bot, validate the role is actually a valid choice before assigning it.
+
+## Example
+
+Below is a full example of using a command to send a message containing a component, and a handler to handle events from that component.
+
+```go
+{{#include component_example.go:3:}}
+```

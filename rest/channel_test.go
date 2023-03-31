@@ -10,7 +10,7 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 )
 
-func getRealClient(t *testing.T) *Client {
+func getRealClient(t *testing.T) RESTClient {
 	tokenEnv := os.Getenv("TOKEN")
 	if tokenEnv == "" {
 		t.Skip("TOKEN env var must be set to run tests against discord API")

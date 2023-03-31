@@ -1,44 +1,19 @@
 package objects
 
 import (
-	"encoding/json"
 	"strconv"
 	"time"
+
+	"wumpgo.dev/snowflake"
 )
+
+type Snowflake snowflake.Snowflake
 
 var _ SnowflakeObject = (*Snowflake)(nil)
 
 const (
 	DiscordEpoch = 1420070400000
 )
-
-type Snowflake uint64
-
-func (s *Snowflake) UnmarshalJSON(bytes []byte) error {
-	var snowflake string
-	err := json.Unmarshal(bytes, &snowflake)
-	if err != nil {
-		return err
-	}
-
-	if snowflake == "" || snowflake == "null" {
-		*s = 0
-		return nil
-	}
-
-	snowInt, err := strconv.ParseInt(snowflake, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	*s = Snowflake(snowInt)
-
-	return nil
-}
-
-func (s Snowflake) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
-}
 
 // CreatedAt returns a time.Time representing the time a Snowflake was created
 func (s Snowflake) CreatedAt() Time {

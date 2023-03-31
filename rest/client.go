@@ -156,7 +156,7 @@ func (u *UserAgent) String() string {
 	return fmt.Sprintf("%s (%s, %s)", u.Name, u.URL, u.Version)
 }
 
-func New(options ...RestOption) *Client {
+func New(options ...RestOption) RESTClient {
 	c := &Client{
 		userAgent: &UserAgent{
 			Name:    "wumpgo",

@@ -43,7 +43,7 @@ func generate(sourceTypes []string) error {
 						jen.Func().
 							Params(
 								jen.Qual("context", "Context"),
-								jen.Op("*").Qual("wumpgo.dev/wumpgo/rest", "Client"),
+								jen.Qual("wumpgo.dev/wumpgo/rest", "RESTClient"),
 								jen.Op("*").Qual("wumpgo.dev/wumpgo/objects", sourceType),
 							),
 					).Block(jen.Return(jen.Id("newHandler").Call(jen.Id("v")), jen.Lit(pascalToSnakeCase(sourceType)), jen.Nil()))
