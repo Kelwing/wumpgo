@@ -29,9 +29,9 @@ func WithInitialCommands(cmds ...any) RouterOption {
 	}
 }
 
-// WithClientCmd sets a *rest.Client on the router which will be attached
+// WithClientCmd sets a rest.RESTClient on the router which will be attached
 // to each CommandContext
-func WithClient(c *rest.Client) RouterOption {
+func WithClient(c rest.RESTClient) RouterOption {
 	return func(r *Router) {
 		r.client = c
 	}

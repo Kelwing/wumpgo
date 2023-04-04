@@ -19,6 +19,7 @@ require (
 	golang.org/x/exp v0.0.0-20230310171629-522b1b587ee0
 	golang.org/x/time v0.3.0
 	nhooyr.io/websocket v1.8.7
+	wumpgo.dev/snowflake v1.0.0
 )
 
 require (

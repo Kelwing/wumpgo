@@ -101,7 +101,7 @@ var defaultModalErrorHandler = func(r ModalResponder, err error) {
 	r.Ephemeral().Content(err.Error())
 }
 
-func (r *Router) routeGatewayModal(ctx context.Context, c *rest.Client, i *objects.InteractionCreate) {
+func (r *Router) routeGatewayModal(ctx context.Context, c rest.RESTClient, i *objects.InteractionCreate) {
 	if i.Type != objects.InteractionModalSubmit {
 		return
 	}

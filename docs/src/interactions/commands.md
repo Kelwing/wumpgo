@@ -52,7 +52,7 @@ The second tag used is the `choices` tag.  This tag is used to specify the possi
 Let's start with a quick example, then we'll go over what each part does.
 
 ```go
-{{#include command_example.go}}
+{{#include command_example.go:3:}}
 ```
 
 We start off with a go:generate comment.  This is required on any file that contains one or more slash commands that needs codegen.  wumpgoctl will only perform generation on files that directly call out to gen.

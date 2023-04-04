@@ -25,7 +25,7 @@ type Receiver interface {
 type eventRouter struct {
 	handlers   map[string][]EventHandlerIface
 	log        zerolog.Logger
-	client     *rest.Client
+	client     rest.RESTClient
 	errHandler func(error)
 	groupName  string
 }
