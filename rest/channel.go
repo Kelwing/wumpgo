@@ -14,13 +14,13 @@ import (
 	"wumpgo.dev/wumpgo/objects/permissions"
 )
 
-func (c *Client) GetChannel(ctx context.Context, id objects.SnowflakeObject) (*objects.Channel, error) {
+func (c *Client) GetChannel(ctx context.Context, id objects.Snowflake) (*objects.Channel, error) {
 	channel := &objects.Channel{}
 
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelBaseFmt, id.GetID())).
+		Path(fmt.Sprintf(ChannelBaseFmt, id)).
 		ContentType(JsonContentType).
 		Bind(channel).
 		Send(c)
@@ -42,7 +42,7 @@ type ModifyChannelParams struct {
 	Reason               string                         `json:"-"`
 }
 
-func (c *Client) ModifyChannel(ctx context.Context, id objects.SnowflakeObject, params *ModifyChannelParams) (*objects.Channel, error) {
+func (c *Client) ModifyChannel(ctx context.Context, id objects.Snowflake, params *ModifyChannelParams) (*objects.Channel, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (c *Client) ModifyChannel(ctx context.Context, id objects.SnowflakeObject, 
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelBaseFmt, id.GetID())).
+		Path(fmt.Sprintf(ChannelBaseFmt, id)).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -67,12 +67,12 @@ func (c *Client) ModifyChannel(ctx context.Context, id objects.SnowflakeObject, 
 	return channel, err
 }
 
-func (c *Client) DeleteChannel(ctx context.Context, id objects.SnowflakeObject, reason string) (*objects.Channel, error) {
+func (c *Client) DeleteChannel(ctx context.Context, id objects.Snowflake, reason string) (*objects.Channel, error) {
 	channel := &objects.Channel{}
 	err := NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelBaseFmt, id.GetID())).
+		Path(fmt.Sprintf(ChannelBaseFmt, id)).
 		Reason(reason).
 		ContentType(JsonContentType).
 		Bind(channel).
@@ -88,8 +88,8 @@ type GetChannelMessagesParams struct {
 	Limit  int               `url:"limit,omitempty"`
 }
 
-func (c *Client) GetChannelMessages(ctx context.Context, id objects.SnowflakeObject, params *GetChannelMessagesParams) ([]*objects.Message, error) {
-	u, err := url.Parse(fmt.Sprintf(ChannelMessagesFmt, id.GetID()))
+func (c *Client) GetChannelMessages(ctx context.Context, id objects.Snowflake, params *GetChannelMessagesParams) ([]*objects.Message, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelMessagesFmt, id))
 	if err != nil {
 		return nil, err
 	}
@@ -111,12 +111,12 @@ func (c *Client) GetChannelMessages(ctx context.Context, id objects.SnowflakeObj
 	return messages, err
 }
 
-func (c *Client) GetChannelMessage(ctx context.Context, channel, message objects.SnowflakeObject) (*objects.Message, error) {
+func (c *Client) GetChannelMessage(ctx context.Context, channel, message objects.Snowflake) (*objects.Message, error) {
 	msg := &objects.Message{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelMessageFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
 		ContentType(JsonContentType).
 		Bind(msg).
 		Send(c)
@@ -124,12 +124,12 @@ func (c *Client) GetChannelMessage(ctx context.Context, channel, message objects
 	return msg, err
 }
 
-func (c *Client) CrossPostMessage(ctx context.Context, channel, message objects.SnowflakeObject) (*objects.Message, error) {
+func (c *Client) CrossPostMessage(ctx context.Context, channel, message objects.Snowflake) (*objects.Message, error) {
 	msg := &objects.Message{}
 	err := NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(CrosspostMessageFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(CrosspostMessageFmt, channel, message)).
 		ContentType(JsonContentType).
 		Bind(msg).
 		Send(c)
@@ -137,11 +137,11 @@ func (c *Client) CrossPostMessage(ctx context.Context, channel, message objects.
 	return msg, err
 }
 
-func (c *Client) DeleteMessage(ctx context.Context, channel, message objects.SnowflakeObject) error {
+func (c *Client) DeleteMessage(ctx context.Context, channel, message objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelMessageFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
 		ContentType(JsonContentType).
 		Send(c)
 }
@@ -150,7 +150,7 @@ type DeleteMessagesParams struct {
 	Messages []objects.Snowflake `json:"messages"`
 }
 
-func (c *Client) BulkDeleteMessages(ctx context.Context, channel objects.SnowflakeObject, params *DeleteMessagesParams) error {
+func (c *Client) BulkDeleteMessages(ctx context.Context, channel objects.Snowflake, params *DeleteMessagesParams) error {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return err
@@ -159,7 +159,7 @@ func (c *Client) BulkDeleteMessages(ctx context.Context, channel objects.Snowfla
 	return NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(BulkDeleteMessagesFmt, channel.GetID())).
+		Path(fmt.Sprintf(BulkDeleteMessagesFmt, channel)).
 		ContentType(JsonContentType).
 		Body(data).
 		Send(c)
@@ -172,7 +172,7 @@ type EditChannelParams struct {
 	Reason string                    `json:"-"`
 }
 
-func (c *Client) EditChannelPermissions(ctx context.Context, channel, overwrite objects.SnowflakeObject, params *EditChannelParams) error {
+func (c *Client) EditChannelPermissions(ctx context.Context, channel, overwrite objects.Snowflake, params *EditChannelParams) error {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return err
@@ -186,29 +186,29 @@ func (c *Client) EditChannelPermissions(ctx context.Context, channel, overwrite 
 	return NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelPermissionsFmt, channel.GetID(), overwrite.GetID())).
+		Path(fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite)).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
 		Send(c)
 }
 
-func (c *Client) DeleteChannelPermission(ctx context.Context, channel, overwrite objects.SnowflakeObject, reason string) error {
+func (c *Client) DeleteChannelPermission(ctx context.Context, channel, overwrite objects.Snowflake, reason string) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelPermissionsFmt, channel.GetID(), overwrite.GetID())).
+		Path(fmt.Sprintf(ChannelPermissionsFmt, channel, overwrite)).
 		Reason(reason).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) GetChannelInvites(ctx context.Context, channel objects.SnowflakeObject) ([]*objects.Invite, error) {
+func (c *Client) GetChannelInvites(ctx context.Context, channel objects.Snowflake) ([]*objects.Invite, error) {
 	var invites []*objects.Invite
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelInvitesFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelInvitesFmt, channel)).
 		ContentType(JsonContentType).
 		Bind(&invites).
 		Send(c)
@@ -227,7 +227,7 @@ type CreateInviteParams struct {
 	Reason            string                   `json:"-"`
 }
 
-func (c *Client) CreateChannelInvite(ctx context.Context, channel objects.SnowflakeObject, params *CreateInviteParams) (*objects.Invite, error) {
+func (c *Client) CreateChannelInvite(ctx context.Context, channel objects.Snowflake, params *CreateInviteParams) (*objects.Invite, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -243,7 +243,7 @@ func (c *Client) CreateChannelInvite(ctx context.Context, channel objects.Snowfl
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelInvitesFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelInvitesFmt, channel)).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -270,7 +270,7 @@ func (c *Client) getEmoji(emoji interface{}) (string, error) {
 	return react, nil
 }
 
-func (c *Client) CreateReaction(ctx context.Context, channel, message objects.SnowflakeObject, emoji interface{}) error {
+func (c *Client) CreateReaction(ctx context.Context, channel, message objects.Snowflake, emoji interface{}) error {
 	react, err := c.getEmoji(emoji)
 	if err != nil {
 		return err
@@ -279,12 +279,12 @@ func (c *Client) CreateReaction(ctx context.Context, channel, message objects.Sn
 	return NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ReactionFmt, channel.GetID(), message.GetID(), url.QueryEscape(react), "@me")).
+		Path(fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me")).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) DeleteOwnReaction(ctx context.Context, channel, message objects.SnowflakeObject, emoji interface{}) error {
+func (c *Client) DeleteOwnReaction(ctx context.Context, channel, message objects.Snowflake, emoji interface{}) error {
 	react, err := c.getEmoji(emoji)
 	if err != nil {
 		return err
@@ -293,12 +293,12 @@ func (c *Client) DeleteOwnReaction(ctx context.Context, channel, message objects
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ReactionFmt, channel.GetID(), message.GetID(), url.QueryEscape(react), "@me")).
+		Path(fmt.Sprintf(ReactionFmt, channel, message, url.QueryEscape(react), "@me")).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) DeleteUserReaction(ctx context.Context, channel, message, user objects.SnowflakeObject, emoji interface{}) error {
+func (c *Client) DeleteUserReaction(ctx context.Context, channel, message, user objects.Snowflake, emoji interface{}) error {
 	react, err := c.getEmoji(emoji)
 	if err != nil {
 		return err
@@ -307,7 +307,7 @@ func (c *Client) DeleteUserReaction(ctx context.Context, channel, message, user 
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ReactionUserFmt, channel.GetID(), message.GetID(), url.QueryEscape(react), user.GetID())).
+		Path(fmt.Sprintf(ReactionUserFmt, channel, message, url.QueryEscape(react), user)).
 		ContentType(JsonContentType).
 		Send(c)
 }
@@ -318,13 +318,13 @@ type GetReactionsParams struct {
 	Limit  int               `url:"limit"`
 }
 
-func (c *Client) GetReactions(ctx context.Context, channel, message objects.SnowflakeObject, emoji interface{}, params *GetReactionsParams) ([]*objects.User, error) {
+func (c *Client) GetReactions(ctx context.Context, channel, message objects.Snowflake, emoji interface{}, params *GetReactionsParams) ([]*objects.User, error) {
 	react, err := c.getEmoji(emoji)
 	if err != nil {
 		return nil, err
 	}
 
-	u, err := url.Parse(fmt.Sprintf(ReactionsFmt, channel.GetID(), message.GetID(), url.QueryEscape(react)))
+	u, err := url.Parse(fmt.Sprintf(ReactionsFmt, channel, message, url.QueryEscape(react)))
 	if err != nil {
 		return nil, err
 	}
@@ -346,16 +346,16 @@ func (c *Client) GetReactions(ctx context.Context, channel, message objects.Snow
 	return users, err
 }
 
-func (c *Client) DeleteAllReactions(ctx context.Context, channel, message objects.SnowflakeObject) error {
+func (c *Client) DeleteAllReactions(ctx context.Context, channel, message objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ReactionsBaseFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ReactionsBaseFmt, channel, message)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) DeleteEmojiReactions(ctx context.Context, channel, message objects.SnowflakeObject, emoji interface{}) error {
+func (c *Client) DeleteEmojiReactions(ctx context.Context, channel, message objects.Snowflake, emoji interface{}) error {
 	reaction, err := c.getEmoji(emoji)
 	if err != nil {
 		return err
@@ -364,17 +364,17 @@ func (c *Client) DeleteEmojiReactions(ctx context.Context, channel, message obje
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ReactionsFmt, channel.GetID(), message.GetID(), reaction)).
+		Path(fmt.Sprintf(ReactionsFmt, channel, message, reaction)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) GetPinnedMessages(ctx context.Context, channel objects.SnowflakeObject) ([]*objects.Message, error) {
+func (c *Client) GetPinnedMessages(ctx context.Context, channel objects.Snowflake) ([]*objects.Message, error) {
 	var messages []*objects.Message
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelPinsFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelPinsFmt, channel)).
 		ContentType(JsonContentType).
 		Bind(&messages).
 		Send(c)
@@ -382,20 +382,20 @@ func (c *Client) GetPinnedMessages(ctx context.Context, channel objects.Snowflak
 	return messages, err
 }
 
-func (c *Client) AddPinnedMessage(ctx context.Context, channel, message objects.SnowflakeObject) error {
+func (c *Client) AddPinnedMessage(ctx context.Context, channel, message objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelPinnedFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ChannelPinnedFmt, channel, message)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) DeletePinnedMessage(ctx context.Context, channel, message objects.SnowflakeObject) error {
+func (c *Client) DeletePinnedMessage(ctx context.Context, channel, message objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelPinnedFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ChannelPinnedFmt, channel, message)).
 		ContentType(JsonContentType).
 		Send(c)
 }
@@ -413,7 +413,7 @@ type CreateMessageParams struct {
 	Files            []*objects.DiscordFile    `json:"-"`
 }
 
-func (c *Client) CreateMessage(ctx context.Context, channel objects.SnowflakeObject, params *CreateMessageParams) (*objects.Message, error) {
+func (c *Client) CreateMessage(ctx context.Context, channel objects.Snowflake, params *CreateMessageParams) (*objects.Message, error) {
 	var contentType string
 	var body []byte
 
@@ -454,7 +454,7 @@ func (c *Client) CreateMessage(ctx context.Context, channel objects.SnowflakeObj
 	err := NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelMessagesFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelMessagesFmt, channel)).
 		ContentType(contentType).
 		Body(body).
 		Bind(msg).
@@ -471,7 +471,7 @@ type EditMessageParams struct {
 	Components      []*objects.Component     `json:"components"`
 }
 
-func (c *Client) EditMessage(ctx context.Context, channel, message objects.SnowflakeObject, params *EditMessageParams) (*objects.Message, error) {
+func (c *Client) EditMessage(ctx context.Context, channel, message objects.Snowflake, params *EditMessageParams) (*objects.Message, error) {
 	body, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -481,7 +481,7 @@ func (c *Client) EditMessage(ctx context.Context, channel, message objects.Snowf
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelMessageFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ChannelMessageFmt, channel, message)).
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(msg).
@@ -489,12 +489,12 @@ func (c *Client) EditMessage(ctx context.Context, channel, message objects.Snowf
 	return msg, err
 }
 
-func (c *Client) FollowNewsChannel(ctx context.Context, channel objects.SnowflakeObject) (*objects.FollowedChannel, error) {
+func (c *Client) FollowNewsChannel(ctx context.Context, channel objects.Snowflake) (*objects.FollowedChannel, error) {
 	followedChannel := &objects.FollowedChannel{}
 	err := NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelFollowersFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelFollowersFmt, channel)).
 		ContentType(JsonContentType).
 		Bind(followedChannel).
 		Send(c)
@@ -502,11 +502,11 @@ func (c *Client) FollowNewsChannel(ctx context.Context, channel objects.Snowflak
 	return followedChannel, err
 }
 
-func (c *Client) StartTyping(ctx context.Context, channel objects.SnowflakeObject) error {
+func (c *Client) StartTyping(ctx context.Context, channel objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelTypingFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelTypingFmt, channel)).
 		ContentType(JsonContentType).
 		Send(c)
 }
@@ -518,7 +518,7 @@ type StartThreadParams struct {
 	Invitable           bool   `json:"invitable,omitempty"`
 }
 
-func (c *Client) StartThreadWithMessage(ctx context.Context, channel, message objects.SnowflakeObject, params *StartThreadParams) (*objects.Channel, error) {
+func (c *Client) StartThreadWithMessage(ctx context.Context, channel, message objects.Snowflake, params *StartThreadParams) (*objects.Channel, error) {
 	body, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -528,7 +528,7 @@ func (c *Client) StartThreadWithMessage(ctx context.Context, channel, message ob
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelMessageThreadsFmt, channel.GetID(), message.GetID())).
+		Path(fmt.Sprintf(ChannelMessageThreadsFmt, channel, message)).
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(thread).
@@ -536,7 +536,7 @@ func (c *Client) StartThreadWithMessage(ctx context.Context, channel, message ob
 	return thread, err
 }
 
-func (c *Client) StartThread(ctx context.Context, channel objects.SnowflakeObject, params *StartThreadParams) (*objects.Channel, error) {
+func (c *Client) StartThread(ctx context.Context, channel objects.Snowflake, params *StartThreadParams) (*objects.Channel, error) {
 	body, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -546,7 +546,7 @@ func (c *Client) StartThread(ctx context.Context, channel objects.SnowflakeObjec
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelThreadsFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelThreadsFmt, channel)).
 		ContentType(JsonContentType).
 		Body(body).
 		Bind(thread).
@@ -579,7 +579,7 @@ type ForumThreadChannel struct {
 	Message *objects.Message
 }
 
-func (c *Client) StartThreadInForumChannel(ctx context.Context, channel objects.SnowflakeObject, params *StartThreadInForumChannelParams) (*objects.ForumThreadChannel, error) {
+func (c *Client) StartThreadInForumChannel(ctx context.Context, channel objects.Snowflake, params *StartThreadInForumChannelParams) (*objects.ForumThreadChannel, error) {
 	var contentType string
 	var body []byte
 
@@ -625,7 +625,7 @@ func (c *Client) StartThreadInForumChannel(ctx context.Context, channel objects.
 	err := NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelMessagesFmt, channel.GetID())).
+		Path(fmt.Sprintf(ChannelMessagesFmt, channel)).
 		ContentType(contentType).
 		Body(body).
 		Reason(reason).
@@ -635,43 +635,43 @@ func (c *Client) StartThreadInForumChannel(ctx context.Context, channel objects.
 	return ch, err
 }
 
-func (c *Client) JoinThread(ctx context.Context, thread objects.SnowflakeObject) error {
+func (c *Client) JoinThread(ctx context.Context, thread objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread.GetID())).
+		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) AddThreadMember(ctx context.Context, thread, user objects.SnowflakeObject) error {
+func (c *Client) AddThreadMember(ctx context.Context, thread, user objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread.GetID(), user.GetID())).
+		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread, user)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) LeaveThread(ctx context.Context, thread objects.SnowflakeObject) error {
+func (c *Client) LeaveThread(ctx context.Context, thread objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread.GetID())).
+		Path(fmt.Sprintf(ChannelThreadMembersMeFmt, thread)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) RemoveThreadMember(ctx context.Context, thread, user objects.SnowflakeObject) error {
+func (c *Client) RemoveThreadMember(ctx context.Context, thread, user objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread.GetID(), user.GetID())).
+		Path(fmt.Sprintf(ChannelThreadMembersUserFmt, thread, user)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) GetThreadMember(ctx context.Context, channel objects.SnowflakeObject, user objects.SnowflakeObject) (*objects.ThreadMember, error) {
+func (c *Client) GetThreadMember(ctx context.Context, channel objects.Snowflake, user objects.Snowflake) (*objects.ThreadMember, error) {
 	member := &objects.ThreadMember{}
 
 	err := NewRequest().
@@ -685,12 +685,12 @@ func (c *Client) GetThreadMember(ctx context.Context, channel objects.SnowflakeO
 	return member, err
 }
 
-func (c *Client) ListThreadMembers(ctx context.Context, thread objects.SnowflakeObject) ([]*objects.ThreadMember, error) {
+func (c *Client) ListThreadMembers(ctx context.Context, thread objects.Snowflake) ([]*objects.ThreadMember, error) {
 	members := []*objects.ThreadMember{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ChannelThreadMembersFmt, thread.GetID())).
+		Path(fmt.Sprintf(ChannelThreadMembersFmt, thread)).
 		Bind(&members).
 		Send(c)
 	return members, err
@@ -707,8 +707,8 @@ type ListThreadsParams struct {
 	Limit  int          `json:"limit,omitempty"`
 }
 
-func (c *Client) ListPublicArchivedThreads(ctx context.Context, channel objects.SnowflakeObject, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
-	u, err := url.Parse(fmt.Sprintf(ChannelThreadsArchivedPublicFmt, channel.GetID()))
+func (c *Client) ListPublicArchivedThreads(ctx context.Context, channel objects.Snowflake, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelThreadsArchivedPublicFmt, channel))
 	if err != nil {
 		return nil, err
 	}
@@ -727,8 +727,8 @@ func (c *Client) ListPublicArchivedThreads(ctx context.Context, channel objects.
 	return threads, err
 }
 
-func (c *Client) ListPrivateArchivedThreads(ctx context.Context, channel objects.SnowflakeObject, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
-	u, err := url.Parse(fmt.Sprintf(ChannelThreadsArchivedPrivateFmt, channel.GetID()))
+func (c *Client) ListPrivateArchivedThreads(ctx context.Context, channel objects.Snowflake, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelThreadsArchivedPrivateFmt, channel))
 	if err != nil {
 		return nil, err
 	}
@@ -747,8 +747,8 @@ func (c *Client) ListPrivateArchivedThreads(ctx context.Context, channel objects
 	return threads, err
 }
 
-func (c *Client) ListJoinedPrivateArchivedThreads(ctx context.Context, channel objects.SnowflakeObject, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
-	u, err := url.Parse(fmt.Sprintf(ChannelUsersMeThreadsArchivedFmt, channel.GetID()))
+func (c *Client) ListJoinedPrivateArchivedThreads(ctx context.Context, channel objects.Snowflake, params ...*ListThreadsParams) (*ListThreadsResponse, error) {
+	u, err := url.Parse(fmt.Sprintf(ChannelUsersMeThreadsArchivedFmt, channel))
 	if err != nil {
 		return nil, err
 	}

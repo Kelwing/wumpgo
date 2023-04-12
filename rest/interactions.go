@@ -13,7 +13,7 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 )
 
-func (c *Client) CreateInteractionResponse(ctx context.Context, interactionID objects.SnowflakeObject, token string, response *objects.InteractionResponse) error {
+func (c *Client) CreateInteractionResponse(ctx context.Context, interactionID objects.Snowflake, token string, response *objects.InteractionResponse) error {
 	var contentType string
 	var body []byte
 
@@ -62,26 +62,26 @@ func (c *Client) CreateInteractionResponse(ctx context.Context, interactionID ob
 	return NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(CreateInteractionResponseFmt, interactionID.GetID(), token)).
+		Path(fmt.Sprintf(CreateInteractionResponseFmt, interactionID, token)).
 		Body(body).
 		ContentType(contentType).
 		OmitAuth().
 		Send(c)
 }
 
-func (c *Client) GetOriginalInteractionResponse(ctx context.Context, applicationID objects.SnowflakeObject, token string) (*objects.Message, error) {
+func (c *Client) GetOriginalInteractionResponse(ctx context.Context, applicationID objects.Snowflake, token string) (*objects.Message, error) {
 	msg := &objects.Message{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
+		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID, token)).
 		Bind(msg).
 		OmitAuth().
 		Send(c)
 	return msg, err
 }
 
-func (c *Client) EditOriginalInteractionResponse(ctx context.Context, applicationID objects.SnowflakeObject, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
+func (c *Client) EditOriginalInteractionResponse(ctx context.Context, applicationID objects.Snowflake, token string, params *EditWebhookMessageParams) (*objects.Message, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (c *Client) EditOriginalInteractionResponse(ctx context.Context, applicatio
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
+		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID, token)).
 		Body(data).
 		ContentType(JsonContentType).
 		Bind(msg).
@@ -100,11 +100,11 @@ func (c *Client) EditOriginalInteractionResponse(ctx context.Context, applicatio
 	return msg, err
 }
 
-func (c *Client) DeleteOriginalInteractionResponse(ctx context.Context, applicationID objects.SnowflakeObject, token string) error {
+func (c *Client) DeleteOriginalInteractionResponse(ctx context.Context, applicationID objects.Snowflake, token string) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID.GetID(), token)).
+		Path(fmt.Sprintf(OriginalInteractionResponseFmt, applicationID, token)).
 		OmitAuth().
 		Send(c)
 }
@@ -121,7 +121,7 @@ type CreateFollowupMessageParams struct {
 	Flags           objects.MessageFlag      `json:"flags,omitempty" url:"-"`
 }
 
-func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, params *CreateFollowupMessageParams) (*objects.Message, error) {
+func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID objects.Snowflake, token string, params *CreateFollowupMessageParams) (*objects.Message, error) {
 	var contentType string
 	var body []byte
 
@@ -157,7 +157,7 @@ func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID object
 		}
 	}
 
-	u, err := url.Parse(fmt.Sprintf(WebhookWithTokenFmt, applicationID.GetID(), token))
+	u, err := url.Parse(fmt.Sprintf(WebhookWithTokenFmt, applicationID, token))
 	if err != nil {
 		return nil, err
 	}
@@ -182,19 +182,19 @@ func (c *Client) CreateFollowupMessage(ctx context.Context, applicationID object
 	return msg, err
 }
 
-func (c *Client) GetFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, messageID objects.SnowflakeObject) (*objects.Message, error) {
+func (c *Client) GetFollowupMessage(ctx context.Context, applicationID objects.Snowflake, token string, messageID objects.Snowflake) (*objects.Message, error) {
 	msg := &objects.Message{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
+		Path(fmt.Sprintf(WebhookMessageFmt, applicationID, token, messageID)).
 		Bind(msg).
 		OmitAuth().
 		Send(c)
 	return msg, err
 }
 
-func (c *Client) EditFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, messageID objects.SnowflakeObject, params *EditWebhookMessageParams) (*objects.Message, error) {
+func (c *Client) EditFollowupMessage(ctx context.Context, applicationID objects.Snowflake, token string, messageID objects.Snowflake, params *EditWebhookMessageParams) (*objects.Message, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -204,7 +204,7 @@ func (c *Client) EditFollowupMessage(ctx context.Context, applicationID objects.
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
+		Path(fmt.Sprintf(WebhookMessageFmt, applicationID, token, messageID)).
 		Body(data).
 		ContentType(JsonContentType).
 		Bind(msg).
@@ -213,11 +213,11 @@ func (c *Client) EditFollowupMessage(ctx context.Context, applicationID objects.
 	return msg, err
 }
 
-func (c *Client) DeleteFollowupMessage(ctx context.Context, applicationID objects.SnowflakeObject, token string, messageID objects.SnowflakeObject) error {
+func (c *Client) DeleteFollowupMessage(ctx context.Context, applicationID objects.Snowflake, token string, messageID objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(WebhookMessageFmt, applicationID.GetID(), token, messageID.GetID())).
+		Path(fmt.Sprintf(WebhookMessageFmt, applicationID, token, messageID)).
 		OmitAuth().
 		Send(c)
 }

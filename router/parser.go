@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
+	"wumpgo.dev/snowflake"
 	"wumpgo.dev/wumpgo/objects"
 	"wumpgo.dev/wumpgo/objects/permissions"
 )
@@ -505,7 +506,7 @@ func unmarshalOptions(dst any, choices []*objects.ApplicationCommandDataOption, 
 			l.Debug().Msg("field is a struct")
 			if vv.Type().Kind() == reflect.String {
 				// Value should be a Snowflake
-				sn, err := objects.SnowflakeFromString(vv.String())
+				sn, err := snowflake.SnowflakeFromString(vv.String())
 				l.Debug().Str("snowflake", vv.String()).Msg("resolving snowflake")
 				if err == nil {
 					if fv.Type().AssignableTo(userType) {

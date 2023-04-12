@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"wumpgo.dev/snowflake"
 	"wumpgo.dev/wumpgo/objects"
 )
 
@@ -175,7 +176,7 @@ func (c *ComponentContext) SnowflakeValues() []objects.Snowflake {
 	snowflakes := make([]objects.Snowflake, 0, len(c.data.Values))
 
 	for _, v := range c.data.Values {
-		s, err := objects.SnowflakeFromString(v)
+		s, err := snowflake.SnowflakeFromString(v)
 		if err != nil {
 			continue
 		}

@@ -9,13 +9,13 @@ import (
 	"wumpgo.dev/wumpgo/objects"
 )
 
-func (c *Client) GetApplicationRoleConnectionMetadataRecords(ctx context.Context, application objects.SnowflakeObject) ([]*objects.ApplicationRoleConnectionMetadata, error) {
+func (c *Client) GetApplicationRoleConnectionMetadataRecords(ctx context.Context, application objects.Snowflake) ([]*objects.ApplicationRoleConnectionMetadata, error) {
 	metadata := []*objects.ApplicationRoleConnectionMetadata{}
 
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ApplicationRoleConnection, application.GetID())).
+		Path(fmt.Sprintf(ApplicationRoleConnection, application)).
 		ContentType(JsonContentType).
 		Bind(&metadata).
 		Send(c)
@@ -24,7 +24,7 @@ func (c *Client) GetApplicationRoleConnectionMetadataRecords(ctx context.Context
 }
 
 func (c *Client) UpdateApplicationRoleConnectionMetadataRecords(
-	ctx context.Context, application objects.SnowflakeObject, params []*objects.ApplicationRoleConnectionMetadata,
+	ctx context.Context, application objects.Snowflake, params []*objects.ApplicationRoleConnectionMetadata,
 ) ([]*objects.ApplicationRoleConnectionMetadata, error) {
 	metadata := []*objects.ApplicationRoleConnectionMetadata{}
 
@@ -36,7 +36,7 @@ func (c *Client) UpdateApplicationRoleConnectionMetadataRecords(
 	err = NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(ApplicationRoleConnection, application.GetID())).
+		Path(fmt.Sprintf(ApplicationRoleConnection, application)).
 		ContentType(JsonContentType).
 		Body(data).
 		Bind(&metadata).
@@ -45,13 +45,13 @@ func (c *Client) UpdateApplicationRoleConnectionMetadataRecords(
 	return metadata, err
 }
 
-func (c *Client) GetUserApplicationRoleConnection(ctx context.Context, application objects.SnowflakeObject) (*objects.ApplicationRoleConnection, error) {
+func (c *Client) GetUserApplicationRoleConnection(ctx context.Context, application objects.Snowflake) (*objects.ApplicationRoleConnection, error) {
 	var connection objects.ApplicationRoleConnection
 
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(UserApplicationRoleConnection, application.GetID())).
+		Path(fmt.Sprintf(UserApplicationRoleConnection, application)).
 		ContentType(JsonContentType).
 		Bind(&connection).
 		Send(c)
@@ -60,7 +60,7 @@ func (c *Client) GetUserApplicationRoleConnection(ctx context.Context, applicati
 }
 
 func (c *Client) UpdateUserApplicationRoleConnection(
-	ctx context.Context, application objects.SnowflakeObject, params *objects.ApplicationRoleConnection,
+	ctx context.Context, application objects.Snowflake, params *objects.ApplicationRoleConnection,
 ) (*objects.ApplicationRoleConnection, error) {
 	var connection objects.ApplicationRoleConnection
 
@@ -72,7 +72,7 @@ func (c *Client) UpdateUserApplicationRoleConnection(
 	err = NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(UserApplicationRoleConnection, application.GetID())).
+		Path(fmt.Sprintf(UserApplicationRoleConnection, application)).
 		ContentType(JsonContentType).
 		Body(data).
 		Bind(&connection).

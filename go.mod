@@ -2,6 +2,8 @@ module wumpgo.dev/wumpgo
 
 go 1.19
 
+replace wumpgo.dev/snowflake => ../snowflake
+
 require (
 	github.com/DataDog/gostackparse v0.6.0
 	github.com/Masterminds/semver v1.5.0

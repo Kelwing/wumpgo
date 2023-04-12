@@ -35,7 +35,7 @@ func (c *Client) CreateGuildFromTemplate(ctx context.Context, code string, reaso
 	return guild, err
 }
 
-func (c *Client) GetGuildTemplates(ctx context.Context, guild objects.SnowflakeObject) ([]*objects.Template, error) {
+func (c *Client) GetGuildTemplates(ctx context.Context, guild objects.Snowflake) ([]*objects.Template, error) {
 	templates := []*objects.Template{}
 	err := NewRequest().
 		Method(http.MethodGet).
@@ -53,7 +53,7 @@ type CreateGuildTemplateParams struct {
 	Reason      string `json:"-"`
 }
 
-func (c *Client) CreateGuildTemplate(ctx context.Context, guild objects.SnowflakeObject, params *CreateGuildTemplateParams) (*objects.Template, error) {
+func (c *Client) CreateGuildTemplate(ctx context.Context, guild objects.Snowflake, params *CreateGuildTemplateParams) (*objects.Template, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (c *Client) CreateGuildTemplate(ctx context.Context, guild objects.Snowflak
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildTemplateFmt, guild.GetID())).
+		Path(fmt.Sprintf(GuildTemplateFmt, guild)).
 		ContentType(JsonContentType).
 		Bind(template).
 		Reason(reason).
@@ -77,11 +77,11 @@ func (c *Client) CreateGuildTemplate(ctx context.Context, guild objects.Snowflak
 	return template, err
 }
 
-func (c *Client) SyncGuildTemplate(ctx context.Context, guild objects.SnowflakeObject, code string) (*objects.Template, error) {
+func (c *Client) SyncGuildTemplate(ctx context.Context, guild objects.Snowflake, code string) (*objects.Template, error) {
 	template := &objects.Template{}
 	err := NewRequest().
 		Method(http.MethodPut).
-		Path(fmt.Sprintf(GuildTemplatesFmt, guild.GetID(), code)).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild, code)).
 		ContentType(JsonContentType).
 		Bind(template).
 		Send(c)
@@ -94,7 +94,7 @@ type ModifyGuildTemplateParams struct {
 	Reason      string `json:"-"`
 }
 
-func (c *Client) ModifyGuildTemplate(ctx context.Context, guild objects.SnowflakeObject, code string, params *ModifyGuildTemplateParams) (*objects.Template, error) {
+func (c *Client) ModifyGuildTemplate(ctx context.Context, guild objects.Snowflake, code string, params *ModifyGuildTemplateParams) (*objects.Template, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (c *Client) ModifyGuildTemplate(ctx context.Context, guild objects.Snowflak
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildTemplatesFmt, guild.GetID(), code)).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild, code)).
 		ContentType(JsonContentType).
 		Reason(reason).
 		Body(data).
@@ -120,12 +120,12 @@ func (c *Client) ModifyGuildTemplate(ctx context.Context, guild objects.Snowflak
 	return template, err
 }
 
-func (c *Client) DeleteGuildTemplate(ctx context.Context, guild objects.SnowflakeObject, code, reason string) (*objects.Template, error) {
+func (c *Client) DeleteGuildTemplate(ctx context.Context, guild objects.Snowflake, code, reason string) (*objects.Template, error) {
 	template := &objects.Template{}
 	err := NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildTemplatesFmt, guild.GetID(), code)).
+		Path(fmt.Sprintf(GuildTemplatesFmt, guild, code)).
 		ContentType(JsonContentType).
 		Reason(reason).
 		Bind(template).

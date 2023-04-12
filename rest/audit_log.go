@@ -17,8 +17,8 @@ type GetAuditLogParams struct {
 	Limit      int                   `url:"limit,omitempty"`
 }
 
-func (c *Client) GetAuditLogs(ctx context.Context, guild objects.SnowflakeObject, params *GetAuditLogParams) (*objects.AuditLog, error) {
-	u, err := url.Parse(fmt.Sprintf(GuildAuditLogsFmt, guild.GetID()))
+func (c *Client) GetAuditLogs(ctx context.Context, guild objects.Snowflake, params *GetAuditLogParams) (*objects.AuditLog, error) {
+	u, err := url.Parse(fmt.Sprintf(GuildAuditLogsFmt, guild))
 	if err != nil {
 		return nil, err
 	}

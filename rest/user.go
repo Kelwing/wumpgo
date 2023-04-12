@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/google/go-querystring/query"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 func (c *Client) GetCurrentUser(ctx context.Context) (*objects.User, error) {
@@ -24,12 +24,12 @@ func (c *Client) GetCurrentUser(ctx context.Context) (*objects.User, error) {
 	return user, err
 }
 
-func (c *Client) GetUser(ctx context.Context, user objects.SnowflakeObject) (*objects.User, error) {
+func (c *Client) GetUser(ctx context.Context, user objects.Snowflake) (*objects.User, error) {
 	u := &objects.User{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(UserFmt, user.GetID())).
+		Path(fmt.Sprintf(UserFmt, user)).
 		ContentType(JsonContentType).
 		Bind(u).
 		Send(c)
@@ -97,12 +97,12 @@ func (c *Client) GetCurrentUserGuilds(ctx context.Context, params *CurrentUserGu
 	return guilds, err
 }
 
-func (c *Client) GetCurrentUserGuildMember(ctx context.Context, guild objects.SnowflakeObject) (*objects.GuildMember, error) {
+func (c *Client) GetCurrentUserGuildMember(ctx context.Context, guild objects.Snowflake) (*objects.GuildMember, error) {
 	member := &objects.GuildMember{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(UsersMeGuildMember, guild.GetID())).
+		Path(fmt.Sprintf(UsersMeGuildMember, guild)).
 		ContentType(JsonContentType).
 		Bind(member).
 		Send(c)
@@ -110,11 +110,11 @@ func (c *Client) GetCurrentUserGuildMember(ctx context.Context, guild objects.Sn
 	return member, err
 }
 
-func (c *Client) LeaveGuild(ctx context.Context, guild objects.SnowflakeObject) error {
+func (c *Client) LeaveGuild(ctx context.Context, guild objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(UsersMeGuild, guild.GetID())).
+		Path(fmt.Sprintf(UsersMeGuild, guild)).
 		ContentType(JsonContentType).
 		Send(c)
 }

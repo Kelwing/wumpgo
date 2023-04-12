@@ -26,12 +26,12 @@ type CreateGuildStickerParams struct {
 	File io.Reader
 }
 
-func (c *Client) GetSticker(ctx context.Context, id objects.SnowflakeObject) (*objects.Sticker, error) {
+func (c *Client) GetSticker(ctx context.Context, id objects.Snowflake) (*objects.Sticker, error) {
 	sticker := &objects.Sticker{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(StickerFmt, id.GetID())).
+		Path(fmt.Sprintf(StickerFmt, id)).
 		ContentType(JsonContentType).
 		Bind(sticker).
 		Send(c)
@@ -52,12 +52,12 @@ func (c *Client) ListNitroStickerPacks(ctx context.Context) ([]*objects.StickerP
 	return packs, err
 }
 
-func (c *Client) ListGuildStickers(ctx context.Context, guildID objects.SnowflakeObject) ([]*objects.Sticker, error) {
+func (c *Client) ListGuildStickers(ctx context.Context, guildID objects.Snowflake) ([]*objects.Sticker, error) {
 	var stickers []*objects.Sticker
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildStickersFmt, guildID.GetID())).
+		Path(fmt.Sprintf(GuildStickersFmt, guildID)).
 		ContentType(JsonContentType).
 		Bind(&stickers).
 		Send(c)
@@ -65,12 +65,12 @@ func (c *Client) ListGuildStickers(ctx context.Context, guildID objects.Snowflak
 	return stickers, err
 }
 
-func (c *Client) GetGuildSticker(ctx context.Context, guildID objects.SnowflakeObject, stickerID objects.SnowflakeObject) (*objects.Sticker, error) {
+func (c *Client) GetGuildSticker(ctx context.Context, guildID objects.Snowflake, stickerID objects.Snowflake) (*objects.Sticker, error) {
 	sticker := &objects.Sticker{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildStickerFmt, guildID.GetID(), stickerID.GetID())).
+		Path(fmt.Sprintf(GuildStickerFmt, guildID, stickerID)).
 		ContentType(JsonContentType).
 		Bind(sticker).
 		Send(c)
@@ -78,7 +78,7 @@ func (c *Client) GetGuildSticker(ctx context.Context, guildID objects.SnowflakeO
 	return sticker, err
 }
 
-func (c *Client) CreateGuildSticker(ctx context.Context, guildID objects.SnowflakeObject, params *CreateGuildStickerParams) (*objects.Sticker, error) {
+func (c *Client) CreateGuildSticker(ctx context.Context, guildID objects.Snowflake, params *CreateGuildStickerParams) (*objects.Sticker, error) {
 	buffer := new(bytes.Buffer)
 	m := multipart.NewWriter(buffer)
 
@@ -117,7 +117,7 @@ func (c *Client) CreateGuildSticker(ctx context.Context, guildID objects.Snowfla
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildStickersFmt, guildID.GetID())).
+		Path(fmt.Sprintf(GuildStickersFmt, guildID)).
 		ContentType(JsonContentType).
 		Body(buffer.Bytes()).
 		Bind(sticker).
@@ -127,7 +127,7 @@ func (c *Client) CreateGuildSticker(ctx context.Context, guildID objects.Snowfla
 	return sticker, err
 }
 
-func (c *Client) ModifyGuildSticker(ctx context.Context, guildID, id objects.SnowflakeObject, params *BaseStickerParams) (*objects.Sticker, error) {
+func (c *Client) ModifyGuildSticker(ctx context.Context, guildID, id objects.Snowflake, params *BaseStickerParams) (*objects.Sticker, error) {
 	if params.RawTags == "" {
 		params.RawTags = strings.Join(params.Tags, ", ")
 	}
@@ -141,7 +141,7 @@ func (c *Client) ModifyGuildSticker(ctx context.Context, guildID, id objects.Sno
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildStickerFmt, guildID.GetID(), id.GetID())).
+		Path(fmt.Sprintf(GuildStickerFmt, guildID, id)).
 		ContentType(JsonContentType).
 		Bind(sticker).
 		Body(data).
@@ -151,11 +151,11 @@ func (c *Client) ModifyGuildSticker(ctx context.Context, guildID, id objects.Sno
 	return sticker, err
 }
 
-func (c *Client) DeleteGuildSticker(ctx context.Context, guildID, id objects.SnowflakeObject, reason ...string) error {
+func (c *Client) DeleteGuildSticker(ctx context.Context, guildID, id objects.Snowflake, reason ...string) error {
 	req := NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildStickerFmt, guildID.GetID(), id.GetID())).
+		Path(fmt.Sprintf(GuildStickerFmt, guildID, id)).
 		ContentType(JsonContentType)
 
 	if len(reason) > 0 {

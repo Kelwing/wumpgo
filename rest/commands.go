@@ -11,12 +11,12 @@ import (
 
 // Global Commands
 
-func (c *Client) GetCommands(ctx context.Context, app objects.SnowflakeObject) ([]*objects.ApplicationCommand, error) {
+func (c *Client) GetCommands(ctx context.Context, app objects.Snowflake) ([]*objects.ApplicationCommand, error) {
 	var commands []*objects.ApplicationCommand
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GlobalApplicationsFmt, app.GetID())).
+		Path(fmt.Sprintf(GlobalApplicationsFmt, app)).
 		ContentType(JsonContentType).
 		Bind(&commands).
 		Send(c)
@@ -24,7 +24,7 @@ func (c *Client) GetCommands(ctx context.Context, app objects.SnowflakeObject) (
 	return commands, err
 }
 
-func (c *Client) CreateCommand(ctx context.Context, app objects.SnowflakeObject, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
+func (c *Client) CreateCommand(ctx context.Context, app objects.Snowflake, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
 	data, err := json.Marshal(command)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (c *Client) CreateCommand(ctx context.Context, app objects.SnowflakeObject,
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GlobalApplicationsFmt, app.GetID())).
+		Path(fmt.Sprintf(GlobalApplicationsFmt, app)).
 		ContentType(JsonContentType).
 		Bind(cmd).
 		Body(data).
@@ -44,12 +44,12 @@ func (c *Client) CreateCommand(ctx context.Context, app objects.SnowflakeObject,
 	return cmd, err
 }
 
-func (c *Client) GetCommand(ctx context.Context, app, commandID objects.SnowflakeObject) (*objects.ApplicationCommand, error) {
+func (c *Client) GetCommand(ctx context.Context, app, commandID objects.Snowflake) (*objects.ApplicationCommand, error) {
 	cmd := &objects.ApplicationCommand{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app.GetID(), commandID.GetID())).
+		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app, commandID)).
 		ContentType(JsonContentType).
 		Bind(cmd).
 		Send(c)
@@ -57,7 +57,7 @@ func (c *Client) GetCommand(ctx context.Context, app, commandID objects.Snowflak
 	return cmd, err
 }
 
-func (c *Client) UpdateCommand(ctx context.Context, app, commandID objects.SnowflakeObject, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
+func (c *Client) UpdateCommand(ctx context.Context, app, commandID objects.Snowflake, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
 	data, err := json.Marshal(command)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (c *Client) UpdateCommand(ctx context.Context, app, commandID objects.Snowf
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app.GetID(), commandID.GetID())).
+		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app, commandID)).
 		ContentType(JsonContentType).
 		Bind(cmd).
 		Body(data).
@@ -77,16 +77,16 @@ func (c *Client) UpdateCommand(ctx context.Context, app, commandID objects.Snowf
 	return cmd, err
 }
 
-func (c *Client) DeleteCommand(ctx context.Context, app, commandID objects.SnowflakeObject) error {
+func (c *Client) DeleteCommand(ctx context.Context, app, commandID objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app.GetID(), commandID.GetID())).
+		Path(fmt.Sprintf(GlobalApplicationsUpdateFmt, app, commandID)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) BulkOverwriteGlobalCommands(ctx context.Context, app objects.SnowflakeObject, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
+func (c *Client) BulkOverwriteGlobalCommands(ctx context.Context, app objects.Snowflake, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
 	data, err := json.Marshal(commands)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (c *Client) BulkOverwriteGlobalCommands(ctx context.Context, app objects.Sn
 	err = NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GlobalApplicationsFmt, app.GetID())).
+		Path(fmt.Sprintf(GlobalApplicationsFmt, app)).
 		ContentType(JsonContentType).
 		Bind(&cmds).
 		Body(data).
@@ -108,12 +108,12 @@ func (c *Client) BulkOverwriteGlobalCommands(ctx context.Context, app objects.Sn
 
 // Guild Commands
 
-func (c *Client) GetGuildCommands(ctx context.Context, app, guild objects.SnowflakeObject) ([]*objects.ApplicationCommand, error) {
+func (c *Client) GetGuildCommands(ctx context.Context, app, guild objects.Snowflake) ([]*objects.ApplicationCommand, error) {
 	var commands []*objects.ApplicationCommand
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationsFmt, app.GetID(), guild.GetID())).
+		Path(fmt.Sprintf(GuildApplicationsFmt, app, guild)).
 		ContentType(JsonContentType).
 		Bind(&commands).
 		Send(c)
@@ -121,7 +121,7 @@ func (c *Client) GetGuildCommands(ctx context.Context, app, guild objects.Snowfl
 	return commands, err
 }
 
-func (c *Client) AddGuildCommand(ctx context.Context, app, guild objects.SnowflakeObject, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
+func (c *Client) AddGuildCommand(ctx context.Context, app, guild objects.Snowflake, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
 	data, err := json.Marshal(command)
 	if err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ func (c *Client) AddGuildCommand(ctx context.Context, app, guild objects.Snowfla
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationsFmt, app.GetID(), guild.GetID())).
+		Path(fmt.Sprintf(GuildApplicationsFmt, app, guild)).
 		ContentType(JsonContentType).
 		Bind(cmd).
 		Body(data).
@@ -140,12 +140,12 @@ func (c *Client) AddGuildCommand(ctx context.Context, app, guild objects.Snowfla
 	return cmd, err
 }
 
-func (c *Client) GetGuildCommand(ctx context.Context, app, guild, commandID objects.SnowflakeObject) (*objects.ApplicationCommand, error) {
+func (c *Client) GetGuildCommand(ctx context.Context, app, guild, commandID objects.Snowflake) (*objects.ApplicationCommand, error) {
 	cmd := &objects.ApplicationCommand{}
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app.GetID(), guild.GetID(), commandID.GetID())).
+		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app, guild, commandID)).
 		ContentType(JsonContentType).
 		Bind(cmd).
 		Send(c)
@@ -153,7 +153,7 @@ func (c *Client) GetGuildCommand(ctx context.Context, app, guild, commandID obje
 	return cmd, err
 }
 
-func (c *Client) UpdateGuildCommand(ctx context.Context, app, guild, commandID objects.SnowflakeObject, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
+func (c *Client) UpdateGuildCommand(ctx context.Context, app, guild, commandID objects.Snowflake, command *objects.ApplicationCommand) (*objects.ApplicationCommand, error) {
 	data, err := json.Marshal(command)
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (c *Client) UpdateGuildCommand(ctx context.Context, app, guild, commandID o
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app.GetID(), guild.GetID(), commandID.GetID())).
+		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app, guild, commandID)).
 		ContentType(JsonContentType).
 		Bind(cmd).
 		Body(data).
@@ -172,16 +172,16 @@ func (c *Client) UpdateGuildCommand(ctx context.Context, app, guild, commandID o
 	return cmd, err
 }
 
-func (c *Client) DeleteGuildCommand(ctx context.Context, app, guild, commandID objects.SnowflakeObject) error {
+func (c *Client) DeleteGuildCommand(ctx context.Context, app, guild, commandID objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app.GetID(), guild.GetID(), commandID.GetID())).
+		Path(fmt.Sprintf(GuildApplicationsUpdateFmt, app, guild, commandID)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) BulkOverwriteGuildCommands(ctx context.Context, application, guild objects.SnowflakeObject, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
+func (c *Client) BulkOverwriteGuildCommands(ctx context.Context, application, guild objects.Snowflake, commands []*objects.ApplicationCommand) ([]*objects.ApplicationCommand, error) {
 	data, err := json.Marshal(commands)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (c *Client) BulkOverwriteGuildCommands(ctx context.Context, application, gu
 	err = NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationsFmt, application.GetID(), guild.GetID())).
+		Path(fmt.Sprintf(GuildApplicationsFmt, application, guild)).
 		ContentType(JsonContentType).
 		Body(data).
 		Bind(&cmds).
@@ -201,12 +201,12 @@ func (c *Client) BulkOverwriteGuildCommands(ctx context.Context, application, gu
 	return cmds, err
 }
 
-func (c *Client) GetGuildApplicationCommandPermissions(ctx context.Context, app, guild objects.SnowflakeObject) ([]*objects.GuildApplicationCommandPermissions, error) {
+func (c *Client) GetGuildApplicationCommandPermissions(ctx context.Context, app, guild objects.Snowflake) ([]*objects.GuildApplicationCommandPermissions, error) {
 	var commands []*objects.GuildApplicationCommandPermissions
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app.GetID(), guild.GetID())).
+		Path(fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app, guild)).
 		ContentType(JsonContentType).
 		Bind(&commands).
 		Send(c)
@@ -214,12 +214,12 @@ func (c *Client) GetGuildApplicationCommandPermissions(ctx context.Context, app,
 	return commands, err
 }
 
-func (c *Client) GetApplicationCommandPermissions(ctx context.Context, app, guild, cmd objects.SnowflakeObject) (*objects.GuildApplicationCommandPermissions, error) {
+func (c *Client) GetApplicationCommandPermissions(ctx context.Context, app, guild, cmd objects.Snowflake) (*objects.GuildApplicationCommandPermissions, error) {
 	var command objects.GuildApplicationCommandPermissions
 	err := NewRequest().
 		Method(http.MethodGet).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app.GetID(), guild.GetID(), cmd.GetID())).
+		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app, guild, cmd)).
 		ContentType(JsonContentType).
 		Bind(&command).
 		Send(c)
@@ -227,7 +227,7 @@ func (c *Client) GetApplicationCommandPermissions(ctx context.Context, app, guil
 	return &command, err
 }
 
-func (c *Client) EditApplicationCommandPermissions(ctx context.Context, app, guild, cmd objects.SnowflakeObject, permissions []*objects.ApplicationCommandPermissions) (*objects.GuildApplicationCommandPermissions, error) {
+func (c *Client) EditApplicationCommandPermissions(ctx context.Context, app, guild, cmd objects.Snowflake, permissions []*objects.ApplicationCommandPermissions) (*objects.GuildApplicationCommandPermissions, error) {
 	data, err := json.Marshal(map[string]interface{}{
 		"permissions": permissions,
 	})
@@ -240,7 +240,7 @@ func (c *Client) EditApplicationCommandPermissions(ctx context.Context, app, gui
 	err = NewRequest().
 		Method(http.MethodPut).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app.GetID(), guild.GetID(), cmd.GetID())).
+		Path(fmt.Sprintf(GuildApplicationCommandPermissionsFmt, app, guild, cmd)).
 		ContentType(JsonContentType).
 		Body(data).
 		Bind(&perms).
@@ -249,7 +249,7 @@ func (c *Client) EditApplicationCommandPermissions(ctx context.Context, app, gui
 	return &perms, err
 }
 
-func (c *Client) BatchEditApplicationCommandPermissions(ctx context.Context, app, guild objects.SnowflakeObject, permissions []*objects.GuildApplicationCommandPermissions) ([]*objects.GuildApplicationCommandPermissions, error) {
+func (c *Client) BatchEditApplicationCommandPermissions(ctx context.Context, app, guild objects.Snowflake, permissions []*objects.GuildApplicationCommandPermissions) ([]*objects.GuildApplicationCommandPermissions, error) {
 	data, err := json.Marshal(permissions)
 	if err != nil {
 		return nil, err
@@ -259,7 +259,7 @@ func (c *Client) BatchEditApplicationCommandPermissions(ctx context.Context, app
 
 	err = NewRequest().
 		Method(http.MethodPut).
-		Path(fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app.GetID(), guild.GetID())).
+		Path(fmt.Sprintf(GuildApplicationCommandsPermissionsFmt, app, guild)).
 		ContentType(JsonContentType).
 		Body(data).
 		Bind(&perms).

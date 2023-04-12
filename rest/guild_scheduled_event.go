@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"wumpgo.dev/wumpgo/objects"
 	"github.com/google/go-querystring/query"
+	"wumpgo.dev/wumpgo/objects"
 )
 
 type CreateGuildScheduledEventParams struct {
@@ -40,7 +40,7 @@ type GetGuildScheduledEventUsersParams struct {
 	After      *objects.Snowflake `url:"after,omitempty"`
 }
 
-func (c *Client) CreateGuildScheduledEvent(ctx context.Context, guildID objects.SnowflakeObject, params *CreateGuildScheduledEventParams) (*objects.GuildScheduledEvent, error) {
+func (c *Client) CreateGuildScheduledEvent(ctx context.Context, guildID objects.Snowflake, params *CreateGuildScheduledEventParams) (*objects.GuildScheduledEvent, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (c *Client) CreateGuildScheduledEvent(ctx context.Context, guildID objects.
 	err = NewRequest().
 		Method(http.MethodPost).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildScheduledEventBaseFmt, guildID.GetID())).
+		Path(fmt.Sprintf(GuildScheduledEventBaseFmt, guildID)).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -66,8 +66,8 @@ func (c *Client) CreateGuildScheduledEvent(ctx context.Context, guildID objects.
 	return event, err
 }
 
-func (c *Client) GetGuildScheduledEvent(ctx context.Context, guildID objects.SnowflakeObject, id objects.SnowflakeObject, params ...*GetGuildScheduledEventParams) (*objects.GuildScheduledEvent, error) {
-	u, err := url.Parse(fmt.Sprintf(GuildScheduledEventFmt, guildID.GetID(), id.GetID()))
+func (c *Client) GetGuildScheduledEvent(ctx context.Context, guildID objects.Snowflake, id objects.Snowflake, params ...*GetGuildScheduledEventParams) (*objects.GuildScheduledEvent, error) {
+	u, err := url.Parse(fmt.Sprintf(GuildScheduledEventFmt, guildID, id))
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (c *Client) GetGuildScheduledEvent(ctx context.Context, guildID objects.Sno
 	return event, err
 }
 
-func (c *Client) ModifyGuildScheduledEvent(ctx context.Context, guildID objects.SnowflakeObject, id objects.SnowflakeObject, params *ModifyGuildScheduledEventParams) (*objects.GuildScheduledEvent, error) {
+func (c *Client) ModifyGuildScheduledEvent(ctx context.Context, guildID objects.Snowflake, id objects.Snowflake, params *ModifyGuildScheduledEventParams) (*objects.GuildScheduledEvent, error) {
 	data, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (c *Client) ModifyGuildScheduledEvent(ctx context.Context, guildID objects.
 	err = NewRequest().
 		Method(http.MethodPatch).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildScheduledEventFmt, guildID.GetID(), id.GetID())).
+		Path(fmt.Sprintf(GuildScheduledEventFmt, guildID, id)).
 		ContentType(JsonContentType).
 		Body(data).
 		Reason(reason).
@@ -119,17 +119,17 @@ func (c *Client) ModifyGuildScheduledEvent(ctx context.Context, guildID objects.
 	return event, err
 }
 
-func (c *Client) DeleteGuildScheduledEvent(ctx context.Context, guildID objects.SnowflakeObject, id objects.SnowflakeObject) error {
+func (c *Client) DeleteGuildScheduledEvent(ctx context.Context, guildID objects.Snowflake, id objects.Snowflake) error {
 	return NewRequest().
 		Method(http.MethodDelete).
 		WithContext(ctx).
-		Path(fmt.Sprintf(GuildScheduledEventFmt, guildID.GetID(), id.GetID())).
+		Path(fmt.Sprintf(GuildScheduledEventFmt, guildID, id)).
 		ContentType(JsonContentType).
 		Send(c)
 }
 
-func (c *Client) GetGuildScheduledEventUsers(ctx context.Context, guildID objects.SnowflakeObject, id objects.SnowflakeObject, params ...*GetGuildScheduledEventUsersParams) ([]*objects.GuildScheduledEventUser, error) {
-	u, err := url.Parse(fmt.Sprintf(GuildScheduledEventUsersFmt, guildID.GetID(), id.GetID()))
+func (c *Client) GetGuildScheduledEventUsers(ctx context.Context, guildID objects.Snowflake, id objects.Snowflake, params ...*GetGuildScheduledEventUsersParams) ([]*objects.GuildScheduledEventUser, error) {
+	u, err := url.Parse(fmt.Sprintf(GuildScheduledEventUsersFmt, guildID, id))
 	if err != nil {
 		return nil, err
 	}

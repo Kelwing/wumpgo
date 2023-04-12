@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"wumpgo.dev/snowflake"
 	"wumpgo.dev/wumpgo/objects"
 )
 
@@ -182,7 +183,7 @@ func (v ModalValue) Int() (int, error) {
 }
 
 func (v ModalValue) Snowflake() (objects.Snowflake, error) {
-	return objects.SnowflakeFromString(v.String())
+	return snowflake.SnowflakeFromString(v.String())
 }
 
 func (v ModalValue) Bool() (bool, error) {
