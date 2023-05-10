@@ -32,6 +32,6 @@ func (d *NOOPDispatcher) Dispatch(event string, data json.RawMessage) error {
 	return nil
 }
 
-func (d *NOOPDispatcher) setLogger(logger *zerolog.Logger) {
+func (d *NOOPDispatcher) SetLogger(logger *zerolog.Logger) {
 	d.logger = logger
 }

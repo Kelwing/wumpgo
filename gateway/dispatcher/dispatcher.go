@@ -8,13 +8,13 @@ import (
 
 type Dispatcher interface {
 	Dispatch(event string, data json.RawMessage) error
-	setLogger(l *zerolog.Logger)
+	SetLogger(l *zerolog.Logger)
 }
 
 type DispatcherOption func(d Dispatcher)
 
 func WithLogger(l *zerolog.Logger) DispatcherOption {
 	return func(d Dispatcher) {
-		d.setLogger(l)
+		d.SetLogger(l)
 	}
 }

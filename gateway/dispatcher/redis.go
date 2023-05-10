@@ -39,6 +39,6 @@ func (d *RedisDispatcher) Dispatch(event string, data json.RawMessage) error {
 	return err
 }
 
-func (d *RedisDispatcher) setLogger(logger *zerolog.Logger) {
+func (d *RedisDispatcher) SetLogger(logger *zerolog.Logger) {
 	d.logger = logger
 }

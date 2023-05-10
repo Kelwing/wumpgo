@@ -42,6 +42,6 @@ func (d *NATSDispatcher) Dispatch(event string, data json.RawMessage) error {
 	return d.conn.Publish(eventName, data)
 }
 
-func (d *NATSDispatcher) setLogger(logger *zerolog.Logger) {
+func (d *NATSDispatcher) SetLogger(logger *zerolog.Logger) {
 	d.logger = logger
 }

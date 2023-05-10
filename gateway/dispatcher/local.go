@@ -33,6 +33,6 @@ func (l *LocalDispatcher) Dispatch(event string, data json.RawMessage) error {
 	return l.receiver.Route(event, data)
 }
 
-func (l *LocalDispatcher) setLogger(logger *zerolog.Logger) {
+func (l *LocalDispatcher) SetLogger(logger *zerolog.Logger) {
 	l.logger = logger
 }
