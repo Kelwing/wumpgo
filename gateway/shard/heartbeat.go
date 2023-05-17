@@ -1,6 +1,7 @@
 package shard
 
 import (
+	"math"
 	"sync"
 	"time"
 
@@ -17,6 +18,7 @@ type Heartbeat struct {
 	lastHeartbeat time.Time
 	logger        zerolog.Logger
 	wg            sync.WaitGroup
+	latency       *atomic.Duration
 }
 
 func NewHeartbeat(interval int64, shard *Shard, logger zerolog.Logger) *Heartbeat {
@@ -25,6 +27,7 @@ func NewHeartbeat(interval int64, shard *Shard, logger zerolog.Logger) *Heartbea
 		acked:    atomic.NewBool(true),
 		gw:       shard,
 		logger:   logger,
+    latency: atomic.NewDuration(time.Duration(math.Inf(1))),
 	}
 }
 
@@ -76,5 +79,6 @@ func (h *Heartbeat) Stop() {
 
 func (h *Heartbeat) ACK() {
 	h.acked.Store(true)
-	h.logger.Debug().Dur("latency", time.Since(h.lastHeartbeat)).Msg("Received heartbeat ACK")
+	h.latency.Store(time.Since(h.lastHeartbeat))
+	h.logger.Debug().Dur("latency", h.latency.Load()).Msg("Received heartbeat ACK")
 }

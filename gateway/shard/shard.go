@@ -278,6 +278,10 @@ func (s *Shard) process(p objects.Payload) error {
 	return nil
 }
 
+func (s *Shard) Latency() time.Duration {
+  return s.heartbeat.latency.Load()
+}
+
 func (s *Shard) Run() error {
 	var err error
 	for {
