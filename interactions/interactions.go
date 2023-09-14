@@ -176,9 +176,9 @@ func (a *App) ProcessRequest(ctx context.Context, data []byte) (resp *objects.In
 
 	l.Debug().Msg("received request")
 
-	// Discord requires all interactions respond within 5 seconds
+	// Discord requires all interactions respond within 3 seconds
 	// so we may as well enforce this here
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(5*time.Second))
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(3*time.Second))
 	defer cancel()
 
 	switch req.Type {
